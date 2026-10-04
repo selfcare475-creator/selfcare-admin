@@ -1,0 +1,19 @@
+name: Deploy to Cloudflare Pages
+
+# NOTE: auto-deploy on push is intentionally disabled until the Cloudflare
+# project name below is set and the CLOUDFLARE_API_TOKEN secret is added.
+# Once configured, re-enable the `push` trigger.
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: da77fd5165dc79f35a5d3c58ca9dc021
+          command: pages deploy public --project-name=ADMIN_PROJECT_NAME --branch=main
