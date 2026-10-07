@@ -5060,6 +5060,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
         <div class="pm-field"><label class="pm-label">القسم الرئيسي (تشيكي)</label><select class="pm-select" id="pmCat_cz" onchange="pmCatChanged('cz')"></select></div>
       </div>
       <div class="pm-field"><label class="pm-label">القسم الفرعي <span style="color:#fbbf24;font-weight:800;font-size:10px">— ده اللي بيحدد مكان الصنف في الموقعين</span></label><select class="pm-select" id="pmSub"></select></div>
+      <div class="pm-field"><label class="pm-label">المادة الفعالة <span style="color:#5eead4;font-weight:800;font-size:10px">— بتظهر تحت اسم الصنف في الموقعين (للأدوية)</span></label><input class="pm-input" id="pmActive" dir="ltr" placeholder="مثال: Paracetamol + Caffeine"></div>
       <div class="pm-field"><label class="pm-label">البادج (Card Text)</label><select class="pm-select" id="pmBadge" onchange="pmUpdatePreview()"></select></div>
       <div class="pm-field wide">
         <label class="pm-label">🖼️ صورة الصنف</label>
@@ -5655,6 +5656,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     // Fill fields
     document.getElementById("pmName_en").value=p.name_en||"";
     document.getElementById("pmName_cz").value=p.name_cz||"";
+    document.getElementById("pmActive").value=p.active_ingredient||"";
     document.getElementById("pmPrice").value=p.price_egp||"";
     document.getElementById("pmPharmCode").value=p.pharmacy_code||"";
     document.getElementById("pmImg").value=p.image_url||"";
@@ -5719,6 +5721,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     // Reset all form fields
     document.getElementById("pmName_en").value="";
     document.getElementById("pmName_cz").value="";
+    document.getElementById("pmActive").value="";
     document.getElementById("pmPrice").value="";
     // v217: Auto-generate the pharmacy_code to prevent collisions
     document.getElementById("pmPharmCode").value=pmGenerateNewCode();
@@ -5916,6 +5919,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     var body={
       name_en:document.getElementById("pmName_en").value.trim(),
       name_cz:document.getElementById("pmName_cz").value.trim(),
+      active_ingredient:document.getElementById("pmActive").value.trim()||null,
       price_egp:Number(document.getElementById("pmPrice").value)||0,
       pharmacy_code:document.getElementById("pmPharmCode").value.trim()||null,
       image_url:document.getElementById("pmImg").value.trim()||null,
@@ -6353,11 +6357,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v231";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v232";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v231</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v232</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -7310,7 +7314,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
       }
       var r;
       if(exists){
-        var upd=Object.assign({},p); delete upd.out_of_stock; delete upd.is_active;
+        var upd=Object.assign({},p); delete upd.out_of_stock; delete upd.is_active; delete upd.active_ingredient;
         r=await fetch(sbUrl()+"/rest/v1/products?pharmacy_code=eq."+encodeURIComponent(p.pharmacy_code),{method:"PATCH",headers:H,body:JSON.stringify(upd)});
       } else {
         r=await fetch(sbUrl()+"/rest/v1/products",{method:"POST",headers:H,body:JSON.stringify(p)});
