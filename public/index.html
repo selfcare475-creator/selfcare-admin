@@ -5056,9 +5056,10 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
         </div>
       </div>
       <div class="pm-field-row">
-        <div class="pm-field"><label class="pm-label">تصنيف انجليزي</label><select class="pm-select" id="pmCat_en"></select></div>
-        <div class="pm-field"><label class="pm-label">تصنيف تشيكي</label><select class="pm-select" id="pmCat_cz"></select></div>
+        <div class="pm-field"><label class="pm-label">القسم الرئيسي (انجليزي)</label><select class="pm-select" id="pmCat_en" onchange="pmCatChanged('en')"></select></div>
+        <div class="pm-field"><label class="pm-label">القسم الرئيسي (تشيكي)</label><select class="pm-select" id="pmCat_cz" onchange="pmCatChanged('cz')"></select></div>
       </div>
+      <div class="pm-field"><label class="pm-label">القسم الفرعي <span style="color:#fbbf24;font-weight:800;font-size:10px">— ده اللي بيحدد مكان الصنف في الموقعين</span></label><select class="pm-select" id="pmSub"></select></div>
       <div class="pm-field"><label class="pm-label">البادج (Card Text)</label><select class="pm-select" id="pmBadge" onchange="pmUpdatePreview()"></select></div>
       <div class="pm-field wide">
         <label class="pm-label">🖼️ صورة الصنف</label>
@@ -5187,8 +5188,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
         <button class="pm-bulk-radio active" data-group="cat" data-val="none" onclick="pmBulkPickRadio(this)">بدون تغيير</button>
         <button class="pm-bulk-radio" data-group="cat" data-val="set" onclick="pmBulkPickRadio(this)">📁 غيّر التصنيف</button>
       </div>
-      <select class="pm-bulk-select" id="pmBulkCatSel" style="display:none">
+      <select class="pm-bulk-select" id="pmBulkCatSel" style="display:none" onchange="pmBulkCatChanged()">
         <option value="">— اختار تصنيف —</option>
+      </select>
+      <select class="pm-bulk-select" id="pmBulkSubSel" style="display:none;margin-top:8px">
+        <option value="">— اختار القسم الفرعي —</option>
       </select>
     </div>
 
@@ -5235,6 +5239,83 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
   var SB=window.SB_URL||"https://lbeuqkerbenrpycuvohl.supabase.co";
   var SBK=window.SB_KEY||"sb_publishable_Lbqjl73U7lqbFNVB5Sj64A_vEe6z5cB";
   var SBH={apikey:SBK,Authorization:"Bearer "+SBK,"Content-Type":"application/json"};
+
+  // ===== v231: one category system for admin + both sites =====
+  // The storefronts place a product by its DB "subcategory". These names must stay
+  // identical to the keys of DB_SUB_TO_SITE in selfcare-en / selfcare-cz.
+  var PM_SUBS={"cold_flu": ["Cold & flu", "Cough & mucus", "Nasal congestion", "Throat & cough"], "pain_relief": ["Pain & fever", "Muscle & joint", "Migraine"], "digestion": ["Digestion", "Reflux & acidity", "Diarrhea & gut", "Cramps & bloating", "Nausea", "Constipation", "Antiparasitic"], "allergy": ["Allergy"], "antibiotics": ["Antibiotics"], "chronic_care": ["Chronic care", "Mental health", "Urinary & kidney"], "weight_loss_diabetes": ["Diabetes", "Weight loss"], "womens_care": ["Women's care"], "mens_health": ["Men's health"], "eyes_ears": ["Eyes & ears"], "oral_care": ["Oral care"], "sleep": ["Sleep support"], "vitamins": ["Vitamins & minerals", "Omega 3", "Hair, skin & nails", "Collagen (oral)", "Immunity", "Sport & protein", "Energy & performance", "Men's vitality"], "sun_beach": ["Sunscreen SPF 50", "Sunscreen SPF 30-45", "Kids sun", "Tanning", "After sun", "Sun & beach"], "skin_care": ["Skin medicines", "Antiviral", "Hemorrhoid care", "Baby care"], "cosmetics": ["Face creams", "Eye care", "Serums", "Face masks", "Scrubs & exfoliation", "Body care", "Deodorant", "Soap & cleansing", "Foot & hand care", "Lips", "Mosquito protection"], "eva_cosmetics": ["Face creams", "Eye care", "Serums", "Face masks", "Scrubs & exfoliation", "Body care", "Deodorant", "Soap & cleansing", "Foot & hand care", "Lips"], "hair_care": ["Shampoo", "Conditioner", "Hair mask", "Hair serum & oil", "Natural oils", "Hair ampoules", "Hair loss", "Anti-dandruff"]};
+  window.SC_TAXONOMY=PM_SUBS;
+  var PM_PSEUDO={best_sellers:1,top_products:1};
+  function pmNormCat(v){ return String(v==null?"":v).trim().toLowerCase().replace(/[\u2019\u2018']/g,"").replace(/\s*&\s*/g,"_").replace(/\s+/g,"_"); }
+  window.scNormCat=pmNormCat;
+  function pmCatFind(v){
+    if(v==null||v==="") return null;
+    var n=pmNormCat(v);
+    for(var i=0;i<pmCats.length;i++){
+      var c=pmCats[i];
+      if(c.key===v || c.key===n || pmNormCat(c.label_en)===n || pmNormCat(c.label_cz)===n) return c;
+    }
+    return null;
+  }
+  function pmProductCat(p){ return p ? (pmCatFind(p.main_category)||pmCatFind(p.cat_en)||pmCatFind(p.cat_cz)) : null; }
+  function pmCatMatch(p,filterVal){
+    var f=pmCatFind(filterVal), c=pmProductCat(p);
+    if(f) return !!c && c.key===f.key;
+    return p.cat_en===filterVal || p.cat_cz===filterVal || p.main_category===filterVal;
+  }
+  function pmSubsFor(key){ return (PM_SUBS[key]||[]).slice(); }
+  function pmSubOwner(sub){ for(var k in PM_SUBS){ if(k!=="eva_cosmetics" && PM_SUBS[k].indexOf(sub)!==-1) return k; } return null; }
+  function pmFillCatSelects(selKey){
+    var catEn=document.getElementById("pmCat_en"), catCz=document.getElementById("pmCat_cz");
+    var hEn='<option value="">— اختار —</option>', hCz=hEn;
+    pmCats.forEach(function(c){
+      if(PM_PSEUDO[c.key]) return;
+      var sel=(c.key===selKey)?' selected':'';
+      hEn+='<option value="'+esc(c.key)+'"'+sel+'>'+esc(c.label_en)+'</option>';
+      hCz+='<option value="'+esc(c.key)+'"'+sel+'>'+esc(c.label_cz)+'</option>';
+    });
+    catEn.innerHTML=hEn; catCz.innerHTML=hCz;
+  }
+  function pmFillSubSelect(key, selected, selId){
+    var el=document.getElementById(selId||"pmSub"); if(!el) return;
+    var subs=pmSubsFor(key);
+    var h='<option value="">'+(key?'— اختار القسم الفرعي —':'— اختار القسم الرئيسي الأول —')+'</option>';
+    subs.forEach(function(x){ h+='<option value="'+esc(x)+'"'+(x===selected?' selected':'')+'>'+esc(x)+'</option>'; });
+    if(selected && subs.indexOf(selected)===-1){
+      h+='<option value="'+esc(selected)+'" selected>⚠️ '+esc(selected)+' (مش معروف للموقع)</option>';
+    }
+    el.innerHTML=h;
+    if(!selected && subs.length===1) el.value=subs[0];
+  }
+  window.pmCatChanged=function(which){
+    var catEn=document.getElementById("pmCat_en"), catCz=document.getElementById("pmCat_cz");
+    var v=(which==="cz"?catCz:catEn).value;
+    catEn.value=v; catCz.value=v;
+    pmFillSubSelect(v,"");
+  };
+  // v231: a product is locked if stock_status says so (by sc_code OR pharmacy_code) or products.out_of_stock is true
+  function pmLockOf(p){
+    if(!p) return undefined;
+    var L=pmLockLookup[p.sc_code]||pmLockLookup[p.pharmacy_code];
+    if(!L && p.out_of_stock===true) L={cz:false,en:false,all:true};
+    return L;
+  }
+  function pmLockCodes(p, extra){
+    var out=[];
+    [p&&p.sc_code, p&&p.pharmacy_code, extra].forEach(function(k){ k=String(k==null?"":k).trim(); if(k && out.indexOf(k)===-1) out.push(k); });
+    return out;
+  }
+  // Writes the lock for one product to stock_status and throws if Supabase refuses.
+  async function pmWriteLock(codes, locked){
+    for(var i=0;i<codes.length;i++){
+      var rd=await fetch(SB+"/rest/v1/stock_status?product_name=eq."+encodeURIComponent(codes[i]),{method:"DELETE",headers:SBH});
+      if(!rd.ok) throw new Error("stock_status DELETE HTTP "+rd.status);
+    }
+    if(locked && codes.length){
+      var rp=await fetch(SB+"/rest/v1/stock_status",{method:"POST",headers:Object.assign({},SBH,{"Prefer":"return=minimal"}),body:JSON.stringify({product_name:codes[0],branch:"ALL",out_of_stock:true})});
+      if(!rp.ok) throw new Error("stock_status POST HTTP "+rp.status);
+    }
+  }
 
   // ========== Load data from Supabase ==========
   window.pmLoadAll=async function(){
@@ -5414,8 +5495,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
   function pmRefreshLockSummary(){
     var total=0;
     pmAll.forEach(function(p){
-      if(!p.sc_code) return;
-      var L=pmLockLookup[p.sc_code];
+      var L=pmLockOf(p);
       if(!L) return;
       if(L.cz || L.en || L.all) total++;
     });
@@ -5463,19 +5543,19 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     var catFilter=document.getElementById("pmFilterCat").value||"";
     var typeFilter=document.getElementById("pmFilterType").value||"all";
     var out=pmAll.filter(function(p){
-      if(catFilter && p.cat_en!==catFilter && p.cat_cz!==catFilter && p.main_category!==catFilter) return false;
+      if(catFilter && !pmCatMatch(p,catFilter)) return false;
       if(typeFilter==="static" && !p.is_static) return false;
       if(typeFilter==="custom" && p.is_static) return false;
       if(typeFilter==="bs_en" && !p.is_bestseller_en) return false;
       if(typeFilter==="bs_cz" && !p.is_bestseller_cz) return false;
       // v215: filter by actual lock status from stock_status
       if(typeFilter==="out"){
-        var L=pmLockLookup[p.sc_code];
+        var L=pmLockOf(p);
         if(!L || (!L.cz && !L.en && !L.all)) return false;
       }
       // v218/219: lock filter from summary panel (only "any" is used now)
       if(pmLockFilter){
-        var L2=pmLockLookup[p.sc_code];
+        var L2=pmLockOf(p);
         if(!L2) return false;
         if(!L2.cz && !L2.en && !L2.all) return false;
       }
@@ -5516,7 +5596,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     var img=p.image_url||"";
     var bsCls=(p.is_bestseller_en&&p.is_bestseller_cz)?"bs-both":(p.is_bestseller_en?"bs-en":(p.is_bestseller_cz?"bs-cz":""));
     // v215: lock status from stock_status lookup, per-site
-    var L=pmLockLookup[p.sc_code]||{cz:false,en:false,all:false};
+    var L=pmLockOf(p)||{cz:false,en:false,all:false};
     var lockedCz=L.cz||L.all;
     var lockedEn=L.en||L.all;
     var anyLock=lockedCz||lockedEn;
@@ -5563,13 +5643,10 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     if(!p){ toast("مش لاقي الصنف"); return; }
     pmCurrentEdit=p;
     // Fill dropdowns
-    var catEn=document.getElementById("pmCat_en"), catCz=document.getElementById("pmCat_cz");
-    var catEnHtml='<option value="">— اختار —</option>', catCzHtml='<option value="">— اختار —</option>';
-    pmCats.forEach(function(c){
-      catEnHtml+='<option value="'+esc(c.label_en)+'"'+(p.cat_en===c.label_en?' selected':'')+'>'+esc(c.label_en)+'</option>';
-      catCzHtml+='<option value="'+esc(c.label_cz)+'"'+(p.cat_cz===c.label_cz?' selected':'')+'>'+esc(c.label_cz)+'</option>';
-    });
-    catEn.innerHTML=catEnHtml; catCz.innerHTML=catCzHtml;
+    // v231: category matched by key (works whatever spelling is stored), subcategory shown and editable
+    var pmPc=pmProductCat(p);
+    pmFillCatSelects(pmPc?pmPc.key:"");
+    pmFillSubSelect(pmPc?pmPc.key:"", p.subcategory||"");
     // Badge dropdown
     var badgeSel=document.getElementById("pmBadge");
     var bHtml='<option value="">— بدون —</option>';
@@ -5592,7 +5669,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     document.getElementById("pmCodeHint").style.display="none";
     document.getElementById("pmRegenBtn").style.display="none";
     // v216: Initialize per-site lock buttons from stock_status lookup
-    var L=pmLockLookup[p.sc_code]||{cz:false,en:false,all:false};
+    var L=pmLockOf(p)||{cz:false,en:false,all:false};
     // v219: Single toggle — locked if ANY of the flags is set
     pmSetLockSingle(!!(L.cz || L.en || L.all));
     // Show delete button only for custom products (not static)
@@ -5632,13 +5709,8 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
   window.pmOpenNewProduct=function(){
     pmCurrentEdit={ __isNew:true, id:null, sc_code:null, pharmacy_code:null };
     // Fill category dropdowns (all empty)
-    var catEn=document.getElementById("pmCat_en"), catCz=document.getElementById("pmCat_cz");
-    var catEnHtml='<option value="">— اختار —</option>', catCzHtml='<option value="">— اختار —</option>';
-    pmCats.forEach(function(c){
-      catEnHtml+='<option value="'+esc(c.label_en)+'">'+esc(c.label_en)+'</option>';
-      catCzHtml+='<option value="'+esc(c.label_cz)+'">'+esc(c.label_cz)+'</option>';
-    });
-    catEn.innerHTML=catEnHtml; catCz.innerHTML=catCzHtml;
+    pmFillCatSelects("");
+    pmFillSubSelect("","");
     // Badge dropdown
     var badgeSel=document.getElementById("pmBadge");
     var bHtml='<option value="">— بدون —</option>';
@@ -5846,9 +5918,6 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
       name_cz:document.getElementById("pmName_cz").value.trim(),
       price_egp:Number(document.getElementById("pmPrice").value)||0,
       pharmacy_code:document.getElementById("pmPharmCode").value.trim()||null,
-      cat_en:document.getElementById("pmCat_en").value||null,
-      cat_cz:document.getElementById("pmCat_cz").value||null,
-      main_category:document.getElementById("pmCat_en").value||null,
       image_url:document.getElementById("pmImg").value.trim()||null,
       desc_en:document.getElementById("pmDesc_en").value.trim()||null,
       desc_cz:document.getElementById("pmDesc_cz").value.trim()||null,
@@ -5860,9 +5929,40 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
       bestseller_order_cz:Number(document.getElementById("pmBsOrderCz").value)||null,
       updated_at:new Date().toISOString()
     };
+    // v231: category + subcategory. Never send an empty category on edit (that used to wipe it).
+    var pmCatKey=document.getElementById("pmCat_en").value||document.getElementById("pmCat_cz").value||"";
+    var pmCatObj=null;
+    pmCats.forEach(function(c){ if(c.key===pmCatKey) pmCatObj=c; });
+    var pmSubVal=document.getElementById("pmSub").value||"";
+    if(pmCatObj){ body.main_category=pmCatObj.key; body.cat_en=pmCatObj.label_en; body.cat_cz=pmCatObj.label_cz; }
+    if(pmSubVal){ body.subcategory=pmSubVal; }
+    if(pmCatObj && pmSubVal){
+      var pmOwner=pmSubOwner(pmSubVal);
+      if(pmOwner && pmSubsFor(pmCatObj.key).indexOf(pmSubVal)===-1){ toast("القسم الفرعي ده مش تابع للقسم الرئيسي المختار"); return; }
+    }
+    if(!isNew){
+      var pmOldCat=pmProductCat(pmCurrentEdit);
+      if(pmCatObj && (!pmOldCat || pmOldCat.key!==pmCatObj.key) && !pmSubVal){ toast("غيّرت القسم الرئيسي — اختار القسم الفرعي كمان"); return; }
+    }
+    // v231: lock state goes on the product row too, so both sites and the admin always agree
+    body.out_of_stock=!!pmGetLockState().single;
     // v216: Validate NEW products before creating
     if(isNew){
       if(!body.name_en && !body.name_cz){ toast("اكتب الاسم أولاً (إنجليزي أو تشيكي)"); return; }
+      if(!body.name_en) body.name_en=body.name_cz;
+      if(!body.name_cz) body.name_cz=body.name_en;
+      if(!(body.price_egp>0)){ toast("اكتب السعر"); return; }
+      if(!pmCatObj){ toast("اختار القسم الرئيسي"); return; }
+      if(!pmSubVal){ toast("اختار القسم الفرعي — من غيره الصنف مش هيتحط في مكانه على الموقع"); return; }
+      // The sites merge products by name: a second product with the same name would never show up
+      var pmNameLc=body.name_en.toLowerCase(), pmNameCzLc=body.name_cz.toLowerCase();
+      var pmDup=null;
+      pmAll.forEach(function(x){
+        if(pmDup) return;
+        var a=String(x.name_en||"").trim().toLowerCase(), b=String(x.name_cz||"").trim().toLowerCase();
+        if((a && (a===pmNameLc||a===pmNameCzLc)) || (b && (b===pmNameLc||b===pmNameCzLc))) pmDup=x;
+      });
+      if(pmDup){ toast("فيه صنف بنفس الاسم ("+(pmDup.sc_code||pmDup.pharmacy_code||"")+") — غيّر الاسم أو عدّل الصنف الموجود"); return; }
       // v217: Safety fallback — regenerate code if user cleared it
       if(!body.pharmacy_code){
         body.pharmacy_code=pmGenerateNewCode();
@@ -5901,17 +6001,20 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
       // v219: Write single lock state to stock_status
       // Locked = one row with branch="ALL", out_of_stock=true (both sites see it)
       // Unlocked = no rows at all
-      var lockKey=pmCurrentEdit.sc_code || (isNew ? null : null);
+      // v231: works for every product (static SC… and added SCX…), and reports failures instead of hiding them
+      var lockCodes=pmLockCodes(pmCurrentEdit, body.pharmacy_code);
+      var lockKey=lockCodes.length?lockCodes[0]:null;
       if(lockKey){
         var lock=pmGetLockState();
         try{
-          // Delete ANY existing rows for this product (cleanup all branch variants)
-          await fetch(SB+"/rest/v1/stock_status?product_name=eq."+encodeURIComponent(lockKey),{method:"DELETE",headers:SBH});
-          // If locked, insert single ALL row
-          if(lock.single){
-            await fetch(SB+"/rest/v1/stock_status",{method:"POST",headers:SBH,body:JSON.stringify({product_name:lockKey,branch:"ALL",out_of_stock:true})});
-          }
-        }catch(e){ console.error("stock_status sync failed", e); }
+          await pmWriteLock(lockCodes, !!lock.single);
+        }catch(e){
+          console.error("stock_status sync failed", e);
+          toast("اتحفظت بيانات الصنف، لكن القفل/الفتح ما اتسجلش: "+e.message);
+          pmCloseModal();
+          pmLoadAll();
+          return;
+        }
       }
       // v219: Explicit toast describing the final state
       var savedMsg = isNew ? "تم إضافة الصنف ✓" : "تم الحفظ ✓";
@@ -5988,17 +6091,17 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     var catFilter=document.getElementById("pmFilterCat").value||"";
     var typeFilter=document.getElementById("pmFilterType").value||"all";
     var visible=pmAll.filter(function(p){
-      if(catFilter && p.cat_en!==catFilter && p.cat_cz!==catFilter && p.main_category!==catFilter) return false;
+      if(catFilter && !pmCatMatch(p,catFilter)) return false;
       if(typeFilter==="static" && !p.is_static) return false;
       if(typeFilter==="custom" && p.is_static) return false;
       if(typeFilter==="bs_en" && !p.is_bestseller_en) return false;
       if(typeFilter==="bs_cz" && !p.is_bestseller_cz) return false;
       if(typeFilter==="out"){
-        var L=pmLockLookup[p.sc_code];
+        var L=pmLockOf(p);
         if(!L || (!L.cz && !L.en && !L.all)) return false;
       }
       if(pmLockFilter){
-        var L2=pmLockLookup[p.sc_code];
+        var L2=pmLockOf(p);
         if(!L2) return false;
         if(!L2.cz && !L2.en && !L2.all) return false;
       }
@@ -6056,8 +6159,10 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     bSel.innerHTML=bHtml;
     var cSel=document.getElementById("pmBulkCatSel");
     var cHtml='<option value="">— اختار تصنيف —</option>';
-    pmCats.forEach(function(c){ cHtml+='<option value="'+esc(c.label_en)+'">'+esc(c.label_en)+'</option>'; });
+    pmCats.forEach(function(c){ if(PM_PSEUDO[c.key]) return; cHtml+='<option value="'+esc(c.key)+'">'+esc(c.label_en)+' / '+esc(c.label_cz)+'</option>'; });
     cSel.innerHTML=cHtml;
+    document.getElementById("pmBulkSubSel").style.display="none";
+    pmFillSubSelect("","","pmBulkSubSel");
     // Sub title
     document.getElementById("pmBulkSub").textContent="هيتم تطبيق التعديلات على "+c+" صنف";
     pmRefreshBulkSummary();
@@ -6081,7 +6186,12 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     }
     if(group==="cat"){
       document.getElementById("pmBulkCatSel").style.display=(val==="set")?"block":"none";
+      document.getElementById("pmBulkSubSel").style.display=(val==="set")?"block":"none";
     }
+    pmRefreshBulkSummary();
+  };
+  window.pmBulkCatChanged=function(){
+    pmFillSubSelect(document.getElementById("pmBulkCatSel").value,"","pmBulkSubSel");
     pmRefreshBulkSummary();
   };
 
@@ -6099,7 +6209,9 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     if(pmBulkChoice.badge==="clear") lines.push("🗑 مسح البادج من الكل");
     if(pmBulkChoice.cat==="set"){
       var cv=document.getElementById("pmBulkCatSel").value;
-      lines.push("📁 تغيير التصنيف لـ: "+(cv||"— لسه ما اخترتش —"));
+      var cvObj=pmCatFind(cv);
+      var sv=document.getElementById("pmBulkSubSel").value;
+      lines.push("📁 تغيير التصنيف لـ: "+(cvObj?cvObj.label_en:"— لسه ما اخترتش —")+" ← "+(sv||"— اختار القسم الفرعي —"));
     }
     if(pmBulkChoice.lock==="lock") lines.push("🔒 قفل الأصناف (على الموقعين)");
     if(pmBulkChoice.lock==="unlock") lines.push("🔓 فتح الأصناف (على الموقعين)");
@@ -6121,6 +6233,8 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
       var c=document.getElementById("pmBulkCatSel");
       if(b) b.addEventListener("change", pmRefreshBulkSummary);
       if(c) c.addEventListener("change", pmRefreshBulkSummary);
+      var sb=document.getElementById("pmBulkSubSel");
+      if(sb) sb.addEventListener("change", pmRefreshBulkSummary);
     }, 100);
   })();
 
@@ -6144,15 +6258,20 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     if(pmBulkChoice.badge==="clear"){ patchBody.use_en=null; patchBody.use_cz=null; }
     if(pmBulkChoice.cat==="set"){
       var catVal=document.getElementById("pmBulkCatSel").value;
-      if(!catVal){ toast("اختار التصنيف الأول"); return; }
-      patchBody.cat_en=catVal;
-      patchBody.main_category=catVal;
-      // Also try to set cat_cz from matched category
-      var matched=pmCats.find(function(x){ return x.label_en===catVal; });
-      if(matched && matched.label_cz) patchBody.cat_cz=matched.label_cz;
+      var matched=pmCatFind(catVal);
+      if(!catVal || !matched){ toast("اختار التصنيف الأول"); return; }
+      var subValBulk=document.getElementById("pmBulkSubSel").value;
+      if(!subValBulk){ toast("اختار القسم الفرعي — هو اللي بيحدد مكان الأصناف في الموقع"); return; }
+      patchBody.main_category=matched.key;
+      patchBody.cat_en=matched.label_en;
+      patchBody.cat_cz=matched.label_cz;
+      patchBody.subcategory=subValBulk;
     }
     // v216: per-site locks are tracked separately and applied to stock_status after the products PATCH
 
+    // v231: the lock is written on the product row as well
+    if(pmBulkChoice.lock==="lock") patchBody.out_of_stock=true;
+    if(pmBulkChoice.lock==="unlock") patchBody.out_of_stock=false;
     // Only require products PATCH if there are content changes
     var hasContentChange = Object.keys(patchBody).length > 0;
     var hasLockChange = pmBulkChoice.lock!=="none";
@@ -6192,14 +6311,9 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
         } catch(e){ itemOk=false; console.error("Bulk PATCH error for", id, e); }
       }
       // v219: Single lock changes (only for products with sc_code)
-      if(hasLockChange && p.sc_code){
+      if(hasLockChange && pmLockCodes(p).length){
         try{
-          // Delete ANY existing rows for this product (cleanup all variants)
-          await fetch(SB+"/rest/v1/stock_status?product_name=eq."+encodeURIComponent(p.sc_code),{method:"DELETE",headers:SBH});
-          if(pmBulkChoice.lock==="lock"){
-            await fetch(SB+"/rest/v1/stock_status",{method:"POST",headers:SBH,body:JSON.stringify({product_name:p.sc_code,branch:"ALL",out_of_stock:true})});
-          }
-          // Unlock = just delete (already done above)
+          await pmWriteLock(pmLockCodes(p), pmBulkChoice.lock==="lock");
         }catch(e){ itemOk=false; console.error("Bulk lock sync failed for", id, e); }
       }
       if(itemOk) ok++; else fail++;
@@ -6239,11 +6353,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v229";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v231";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v229</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v231</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -7119,6 +7233,96 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     } catch(e){
       alert("خطأ: " + String(e));
     }
+  };
+})();
+</script>
+
+<script id="admin-v231-safe-legacy-writes">
+/* v231: the old Stock tab and Quick-add used to overwrite a product's name, price,
+   category and subcategory with guessed values. They now only write what the user typed. */
+(function(){
+  function sbUrl(){ return (typeof SB_URL!=="undefined")?SB_URL:"https://lbeuqkerbenrpycuvohl.supabase.co"; }
+  function sbHeaders(){ return (typeof SB_HEADERS!=="undefined")?SB_HEADERS:{}; }
+  function say(m){ if(typeof toast==="function") toast(m); }
+
+  // 1) "حفظ الجملة" (card sentence): existing products get ONLY the two sentences updated.
+  window.saveProductTextRow=async function(body,dyn){
+    body=body||{};
+    var id=(dyn&&dyn.id)||null;
+    if(!id && body.pharmacy_code){
+      var check=await fetch(sbUrl()+"/rest/v1/products?pharmacy_code=eq."+encodeURIComponent(body.pharmacy_code)+"&select=id",{headers:sbHeaders()});
+      var rows=check.ok?await check.json():[];
+      if(rows&&rows.length) id=rows[0].id;
+    }
+    if(id){
+      var patch={use_en:body.use_en||null,use_cz:body.use_cz||null,updated_at:new Date().toISOString()};
+      var r=await fetch(sbUrl()+"/rest/v1/products?id=eq."+encodeURIComponent(id),{method:"PATCH",headers:sbHeaders(),body:JSON.stringify(patch)});
+      if(!r.ok) throw new Error(await r.text());
+      return id;
+    }
+    // Product not in the database yet: create it without inventing a category.
+    var b2=Object.assign({},body); delete b2.main_category; delete b2.subcategory; delete b2.out_of_stock;
+    var r2=await fetch(sbUrl()+"/rest/v1/products",{method:"POST",headers:sbHeaders(),body:JSON.stringify(b2)});
+    if(!r2.ok) throw new Error(await r2.text());
+    return null;
+  };
+
+  // 2) Quick add: subcategories come from the same list the sites understand.
+  function qaKey(){ var c=document.getElementById("qaCategory"); return (window.scNormCat&&c)?window.scNormCat(c.value):""; }
+  window.populateQuickSubcategories=function(selected){
+    var sub=document.getElementById("qaSubcategory"); if(!sub) return;
+    var subs=((window.SC_TAXONOMY||{})[qaKey()]||[]);
+    var current=selected||sub.value;
+    var h='<option value="">اختار السب كاتيجوري</option>';
+    subs.forEach(function(x){ h+='<option value="'+String(x).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")+'">'+String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</option>'; });
+    sub.innerHTML=h;
+    if(current && subs.indexOf(current)!==-1) sub.value=current;
+    else if(subs.length===1) sub.value=subs[0];
+  };
+  var genOrig=(typeof generatedQuickProduct==="function")?generatedQuickProduct:null;
+  if(genOrig){
+    window.generatedQuickProduct=function(){
+      var p=genOrig();
+      var catEl=document.getElementById("qaCategory"), subEl=document.getElementById("qaSubcategory");
+      if(catEl && catEl.value) p.main_category=catEl.value;
+      var subs=((window.SC_TAXONOMY||{})[window.scNormCat?window.scNormCat(p.main_category):""]||[]);
+      var chosen=subEl?String(subEl.value||"").trim():"";
+      p.subcategory=(chosen && subs.indexOf(chosen)!==-1)?chosen:"";
+      return p;
+    };
+  }
+  window.saveQuickProduct=async function(){
+    var p=generatedQuickProduct();
+    if(!p.name_en||!p.name_cz||!p.price_egp||!p.pharmacy_code||!p.image_url){say("اكمل اسم الإنجليزي والتشيكي والسعر والكود والصورة");return}
+    if(!p.main_category||!p.subcategory){say("اختار القسم الرئيسي والقسم الفرعي (Best sellers مش قسم — بيتحدد من إدارة الأصناف)");return}
+    if(!p.use_en||!p.use_cz){say("اختار جملة الكارت من الاقتراحات أو اكتب الترجمة التشيكي");return}
+    if(!/^https?:\/\//i.test(p.image_url)){say("لينك الصورة غير صحيح");return}
+    try{
+      var H=sbHeaders();
+      var byCode=await fetch(sbUrl()+"/rest/v1/products?pharmacy_code=eq."+encodeURIComponent(p.pharmacy_code)+"&select=id",{headers:H});
+      var codeRows=byCode.ok?await byCode.json():[];
+      var exists=!!(codeRows&&codeRows.length);
+      if(!exists){
+        // The sites merge products by name, so a second product with the same name would never appear.
+        var byName=await fetch(sbUrl()+"/rest/v1/products?name_en=ilike."+encodeURIComponent(p.name_en.replace(/[%_*]/g," "))+"&select=pharmacy_code",{headers:H});
+        var nameRows=byName.ok?await byName.json():[];
+        if(nameRows&&nameRows.length){say("فيه صنف بنفس الاسم ("+nameRows[0].pharmacy_code+") — غيّر الاسم أو عدّل الصنف الموجود");return}
+      }
+      var r;
+      if(exists){
+        var upd=Object.assign({},p); delete upd.out_of_stock; delete upd.is_active;
+        r=await fetch(sbUrl()+"/rest/v1/products?pharmacy_code=eq."+encodeURIComponent(p.pharmacy_code),{method:"PATCH",headers:H,body:JSON.stringify(upd)});
+      } else {
+        r=await fetch(sbUrl()+"/rest/v1/products",{method:"POST",headers:H,body:JSON.stringify(p)});
+      }
+      if(!r.ok) throw new Error(await r.text());
+      say(exists?"تم تحديث المنتج في الموقعين":"تم إضافة المنتج للموقعين");
+      ["qaName","qaNameCz","qaPrice","qaCode","qaImage","qaUseEn","qaUseCz","qaCategory","qaSubcategory"].forEach(function(id){var el=document.getElementById(id); if(el)el.value=""});
+      if(typeof initQuickProductTools==="function") initQuickProductTools();
+      var pv=document.getElementById("qaPreview"); if(pv) pv.classList.remove("show");
+      if(typeof loadProductsTable==="function") await loadProductsTable();
+      if(typeof loadStock==="function") await loadStock();
+    }catch(e){console.error(e);say("تعذر حفظ المنتج: "+String(e&&e.message||e).slice(0,120))}
   };
 })();
 </script>
