@@ -1,0 +1,18 @@
+name: Preview the Scooter section (not production)
+
+on:
+  push:
+    branches: [ mobility-admin ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy a preview build
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: da77fd5165dc79f35a5d3c58ca9dc021
+          command: pages deploy public --project-name=selfcare-admin-backup --branch=mobility-admin

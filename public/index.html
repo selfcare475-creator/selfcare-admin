@@ -1173,6 +1173,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
     <button class="category-btn" id="catProducts" onclick="setCategory('products')">Products</button>
     <button class="category-btn" id="catReports" onclick="setCategory('reports')">Reports</button>
     <button class="category-btn" id="catSettings" onclick="setCategory('settings')">Settings</button>
+    <button class="category-btn" id="catMobility" onclick="setCategory('mobility')">Scooter</button>
   </div>
   <div class="filter-row" id="ordersFilters">
     <div class="filter-box">
@@ -1385,6 +1386,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
     </div>
   </section>
 
+  <section class="section" id="sectionMobility"><div id="mobAdminHost"></div></section>
   <section class="section" id="sectionSettings">
     <div class="settings-accordion">
       <button class="settings-toggle" id="settingsToggleMain" onclick="toggleSettingsPanel('main')"><span>Settings</span><span class="arrow">⌄</span></button>
@@ -2653,6 +2655,9 @@ function setCategory(cat){
   var pmBtn=document.getElementById("catProducts"); if(pmBtn) pmBtn.classList.toggle("active",cat==="products");
   document.getElementById("catReports").classList.toggle("active",cat==="reports");
   document.getElementById("catSettings").classList.toggle("active",cat==="settings");
+  var mobSec=document.getElementById("sectionMobility"); if(mobSec) mobSec.classList.toggle("active",cat==="mobility");
+  var mobBtn=document.getElementById("catMobility"); if(mobBtn) mobBtn.classList.toggle("active",cat==="mobility");
+  if(cat==="mobility" && window.scMobAdmin) window.scMobAdmin.open();
   if(cat==="stock")renderStock();
   if(cat==="products" && typeof pmLoadAll==="function"){ pmLoadAll(); }
   if(cat==="settings"){renderPreparerManager();renderCourierManager();renderHotelDeliveryFees();}
@@ -6357,11 +6362,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v232";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v233";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v232</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v233</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -7331,5 +7336,576 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 })();
 </script>
 
+
+<!-- MOBILITY ADMIN START -->
+<style>
+@media(min-width:431px){.category-row{grid-template-columns:repeat(5,1fr)!important}}
+@media(max-width:430px){#catMobility{grid-column:1/-1}}
+#mobAdminHost{display:block;margin-top:4px}
+</style>
+<script>
+(function () {
+const host = document.getElementById('mobAdminHost');
+if (!host) return;
+const root = host.attachShadow({ mode: 'open' });
+root.innerHTML = "<style>\n  :host{display:block;\n    --bg:#F2F7F8; --surface:#fff; --ink:#0C2A3A; --ink-soft:#4A6472;\n    --sea:#0B7285; --sea-deep:#075564; --sea-tint:#DCEEF1; --sun:#FFC53D; --sun-deep:#E59E00; --line:#CFDDE2;\n    --ok:#17734A; --ok-tint:#E2F3EA; --stop:#A93A1C; --stop-tint:#FBE9E3; --wait:#8A5A00; --wait-tint:#FFF1CC;\n    --gutter:clamp(12px,3vw,28px);\n  }\n  *,*::before,*::after{box-sizing:border-box}\n  .mroot{border-radius:18px;overflow:hidden;padding-bottom:14px;background:var(--bg);color:var(--ink);font:400 16px/1.6 \"IBM Plex Sans Arabic\",system-ui,\"Segoe UI\",Tahoma,sans-serif;overflow-x:hidden}\n  button,input,select,textarea{font:inherit;color:inherit}\n  button{cursor:pointer}\n  h1,h2,h3,p{margin:0}\n  h2{font-size:1.25rem;font-weight:700}\n  h3{font-size:1.05rem;font-weight:700}\n  [hidden]{display:none!important}\n  :focus-visible{outline:3px solid var(--sun-deep);outline-offset:2px}\n  .ltr{direction:ltr;unicode-bidi:isolate;display:inline-block}\n  .wrap{max-width:1100px;margin:0 auto;padding-inline:var(--gutter)}\n  .muted{color:var(--ink-soft)}\n  .small{font-size:.9rem}\n\n  .top{background:var(--sea-deep);color:#fff;position:sticky;top:0;z-index:10}\n  .top-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-block:10px}\n  .top b{font-size:1.05rem}\n  .top .btn{min-height:40px}\n  .tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-bottom:0}\n  .tabs::-webkit-scrollbar{display:none}\n  .tabs button{flex:none;border:0;background:transparent;color:#CFE6EA;font-weight:500;padding:10px 14px;border-bottom:3px solid transparent;white-space:nowrap}\n  .tabs button[aria-selected=\"true\"]{color:#fff;border-color:var(--sun);font-weight:700}\n  .count{display:inline-block;min-width:22px;padding:0 6px;border-radius:99px;background:var(--sun);color:var(--ink);font-size:.8rem;font-weight:700;text-align:center;margin-inline-start:6px}\n  .demo{background:var(--sun);padding:6px var(--gutter);text-align:center;font-size:.9rem}\n\n  main{padding-block:18px 80px}\n  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border-radius:10px;border:2px solid transparent;padding:0 16px;font-weight:700;background:var(--sea);color:#fff;text-decoration:none;white-space:nowrap}\n  .btn.sun{background:var(--sun);color:var(--ink)}\n  .btn.line{background:#fff;color:var(--ink);border-color:var(--line)}\n  .btn.danger{background:#fff;color:var(--stop);border-color:var(--stop)}\n  .btn.wa{background:#128C4B}\n  .btn.ghost{background:rgba(255,255,255,.14)}\n  .btn:disabled{opacity:.55;cursor:not-allowed}\n  .btn.sm{min-height:38px;padding:0 12px;font-size:.92rem}\n\n  .today{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}\n  .today div{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 12px}\n  .today b{display:block;font-size:1.6rem;line-height:1.2}\n  .today span{font-size:.88rem;color:var(--ink-soft)}\n  .bar2{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}\n  .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1 1 100%}\n  .chips::-webkit-scrollbar{display:none}\n  .chips button{flex:none;border:2px solid var(--line);background:#fff;border-radius:99px;padding:6px 14px;font-weight:500}\n  .chips button[aria-pressed=\"true\"]{background:var(--ink);border-color:var(--ink);color:#fff}\n  .field{width:100%;min-height:46px;border:2px solid var(--line);border-radius:10px;background:#fff;padding:8px 12px}\n  textarea.field{min-height:70px;resize:vertical}\n  .field:focus{outline:none;border-color:var(--sea);box-shadow:0 0 0 3px var(--sea-tint)}\n  .search{flex:1 1 220px}\n\n  .list{display:grid;gap:12px}\n  .bk{background:#fff;border:2px solid var(--line);border-radius:16px;overflow:hidden}\n  .bk.pending{border-color:var(--sun-deep)}\n  .bk-head{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;background:#F7FAFB;border-bottom:1px solid var(--line);flex-wrap:wrap}\n  .bk-code{font-weight:700;letter-spacing:.03em}\n  .st{font-size:.85rem;font-weight:700;border-radius:99px;padding:3px 12px}\n  .st.pending{background:var(--wait-tint);color:var(--wait)}\n  .st.confirmed{background:var(--sea-tint);color:var(--sea-deep)}\n  .st.delivered{background:var(--ok-tint);color:var(--ok)}\n  .st.returned{background:#E7ECEF;color:var(--ink-soft)}\n  .st.cancelled{background:var(--stop-tint);color:var(--stop)}\n  .bk-body{padding:12px 14px;display:grid;gap:12px}\n  .bk-main{display:grid;gap:4px}\n  .bk-name{font-size:1.1rem;font-weight:700}\n  .facts{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0}\n  .facts dt{color:var(--ink-soft)}\n  .facts dd{margin:0;font-weight:500}\n  .cash{background:var(--sea-tint);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}\n  .cash .big{font-size:1.2rem;font-weight:700}\n  .bk-actions{display:flex;gap:8px;flex-wrap:wrap}\n  details.gloss{font-size:.9rem;color:var(--ink-soft)}\n  details.gloss summary{cursor:pointer;padding:4px 0}\n  details.gloss p{background:#F7FAFB;border-radius:10px;padding:10px;margin-top:4px;white-space:pre-line}\n  .empty{text-align:center;padding:40px 16px;color:var(--ink-soft);background:#fff;border:2px dashed var(--line);border-radius:16px}\n\n  .cal-wrap{overflow-x:auto;background:#fff;border:2px solid var(--line);border-radius:16px}\n  table.cal{border-collapse:collapse;min-width:100%}\n  .cal th,.cal td{padding:6px 4px;text-align:center;border-bottom:1px solid var(--line);border-inline-start:1px solid var(--line);min-width:44px;font-size:.88rem}\n  .cal th:first-child,.cal td:first-child{position:sticky;inset-inline-start:0;background:#fff;text-align:start;min-width:120px;padding-inline:10px;border-inline-start:0;font-weight:700;z-index:1}\n  .cal thead th{background:#F7FAFB;font-weight:500;line-height:1.2}\n  .cal thead th.now{background:var(--sun)}\n  .cal td.free{background:var(--ok-tint);color:var(--ok);font-weight:700}\n  .cal td.part{background:var(--wait-tint);color:var(--wait);font-weight:700}\n  .cal td.full{background:var(--stop-tint);color:var(--stop);font-weight:700}\n  .cal tbody tr:last-child td{border-bottom:0}\n  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:.9rem}\n  .legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-inline-end:5px}\n\n  .panel{background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:12px}\n  .panel+.panel{margin-top:12px}\n  .grid2{display:grid;gap:10px}\n  .lab{display:grid;gap:4px;font-weight:500;font-size:.95rem}\n  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}\n  .tiers{display:grid;gap:6px}\n  .tier{display:grid;grid-template-columns:1fr 1fr 1fr 44px;gap:6px;align-items:end}\n  .tier .x{min-height:46px;border:2px solid var(--line);background:#fff;border-radius:10px;color:var(--stop);font-weight:700}\n  .switch{display:inline-flex;align-items:center;gap:8px;font-weight:500}\n  .switch input{width:22px;height:22px;accent-color:var(--sea)}\n  .section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}\n\n  .hrow{display:grid;grid-template-columns:1fr minmax(120px,170px) auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}\n  .hrow:last-child{border-bottom:0}\n  .hrow b{font-weight:500;direction:ltr;text-align:start;overflow-wrap:anywhere}\n  .hrow .field{min-height:40px;padding:4px 8px}\n  .toast{position:fixed;inset-inline:0;bottom:16px;margin:auto;width:max-content;max-width:92vw;background:var(--ink);color:#fff;padding:10px 18px;border-radius:12px;z-index:50;font-weight:500}\n  .toast.bad{background:var(--stop)}\n  dialog{border:0;border-radius:18px;padding:0;width:min(560px,94vw);max-height:92vh;color:var(--ink)}\n  dialog::backdrop{background:rgba(7,42,58,.55)}\n  .dlg{padding:16px;display:grid;gap:12px}\n  .dlg-head{display:flex;justify-content:space-between;align-items:center}\n  .pick{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;border:2px solid var(--line);border-radius:12px;padding:8px 12px}\n  .pick input{width:76px;text-align:center}\n  .quote{background:var(--sea-tint);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 12px}\n  .login{max-width:380px;margin:12vh auto 0;display:grid;gap:12px}\n\n  @media (min-width:720px){\n    .grid2{grid-template-columns:1fr 1fr}\n    .bk-body{grid-template-columns:1.4fr 1fr}\n    .bk-actions,.bk-notes{grid-column:1/-1}\n    .today b{font-size:2rem}\n  }\n\n  .top{position:static}\n  .mroot .wrap{max-width:none}\n  #addProduct,#addZone,#outBtn{display:none!important}\n  .pin{max-width:420px;margin:28px auto}\n  .lockbtn{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:10px;padding:6px 12px;font-size:.85rem}\n<\/style><div class=\"mroot\" dir=\"rtl\"><div id=\"pinView\" class=\"wrap\" hidden>\n  <form class=\"panel login pin\" id=\"pinForm\">\n    <h2>قسم الاسكوتر<\/h2>\n    <p class=\"muted small\">اكتب الرقم السري للقسم. بيتحفظ على الجهاز ده، فمش هتكتبه تاني.<\/p>\n    <label class=\"lab\">الرقم السري<input class=\"field ltr\" type=\"password\" inputmode=\"numeric\" id=\"pinInput\" autocomplete=\"off\" required><\/label>\n    <button class=\"btn\" type=\"submit\">دخول<\/button>\n    <p class=\"small\" id=\"pinMsg\" style=\"color:var(--stop)\"><\/p>\n  <\/form>\n<\/div>\n<div id=\"bootMsg\" class=\"wrap muted\" style=\"padding:24px 0\">جاري التحميل…<\/div>\n<div id=\"app\" hidden>\n  <header class=\"top\">\n    <div class=\"wrap\">\n      <div class=\"top-row\">\n        <b>Self Care Mobility<\/b>\n        <div class=\"row\">\n          <button class=\"btn sun sm\" id=\"newBtn\">+ حجز جديد<\/button>\n          <button class=\"btn ghost sm\" id=\"outBtn\" hidden>خروج<\/button><button type=\"button\" class=\"lockbtn\" id=\"lockBtn\">قفل القسم<\/button>\n        <\/div>\n      <\/div>\n      <nav class=\"tabs\" role=\"tablist\">\n        <button role=\"tab\" data-tab=\"bookings\" aria-selected=\"true\">الحجوزات<span class=\"count\" id=\"newCount\" hidden><\/span><\/button>\n        <button role=\"tab\" data-tab=\"calendar\" aria-selected=\"false\">التوافر<\/button>\n        <button role=\"tab\" data-tab=\"products\" aria-selected=\"false\">المنتجات والأسعار<\/button>\n        <button role=\"tab\" data-tab=\"zones\" aria-selected=\"false\">مناطق التوصيل<\/button>\n        <button role=\"tab\" data-tab=\"settings\" aria-selected=\"false\">الإعدادات<\/button>\n      <\/nav>\n    <\/div>\n  <\/header>\n  <div class=\"demo\" id=\"demoNote\" hidden>وضع تجربة: جداول الحجز لسه ما اتركبتش على قاعدة بيانات الصيدلية، فاللي بتعمله هنا بيتحفظ على الجهاز ده بس.<\/div>\n\n  <main class=\"wrap\">\n    <section data-view=\"bookings\">\n      <div class=\"today\" id=\"today\"><\/div>\n      <div class=\"bar2\">\n        <div class=\"chips\" id=\"filters\"><\/div>\n        <input class=\"field search\" id=\"search\" type=\"search\" placeholder=\"بحث بالاسم، الكود، الفندق أو الرقم\">\n      <\/div>\n      <div class=\"list\" id=\"bookingList\"><\/div>\n    <\/section>\n\n    <section data-view=\"calendar\" hidden>\n      <div class=\"section-head\">\n        <h2>التوافر يوم بيوم<\/h2>\n        <div class=\"row\">\n          <button class=\"btn line sm\" id=\"calPrev\">الأسبوعين اللي قبل<\/button>\n          <button class=\"btn line sm\" id=\"calToday\">النهارده<\/button>\n          <button class=\"btn line sm\" id=\"calNext\">الأسبوعين اللي بعد<\/button>\n        <\/div>\n      <\/div>\n      <div class=\"cal-wrap\"><table class=\"cal\" id=\"cal\"><\/table><\/div>\n      <div class=\"legend\">\n        <span><i style=\"background:var(--ok-tint)\"><\/i>كله متاح<\/span>\n        <span><i style=\"background:var(--wait-tint)\"><\/i>جزء محجوز<\/span>\n        <span><i style=\"background:var(--stop-tint)\"><\/i>مفيش متاح<\/span>\n        <span class=\"muted\">الرقم هو عدد القطع الفاضية في اليوم ده.<\/span>\n      <\/div>\n    <\/section>\n\n    <section data-view=\"products\" hidden>\n      <div class=\"section-head\"><h2>المنتجات والأسعار<\/h2><button class=\"btn line sm\" id=\"addProduct\">+ منتج جديد<\/button><\/div>\n      <p class=\"muted small\" style=\"margin-bottom:12px\">المنتج اللي من غير أسعار بيظهر في الموقع بزرار \"اسأل على واتساب\" ومحدش يقدر يحجزه أونلاين. العدد هو اللي بيحدد كام قطعة ينفع تتحجز في نفس الوقت.<\/p>\n      <div id=\"productList\"><\/div>\n    <\/section>\n\n    <section data-view=\"zones\" hidden>\n      <div class=\"section-head\"><h2>مناطق التوصيل<\/h2><button class=\"btn line sm\" id=\"addZone\">+ منطقة جديدة<\/button><\/div>\n      <div id=\"zoneList\"><\/div>\n    <\/section>\n\n    <section data-view=\"hotels\" hidden>\n      <div class=\"section-head\"><h2>الفنادق<\/h2><span class=\"muted small\" id=\"hotelCount\"><\/span><\/div>\n      <p class=\"muted small\" style=\"margin-bottom:12px\">العميل بيكتب أول حروف من اسم الفندق ويختاره، والمنطقة هنا هي اللي بتحدد رسوم التوصيل. الفندق اللي \"خارج التوصيل\" بيتحول على واتساب. أي تغيير بيتحفظ على طول.<\/p>\n      <form class=\"panel\" id=\"hotelAdd\">\n        <div class=\"grid2\">\n          <label class=\"lab\">إضافة فندق<input class=\"field\" name=\"name\" dir=\"ltr\" required minlength=\"2\" maxlength=\"120\" placeholder=\"Hotel name\"><\/label>\n          <label class=\"lab\">المنطقة<select class=\"field\" name=\"zone\"><\/select><\/label>\n        <\/div>\n        <div class=\"row\"><button class=\"btn\" type=\"submit\">إضافة<\/button><\/div>\n      <\/form>\n      <div class=\"bar2\" style=\"margin-top:12px\">\n        <input class=\"field search\" id=\"hotelSearch\" type=\"search\" dir=\"ltr\" placeholder=\"Search hotels\">\n        <select class=\"field\" id=\"hotelFilter\" style=\"flex:0 1 200px\"><\/select>\n      <\/div>\n      <div class=\"panel\" id=\"hotelList\" style=\"gap:0;padding:4px 14px\"><\/div>\n    <\/section>\n\n    <section data-view=\"settings\" hidden>\n      <div class=\"section-head\"><h2>الإعدادات<\/h2><\/div>\n      <form class=\"panel\" id=\"settingsForm\"><\/form>\n    <\/section>\n  <\/main>\n<\/div>\n\n<dialog id=\"newDlg\">\n  <form class=\"dlg\" id=\"newForm\" method=\"dialog\">\n    <div class=\"dlg-head\"><h2>حجز جديد<\/h2><button type=\"button\" class=\"btn line sm\" id=\"newClose\">إغلاق<\/button><\/div>\n    <p class=\"muted small\">للحجوزات اللي بتيجي بالتليفون أو الواتساب. بيتسجل \"مؤكد\" على طول وبيتخصم من المتاح.<\/p>\n    <div id=\"nItems\" style=\"display:grid;gap:8px\"><\/div>\n    <div class=\"grid2\">\n      <label class=\"lab\">يوم التسليم<input class=\"field\" type=\"date\" id=\"nStart\" required><\/label>\n      <label class=\"lab\">المدة (أيام)<input class=\"field ltr\" type=\"number\" id=\"nDays\" min=\"1\" max=\"90\" value=\"7\" required list=\"nDayList\"><datalist id=\"nDayList\"><\/datalist><\/label>\n      <label class=\"lab\">المنطقة<select class=\"field\" id=\"nZone\"><\/select><\/label>\n      <label class=\"lab\">العملة<select class=\"field\" id=\"nCur\"><option>GBP<\/option><option>EUR<\/option><option>USD<\/option><option>EGP<\/option><\/select><\/label>\n      <label class=\"lab\">اسم العميل<input class=\"field\" id=\"nName\" required minlength=\"2\" maxlength=\"80\"><\/label>\n      <label class=\"lab\">رقم الواتساب<input class=\"field ltr\" id=\"nPhone\" type=\"tel\" required maxlength=\"24\" placeholder=\"+44 7700 900123\"><\/label>\n      <label class=\"lab\">الفندق<input class=\"field\" id=\"nHotel\" dir=\"ltr\" list=\"nHotels\" autocomplete=\"off\" required minlength=\"2\" maxlength=\"120\"><datalist id=\"nHotels\"><\/datalist><\/label>\n      <label class=\"lab\">رقم الغرفة<input class=\"field\" id=\"nRoom\" maxlength=\"20\"><\/label>\n      <label class=\"lab\">ميعاد التسليم<select class=\"field\" id=\"nSlot\"><option value=\"morning\">الصبح 9 – 12<\/option><option value=\"afternoon\">بعد الضهر 12 – 5<\/option><option value=\"evening\">بالليل 5 – 11<\/option><\/select><\/label>\n      <label class=\"lab\">لغة العميل<select class=\"field\" id=\"nLang\"><option value=\"en\">إنجليزي<\/option><option value=\"de\">ألماني<\/option><\/select><\/label>\n    <\/div>\n    <label class=\"lab\">ملاحظات<textarea class=\"field\" id=\"nNotes\" maxlength=\"500\"><\/textarea><\/label>\n    <div class=\"quote\" id=\"nQuote\"><\/div>\n    <p class=\"small\" id=\"nMsg\" style=\"color:var(--stop)\"><\/p>\n    <button class=\"btn\" type=\"submit\" id=\"nSave\">تسجيل الحجز<\/button>\n  <\/form>\n<\/dialog>\n\n<div class=\"toast\" id=\"toast\" hidden role=\"status\"><\/div>\n\n<\/div>";
+
+/* ============================================================================
+   الربط بقاعدة البيانات: نفس القيمتين اللي في index.html
+   (الـ publishable / anon key بس، مش الـ service_role)
+   ========================================================================== */
+
+const IMG = 'https://res.cloudinary.com/de4boyel3/image/upload/f_auto,q_auto,w_900/';
+/* Hotel list imported from the pharmacy's delivery table, sorted into the three delivery areas. */
+const HOTELS = {"downtown": "Al Dora|Al Dora Hotel|Al Dora Residence|Albatros Blu Spa|Aldau|Alia Beach|Alia Beach Resort|Amarina Sapphire|Aqua Joy|Aqua Magic|Arabia Azur|Arabia Azur Resort|Bel Air Azur|Bel Air Azur Resort|Bella Vista|Bella Vista Resort Hurghada|Blu Spa|Continental|Continental Hotel Hurghada|Diana Hotel|Diana Hotel Hurghada|Eagles Downtown Zahabia|Eagles Downtown Zahabia Resort & Aqua Park|El Palacio|Elysees|Elysees Dream Beach|Elysees Dream Beach Hotel|Elysees Hotel|Empire Beach|Empire Beach Resort|Four Seasons Hotel|Four Seasons Hotel Hurghada|Gaisum Village|Geisum|Geisum Village|Giftun Azur|Giftun Azur Resort|Grand Palace|Hilton Hurghada Plaza|Hilton Plaza|Ivory Suites|Jaz Ivory|Jaz Neo Ivory|Jaz Neo Ivory Hurghada|Jewels Sahara|Jewels Sahara Boutique Resort|King Tut|King Tut Aqua Park Beach Resort|Le Pacha|Le Pacha Resort|Magic Beach|Marlin Inn|Mashrabiya|Mashrabiya Hotel|Meraki|Meraki Resort Hurghada|Minamark|Minamark Hotel|Mirette|Moreno Horizon|New Gaisum|New Gaisum Resort|New Geisum|New Geisum Resort|Old Vic|Old Vic Resort|Palma De Mirette|Pickalbatros Blu Spa Resort|Pickalbatros White Beach|Pickalbatros White Beach Resort|Regina Resort|Regina Swiss Inn|Regina Swiss Inn Resort|Royal Lagoons|Royal Lagoons Resort|Royal Lagoons Resort & Aqua Park|Royal Star|Royal Star Beach Resort|Sahara Boutique Resort|Sea Star|Sea Star Beau Rivage|Seagull|Seagull Beach Resort|Serry|Sindbad Club|Siva Grand Beach|Sky View|Sky View Suites|Sky View Suites Hotel|Sphinx|Sphinx Aqua Park Beach Resort|Steigenberger Aldau|Steigenberger ALDAU Beach Hotel|Steigenberger Aqua Magic|Steigenberger Aqua Magic Hurghada|Steigenberger Pure Lifestyle|Sunny Days|Sunny Days El Palacio|Sunny Days El Palacio Resort & Spa|Sunny Days Mirette|Sunny Days Palma De Mirette|Sunny Days Palma De Mirette Resort & Spa|Sunrise Aqua Joy|Sunrise Aqua Joy Resort|Sunrise Holidays Resort|Swiss Inn|Swiss Inn Resort Hurghada|The Grand Hotel|The Grand Palace|The Grand Resort|The Grand Resort Hurghada|Tiba Golden|Tiba Golden Resort|White Beach|Zahabia|Zahabia Eagles|Zahabia Hotel & Beach Resort", "villages": "Aladdin|Aladdin Beach Resort|Albatros Aqua Blu|Albatros Aqua Park|Albatros Aqua Park Resort|Albatros Palace|Albatros Palace Resort|Ali Baba|Ali Baba Palace|AMC Royal|AMC Royal Hotel & Spa|Aqua Blu Resort|Aqua Vista Resort|Beach Albatros|Beach Albatros Resort|Bellagio|Bellagio Beach Resort|Blend Club Aqua Resort|Caves Beach|Caves Beach Resort|Coral Beach|Coral Beach Hurghada|Dana Beach|Dana Beach Resort|Desert Rose|Desert Rose Resort|El Karma|Festival Riviera|Festival Riviera Resort|Golden Beach|Golden Beach Resort|Gravity Hotel|Gravity Hotel & Aqua Park Hurghada|Gravity Hurghada|Hawaii|Hawaii Caesar|Hawaii Caesar Palace|Hawaii Caesar Palace Aqua Park|Hawaii Le Jardin|Hawaii Le Jardin Aqua Park|Hawaii Paradise|Hawaii Paradise Aqua Park|Hawaii Resorts|Hawaii Riviera|Hawaii Riviera Aqua Park|Hurghada Long Beach|Hurghada Long Beach Resort|Jasmine Palace|Jasmine Palace Resort|Jasmine Village|Jaz Aquamarine|Jaz Aquamarine Resort|Jaz Casa Del Mar|Jaz Casa Del Mar Beach|Jaz Casa Del Mar Resort|Jungle|Jungle Aqua Park|Le Jardin|Long Beach|Mamlouk Palace|Mercure|Mercure Hurghada|Mirage Bay|Mirage Bay Resort & Aqua Park|Mirage New Hawaii|Mirage New Hawaii Resort|Neverland|Neverland City Hurghada|Neverland Hurghada|New Hawaii|Nubia|Nubia Aqua Beach Resort|Palm Beach|Palm Beach Resort|Pharaoh Azur|Pharaoh Azur Resort|Pickalbatros Aqua Blu|Pickalbatros Aqua Blu Resort|Pickalbatros Aqua Park|Pickalbatros Aqua Park Resort|Pickalbatros Aqua Vista|Pickalbatros Aqua Vista Resort|Pickalbatros Dana Beach Resort|Pickalbatros Jungle Aqua Park|Rewaya Inn|Rewaya Luxury|Rewaya Majestic|Rixos Magawish|Rixos Premium Magawish|Sentido Mamlouk Palace|Sunrise Alma Bay|Sunrise Alora|Sunrise Garden Beach|Sunrise Garden Beach Resort|Sunrise Mamlouk|Sunrise Mamlouk Palace Resort|Sunrise Solara|The Caves|The Caves Resort|The Three Corners Sunny Beach Resort|Three Corners|Three Corners Sunny Beach|Three Corners Sunny Beach Resort|Titanic Aqua Park|Titanic Aqua Park Resort|Titanic Beach|Titanic Beach Spa & Aqua Park|Titanic Palace|Titanic Pearl|Titanic Royal|Titanic Royal Resort|TUI Blue Crystal Bay", "makadi": "Albatros Makadi|Albatros Makadi Resort|Cleopatra Luxury Makadi|Cleopatra Luxury Resort Makadi Bay|Cleopatra Makadi|Fort Arabesque|Fort Arabesque Resort|Fort Arabesque Resort, Spa & Villas|Fort Arabesque The West Bay|Golden Bay Makadi|Grand Makadi|Grand Water World Makadi|Grand Waterworld|Grand Waterworld Makadi|Grand Waterworld Makadi Bay|Grand Waterworld Resort Makadi|Harmony Makadi Bay|Iberotel Makadi Beach|Iberotel Makadi Beach Club|Jaz Aquaviva|Jaz Makadi Blue|Jaz Makadi Gardens|Jaz Makadi Oasis|Jaz Makadi Oasis Club|Jaz Makadi Oasis Resort|Jaz Makadi Saraya|Jaz Makadi Saraya Palms|Jaz Makadi Saraya Resort|Jaz Makadi Star|Jaz Makadi Star & Spa|Jaz Makadi Star and Spa|Jaz Makadina|Jaz Makadina Resort|Jaz Neo Saraya Palm|Jaz Palmavera Makadi|Jaz Palmriva Beach|Labranda|Labranda Club Makadi|Labranda Club Makadi Resort|Labranda Garden Makadi|Labranda Royal Makadi|Labranda Royal Makadi Resort|Lemon & Soul|Lemon & Soul Makadi|Lemon and Soul Makadi|Lemon Soul Makadi|Makadi Bay Hotel|Makadi Heights|Makadi Palace|Makadi Spa|Makadi Spa Hotel|Prima Life Makadi|Prima Life Makadi Resort|Prima Life Makadi Resort & Spa|Red Sea Taj Mahal Resort|Royal Pharaohs Makadi|Serenity|Serenity Alma Heights|Serenity Alma Heights / Fun City|Serenity Alpha Beach|Serenity Alpha Beach Makadi Bay|Serenity Fun City|Serenity Makadi Beach|Serenity Makadi Heights|Siva Golden|Siva Golden Bay|Siva Golden Bay Makadi|Steigenberger Makadi|Stella Beach Makadi|Stella Beach Resort & Spa Makadi Bay|Stella Beach Resort Makadi Bay|Stella Di Mare|Stella Di Mare Makadi Bay|Stella Gardens Makadi|Stella Gardens Resort & Spa Makadi Bay|Stella Gardens Resort Makadi Bay|Stella Makadi|Sunrise Royal Makadi|Sunrise Royal Makadi Resort|Sunrise Tucana|Sunrise Tucana Resort|Sunwing Makadi|Sunwing Waterworld Makadi|The Grand Makadi|Tia Heights|Tia Heights Makadi Bay|TUI Blue Makadi|TUI Blue Makadi Gardens|Xanadu Makadi Bay", "sahl": "Al Kasr|Al Kasr Sahl|Al Kasr Sahl Hasheesh|Albatros Citadel Resort|Ali Pasha|Ancient Sands El Gouna|Asteria|Azzurra Sahl Hasheesh|Baron Palace|Baron Palace Sahl Hasheesh|Casa Cook|Casa Cook El Gouna|Citadel|Citadel Resort|Cook's Club El Gouna|Creek Hotel|Dawar El Omda El Gouna|Fanadir Hotel El Gouna|Flow Spectrum Resort|Gravity Sahl Hasheesh|Gravity Sahl Hasheesh Resort|Jaz Elite Asteria|Kai Sahl Hasheesh|Kaisol Romance|Kaisol Romance Resort Sahl Hasheesh|La Maison Bleue El Gouna|Mangroovy El Gouna|Mosaique Hotel El Gouna|Movenpick|Movenpick Resort & Spa El Gouna|Ocean View El Gouna|Old Palace|Old Palace Resort Sahl Hasheesh|Pickalbatros Citadel Resort|Premier Le Reve|Premier Le Reve Hotel & Spa|Premier Le Reve Sahl Hasheesh|Pyramisa|Pyramisa Beach Resort Sahl Hasheesh|Rihana|Serenity Sahl Hasheesh|Serenity Sky Arc|Sheraton Miramar|SRNTY|SRNTY Sahl Hasheesh|Steigenberger Golf|Steigenberger Golf Resort El Gouna|Sultan Bey El Gouna|The Oberoi Sahl Hasheesh|The Three Corners Ocean View|The Three Corners Ocean View El Gouna|The V Luxury Resort Sahl Hasheesh|The V Sahl Hasheesh|Three Corners Rihana|Three Corners Rihana Resort|Tropitel|Tropitel Elite Sahl Hasheesh|Tropitel Sahl Hasheesh|Tropitel Sahl Hasheesh Resort|V Luxury Resort Sahl Hasheesh|Zen Resort Sahl Hasheesh", "soma": "Amarina Abu Soma Resort|Amwaj Beach Club Abu Soma|Aqua Mondo Abu Soma|Breakers Soma Bay|Caribbean World Soma Bay|Cascades Soma Bay|Eagles Paradise Abu Soma Resort|Imperial Shams Abu Soma|Jaz Soma Beach|Jolie Bay|Kempinski Hotel Soma Bay|Kempinski Soma Bay|Lamar Resort Abu Soma|Lotus Bay Resort|Menaville Safaga|Movenpick Soma Bay|Movenpick Waterpark Resort & Spa Soma Bay|Movenpick Waterpark Soma Bay|Naga Bay|Orca Village Safaga|Palm Royal Soma Bay|Palm Royale Soma Bay|Ras Soma|Robinson Soma Bay|Sentido Naga Bay|Sentido Palm Royale Soma Bay|Seven Seas Jolie Bay|Shams Lodge Water Sports Resort|Shams Prestige Abu Soma|Shams Safaga Resort|Sheraton Soma Bay|Sheraton Soma Bay Resort|Solymar Soma Beach|Steigenberger Ras Soma|Steigenberger Resort Ras Soma|Sun Beach Abu Soma|Sun Beach Hotel Abu Soma|The Breakers Diving & Surfing Lodge Soma Bay|The Breakers Soma Bay|The Cascades Golf Resort, Spa & Thalasso|The Cascades Soma Bay|TUI Magic Life Kalawy"};
+const SEED = {
+  settings: { deposit_pct: 20, min_days: 7, max_days: 60, lead_days: 1, turnaround_days: 0,
+    official_gbp: 69.19, official_eur: 58.47, official_usd: 52.25, rate_discount: 5, whatsapp: '201040797464',
+    phone_1: '+20 104 079 7464', phone_2: '+20 150 140 1776',
+    hours_en: 'Every day, 9 am to 11 pm', hours_de: 'Täglich von 9 bis 23 Uhr' },
+  products: [
+    { id: 'p-scooter', slug: 'scooter', category: 'scooter', name_en: 'Mobility scooter', name_de: 'Elektroscooter', name_ar: 'سكوتر كهربائي',
+      desc_en: 'Four wheels, a padded seat and a front basket. Goes about 15 to 20 km on a full charge.',
+      desc_de: 'Vier Räder, gepolsterter Sitz und Korb vorne. Fährt mit einer vollen Ladung etwa 15 bis 20 km.',
+      image_url: IMG + 'v1783504784/ChatGPT_Image_Jul_8_2026_12_58_24_PM_1_px842a.png', stock_qty: 2, active: true, sort_order: 10 },
+    { id: 'p-chair', slug: 'wheelchair', category: 'wheelchair', name_en: 'Wheelchair', name_de: 'Rollstuhl', name_ar: 'كرسي متحرك',
+      desc_en: 'A folding wheelchair for the days when walking the whole resort is too much.',
+      desc_de: 'Ein faltbarer Rollstuhl für Tage, an denen die Wege in der Anlage zu weit sind.',
+      image_url: '', stock_qty: 1, active: true, sort_order: 20 }
+  ],
+  tiers: [
+    { product_id: 'p-scooter', days: 7, price_gbp: 80, price_eur: 95 }, { product_id: 'p-scooter', days: 10, price_gbp: 110, price_eur: 130 }, { product_id: 'p-scooter', days: 14, price_gbp: 155, price_eur: 180 }
+  ],
+  zones: [
+    { id: 'z-downtown', slug: 'downtown', name_en: 'Hurghada centre', name_de: 'Hurghada Zentrum', name_ar: 'وسط البلد', hint_en: 'Hotels in central Hurghada', hint_de: 'Hotels im Zentrum von Hurghada', fee_egp: 200, active: true, sort_order: 10 },
+    { id: 'z-villages', slug: 'villages', name_en: 'Resort strip and outer districts', name_de: 'Hotelzone und Außenbezirke', name_ar: 'القرى والأحياء', hint_en: 'The tourist villages and districts outside the centre', hint_de: 'Die Feriendörfer und Viertel außerhalb des Zentrums', fee_egp: 800, active: true, sort_order: 20 },
+    { id: 'z-makadi', slug: 'makadi', name_en: 'Makadi Bay', name_de: 'Makadi Bay', name_ar: 'مكادي', hint_en: 'All Makadi Bay resorts', hint_de: 'Alle Resorts in Makadi Bay', fee_egp: 1500, active: true, sort_order: 30 },
+    { id: 'z-sahl', slug: 'sahl', name_en: 'Sahl Hasheesh and El Gouna', name_de: 'Sahl Hasheesh und El Gouna', name_ar: 'سهل حشيش والجونة', hint_en: 'Resorts in Sahl Hasheesh and El Gouna', hint_de: 'Resorts in Sahl Hasheesh und El Gouna', fee_egp: 1000, active: true, sort_order: 40 },
+    { id: 'z-soma', slug: 'soma', name_en: 'Soma Bay and Safaga', name_de: 'Soma Bay und Safaga', name_ar: 'سوما باي وسفاجا', hint_en: 'Soma Bay, Abu Soma, Safaga and Kalawy', hint_de: 'Soma Bay, Abu Soma, Safaga und Kalawy', fee_egp: 2500, active: true, sort_order: 50 }
+  ],
+  bookings: [],
+  hotels: Object.entries(HOTELS).flatMap(([z, list]) => list.split('|').map((name, i) => ({ id: 'h-' + z + '-' + i, name, zone_id: z === 'none' ? null : 'z-' + z, active: true })))
+};
+const DEMO_KEY = 'scm_demo_v4';
+let LIVE = true;
+
+const $ = (s, r = root) => r.querySelector(s);
+const $$ = (s, r = root) => [...r.querySelectorAll(s)];
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+};
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+const toDate = iso => new Date(iso + 'T00:00:00Z');
+const addDays = (iso, n) => { const d = toDate(iso); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Africa/Cairo' }).format(new Date());
+const fmtDate = iso => new Intl.DateTimeFormat('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(toDate(iso));
+const fmtIn = (iso, lang) => new Intl.DateTimeFormat(lang === 'de' ? 'de-DE' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(toDate(iso));
+const money = (n, cur) => `<span class="ltr">${Number(n).toLocaleString('en-GB', { maximumFractionDigits: 0 })} ${esc(cur)}</span>`;
+const SYM = { GBP: '£', EUR: '€', USD: '$', EGP: 'EGP ' };
+const moneyIn = (n, cur, lang) => { const s = Number(n).toLocaleString(lang === 'de' ? 'de-DE' : 'en-GB', { maximumFractionDigits: 0 }); return lang === 'de' ? `${s} ${SYM[cur].trim()}` : `${SYM[cur]}${s}`; };
+
+const STATUS = { pending: 'جديد', confirmed: 'مؤكد', delivered: 'عند العميل', returned: 'رجع وخلص', cancelled: 'ملغي' };
+const SLOT = { ar: { morning: 'الصبح 9 – 12', afternoon: 'بعد الضهر 12 – 5', evening: 'بالليل 5 – 11' },
+  en: { morning: 'in the morning (9 am to 12 noon)', afternoon: 'in the afternoon (12 noon to 5 pm)', evening: 'in the evening (5 pm to 11 pm)' },
+  de: { morning: 'am Vormittag (9 bis 12 Uhr)', afternoon: 'am Nachmittag (12 bis 17 Uhr)', evening: 'am Abend (17 bis 23 Uhr)' } };
+
+const A = { tab: 'bookings', filter: 'active', q: '', hq: '', hz: 'all', calStart: today(), db: { products: [], tiers: [], zones: [], settings: {}, bookings: [], hotels: [] } };
+
+function toast(text, bad) {
+  const el = $('#toast'); el.textContent = text; el.className = 'toast' + (bad ? ' bad' : ''); el.hidden = false;
+  clearTimeout(toast.t); toast.t = setTimeout(() => el.hidden = true, 3200);
+}
+const fail = e => { console.error(e); toast('حصل خطأ: ' + (e.message || e), true); };
+
+/* ============================================================================
+   البيانات
+   ========================================================================== */
+const demoDb = () => store.get(DEMO_KEY) || JSON.parse(JSON.stringify(SEED));
+const ok = r => { if (r.error) throw new Error(r.error.message); return r.data; };
+const PIN_KEY = 'scm_admin_pin';
+let PIN = store.get(PIN_KEY) || '';
+// The pharmacy admin's own connection (SB_URL / SB_KEY), through the PIN-checked functions only.
+async function rpc(fn, args) {
+  const r = await fetch(SB_URL + '/rest/v1/rpc/' + fn, { method: 'POST',
+    headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(args) });
+  const j = await r.json().catch(() => null);
+  if (!r.ok) { const e = new Error((j && j.message) || 'HTTP ' + r.status); e.status = r.status; throw e; }
+  if (j && j.error === 'denied') { const e = new Error('الرقم السري غلط'); e.denied = true; throw e; }
+  return j;
+}
+const api = {
+  async load() {
+    if (!LIVE) { const d = demoDb(); d.hotels = d.hotels || []; return d; }
+    const [d, hotels] = await Promise.all([rpc('mob_admin_load', { p_pin: PIN }),
+      fetch(SB_URL + '/rest/v1/mob_hotels?select=id,name,zone_id,active&active=eq.true&order=name&limit=3000', { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } }).then(r => r.ok ? r.json() : [])]);
+    d.hotels = hotels; return d;
+  },
+  async patchBooking(id, patch) {
+    if (LIVE) return rpc('mob_admin_patch_booking', { p_pin: PIN, p_id: id, p_patch: patch });
+    const d = demoDb(); Object.assign(d.bookings.find(b => b.id === id), patch); store.set(DEMO_KEY, d);
+  },
+  async saveProduct(p, tiers) {
+    if (LIVE) return rpc('mob_admin_save_product', { p_pin: PIN, p_product: p, p_tiers: tiers });
+    const d = demoDb(), i = d.products.findIndex(x => x.id === p.id);
+    i < 0 ? d.products.push(p) : d.products[i] = { ...d.products[i], ...p };
+    d.tiers = d.tiers.filter(t => t.product_id !== p.id).concat(tiers.map(t => ({ ...t, product_id: p.id })));
+    store.set(DEMO_KEY, d);
+  },
+  async saveZone(z) {
+    if (LIVE) return rpc('mob_admin_save_zone', { p_pin: PIN, p_zone: z });
+    const d = demoDb(), i = d.zones.findIndex(x => x.id === z.id);
+    i < 0 ? d.zones.push(z) : d.zones[i] = { ...d.zones[i], ...z }; store.set(DEMO_KEY, d);
+  },
+  async saveHotel() { throw new Error('الفنادق ورسوم توصيلها بتتعدل من إعدادات الصيدلية.'); },
+  async saveSettings(obj) {
+    if (LIVE) return rpc('mob_admin_save_settings', { p_pin: PIN, p_settings: obj });
+    const d = demoDb(); Object.assign(d.settings, obj); store.set(DEMO_KEY, d);
+  },
+  async createBooking(p) {
+    if (LIVE) return rpc('mob_admin_create_booking', { p_pin: PIN, p });
+    const d = demoDb(), q = quoteFor(p, d);
+    for (const it of p.items) if (freeOn(d, it.product_id, p.start_date, p.days) < it.qty) throw new Error('MOB_UNAVAILABLE');
+    const AL = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const b = { id: uid(), code: 'SC-' + Array.from({ length: 5 }, () => AL[Math.floor(Math.random() * AL.length)]).join(''),
+      status: 'confirmed', source: 'admin', customer_name: p.name, phone: p.phone, hotel: p.hotel, room: p.room, zone_id: p.zone_id,
+      zone_name: q.zone.name_en, start_date: p.start_date, end_date: addDays(p.start_date, p.days), days: p.days, delivery_slot: p.slot,
+      notes: p.notes, lang: p.lang, currency: p.currency, rental_amount: q.rental, delivery_amount: q.delivery, delivery_fee_egp: q.zone.fee_egp,
+      deposit_amount: q.deposit, total_due: q.total, deposit_refunded: false, admin_notes: '', items: q.items, created_at: new Date().toISOString() };
+    d.bookings.unshift(b); store.set(DEMO_KEY, d); return b;
+  }
+};
+
+/* نفس قواعد التسعير اللي في قاعدة البيانات والموقع */
+const official = (d, c) => Number(d.settings['rate_' + c.toLowerCase()] || d.settings['official_' + c.toLowerCase()] || 0);
+const cashRate = (d, c) => official(d, c) - Number(d.settings.rate_discount || 0);
+// Same rule as the site and the database: a listed length has its own price, any other
+// length is charged at the day rate of the longest listed length below it.
+function unitPrice(d, pid, days, cur) {
+  days = Number(days);
+  const t = d.tiers.filter(x => x.product_id === pid && Number(x.days) <= days).sort((a, b) => a.days - b.days).pop();
+  if (!t || !days) return null;
+  const scale = v => Number(t.days) === days ? Number(v) : Math.round(days * Number(v) / Number(t.days));
+  const gbp = scale(t.price_gbp), og = official(d, 'GBP'), ru = cashRate(d, 'USD');
+  if (cur === 'GBP') return gbp;
+  if (cur === 'EUR') return scale(t.price_eur);
+  if (og <= 0) return null;
+  if (cur === 'EGP') return Math.round(gbp * og / 10) * 10;
+  return ru > 0 ? Math.round(gbp * og / ru) : null;
+}
+function convertEgp(d, egp, cur) {
+  if (cur === 'EGP') return Math.round(egp);
+  const r = cashRate(d, cur);
+  if (r <= 0) return null;
+  return egp <= 0 ? 0 : Math.max(1, Math.round(egp / r));
+}
+function quoteFor(p, d) {
+  const items = p.items.map(it => { const pr = d.products.find(x => x.id === it.product_id), u = unitPrice(d, it.product_id, p.days, p.currency);
+    return { product_id: it.product_id, product_name: p.lang === 'de' ? pr.name_de : pr.name_en, qty: it.qty, unit_price: u, line_total: u == null ? null : u * it.qty }; });
+  const rental = items.reduce((a, i) => a + (i.line_total || 0), 0), zone = d.zones.find(z => z.id === p.zone_id);
+  const delivery = zone ? convertEgp(d, Number(zone.fee_egp), p.currency) : 0, deposit = Math.round(rental * Number(d.settings.deposit_pct) / 100);
+  return { items, rental, delivery, deposit, total: rental + delivery + deposit, zone, missing: items.some(i => i.unit_price == null) };
+}
+const HOLD = ['pending', 'confirmed', 'delivered'];
+function usedOn(d, pid, day) {
+  const gap = Number(d.settings.turnaround_days || 0);
+  return d.bookings.filter(b => HOLD.includes(b.status) && b.start_date <= day && day < addDays(b.end_date, gap))
+    .reduce((a, b) => a + (b.items || []).filter(i => i.product_id === pid).reduce((x, i) => x + i.qty, 0), 0);
+}
+function freeOn(d, pid, start, days) {
+  const p = d.products.find(x => x.id === pid); let min = p.stock_qty;
+  for (let i = 0; i < days; i++) min = Math.min(min, p.stock_qty - usedOn(d, pid, addDays(start, i)));
+  return Math.max(0, min);
+}
+
+/* ============================================================================
+   رسائل الواتساب للعميل (بلغته) + معناها بالعربي
+   ========================================================================== */
+function waMessage(b) {
+  const lang = b.lang === 'de' ? 'de' : 'en';
+  const items = (b.items || []).map(i => `${i.qty} × ${i.product_name}`).join(', ');
+  const v = { name: b.customer_name, code: b.code, items, hotel: b.hotel, start: fmtIn(b.start_date, lang), end: fmtIn(b.end_date, lang),
+    slot: SLOT[lang][b.delivery_slot] ? ' ' + SLOT[lang][b.delivery_slot] : '', total: moneyIn(b.total_due, b.currency, lang), dep: moneyIn(b.deposit_amount, b.currency, lang) };
+  const ar = { ...v, start: fmtDate(b.start_date), end: fmtDate(b.end_date), slot: SLOT.ar[b.delivery_slot] ? ' ' + SLOT.ar[b.delivery_slot] : '',
+    total: `${Number(b.total_due)} ${b.currency}`, dep: `${Number(b.deposit_amount)} ${b.currency}` };
+  const M = {
+    confirm: {
+      label: 'رسالة تأكيد الحجز',
+      en: `Hello ${v.name}, this is Self Care Mobility. Your booking ${v.code} is confirmed.\n\nWe will bring ${v.items} to ${v.hotel} on ${v.start}${v.slot}.\n\nPlease have ${v.total} ready in cash. ${v.dep} of that is your deposit, and you get it back when we collect on ${v.end}.`,
+      de: `Hallo ${v.name}, hier ist Self Care Mobility. Ihre Buchung ${v.code} ist bestätigt.\n\nWir bringen ${v.items} am ${v.start}${v.slot} ins ${v.hotel}.\n\nBitte halten Sie ${v.total} in bar bereit. Davon sind ${v.dep} Ihre Kaution, die Sie bei der Abholung am ${v.end} zurückbekommen.`,
+      ar: `أهلا ${ar.name}، معاك Self Care Mobility. حجزك ${ar.code} اتأكد.\n\nهنوصل ${ar.items} لفندق ${ar.hotel} يوم ${ar.start}${ar.slot}.\n\nمن فضلك جهز ${ar.total} كاش. منهم ${ar.dep} تأمين هيرجعلك وقت الاستلام يوم ${ar.end}.`
+    },
+    collect: {
+      label: 'رسالة تذكير بالاستلام',
+      en: `Hello ${v.name}, this is Self Care Mobility. We will collect your rental from ${v.hotel} on ${v.end} and hand back your deposit of ${v.dep}.\n\nWhat time suits you best?`,
+      de: `Hallo ${v.name}, hier ist Self Care Mobility. Wir holen Ihre Miete am ${v.end} im ${v.hotel} ab und geben Ihnen die Kaution von ${v.dep} zurück.\n\nWelche Uhrzeit passt Ihnen am besten?`,
+      ar: `أهلا ${ar.name}، معاك Self Care Mobility. هنستلم منك يوم ${ar.end} من فندق ${ar.hotel} ونرجعلك التأمين ${ar.dep}.\n\nإيه أنسب وقت ليك؟`
+    },
+    thanks: {
+      label: 'رسالة شكر',
+      en: `Hello ${v.name}, thank you for renting with Self Care Mobility. We hope you enjoyed your holiday in Hurghada and we would be glad to see you again.`,
+      de: `Hallo ${v.name}, vielen Dank, dass Sie bei Self Care Mobility gemietet haben. Wir hoffen, Sie hatten einen schönen Urlaub in Hurghada, und freuen uns auf ein Wiedersehen.`,
+      ar: `أهلا ${ar.name}، شكرا إنك أجرت من Self Care Mobility. نتمنى تكون استمتعت بإجازتك في الغردقة ويسعدنا نشوفك تاني.`
+    },
+    cancel: {
+      label: 'رسالة إلغاء',
+      en: `Hello ${v.name}, this is Self Care Mobility. Your booking ${v.code} has been cancelled. If you would like other dates, just reply to this message.`,
+      de: `Hallo ${v.name}, hier ist Self Care Mobility. Ihre Buchung ${v.code} wurde storniert. Wenn Sie einen anderen Termin wünschen, antworten Sie einfach auf diese Nachricht.`,
+      ar: `أهلا ${ar.name}، معاك Self Care Mobility. حجزك ${ar.code} اتلغى. لو حابب تواريخ تانية رد على الرسالة دي.`
+    }
+  };
+  const key = { pending: 'confirm', confirmed: 'confirm', delivered: 'collect', returned: 'thanks', cancelled: 'cancel' }[b.status];
+  const m = M[key];
+  // Online bookings arrive on our WhatsApp from the guest's own number, so name and phone may be empty here.
+  const tidy = x => x.replace(/^(Hello|Hallo) ,/, '$1,').replace(/^أهلا ،/, 'أهلا،');
+  const text = tidy(m[lang]), digits = String(b.phone || '').replace(/\D/g, '');
+  return { label: m.label, text, ar: tidy(m.ar), url: 'https://wa.me/' + digits + '?text=' + encodeURIComponent(text) };
+}
+
+/* ============================================================================
+   الحجوزات
+   ========================================================================== */
+const FILTERS = [['active', 'الشغالة'], ['pending', 'جديد'], ['confirmed', 'مؤكد'], ['delivered', 'عند العميل'], ['returned', 'رجع وخلص'], ['cancelled', 'ملغي'], ['all', 'الكل']];
+function renderBookings() {
+  const d = A.db, td = today(), n = s => d.bookings.filter(s).length;
+  const fresh = n(b => b.status === 'pending');
+  $('#newCount').hidden = !fresh; $('#newCount').textContent = fresh;
+  const cb = document.getElementById('catMobility'); if (cb) cb.textContent = fresh ? `Scooter (${fresh})` : 'Scooter';
+  $('#today').innerHTML = `<div><b>${fresh}</b><span>حجز جديد مستني تأكيد</span></div>
+    <div><b>${n(b => ['pending', 'confirmed'].includes(b.status) && b.start_date === td)}</b><span>تسليم النهارده</span></div>
+    <div><b>${n(b => b.status === 'delivered' && b.end_date <= td)}</b><span>استلام النهارده أو متأخر</span></div>`;
+  $('#filters').innerHTML = FILTERS.map(([k, l]) => `<button type="button" data-filter="${k}" aria-pressed="${A.filter === k}">${l}</button>`).join('');
+  const q = A.q.trim().toLowerCase();
+  let rows = d.bookings.filter(b => A.filter === 'all' ? true : A.filter === 'active' ? HOLD.includes(b.status) : b.status === A.filter)
+    .filter(b => !q || [b.code, b.customer_name, b.hotel, b.phone, b.room].join(' ').toLowerCase().includes(q));
+  const nextDay = b => b.status === 'delivered' ? b.end_date : b.start_date;
+  rows = HOLD.includes(A.filter) || A.filter === 'active' ? rows.sort((a, b) => nextDay(a).localeCompare(nextDay(b)))
+    : rows.sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  $('#bookingList').innerHTML = rows.length ? rows.map(bookingCard).join('') : `<div class="empty">${d.bookings.length ? 'مفيش حجوزات بالشكل ده.' : 'لسه مفيش حجوزات. أول حجز من الموقع هيظهر هنا، أو سجل واحد من زرار "حجز جديد".'}</div>`;
+}
+function bookingCard(b) {
+  const wa = waMessage(b), s = b.status;
+  const acts = [];
+  if (s === 'pending') acts.push(`<button class="btn" data-set="confirmed" data-id="${esc(b.id)}">تأكيد الحجز</button>`);
+  if (s === 'confirmed') acts.push(`<button class="btn" data-set="delivered" data-id="${esc(b.id)}">تم التسليم واستلمت الكاش</button>`);
+  if (s === 'delivered') acts.push(`<button class="btn" data-set="returned" data-id="${esc(b.id)}">تم الاستلام ورديت التأمين</button>`);
+  acts.push(`<a class="btn wa" target="_blank" rel="noopener" href="${esc(wa.url)}">${esc(wa.label)}</a>`);
+  if (b.phone) acts.push(`<a class="btn line" href="tel:${esc(String(b.phone).replace(/[^\d+]/g, ''))}">اتصال</a>`);
+  if (s === 'pending' || s === 'confirmed') acts.push(`<button class="btn danger" data-set="cancelled" data-id="${esc(b.id)}">إلغاء</button>`);
+  return `<article class="bk ${s}">
+    <div class="bk-head"><span class="bk-code ltr">${esc(b.code)}</span><span class="row"><span class="muted small">${b.source === 'admin' ? 'مسجل يدوي' : 'من الموقع'}</span><span class="st ${s}">${STATUS[s]}</span></span></div>
+    <div class="bk-body">
+      <div class="bk-main">
+        <div class="bk-name">${esc(b.customer_name || 'عميل من الموقع')} <span class="muted small">(${b.lang === 'de' ? 'ألماني' : 'إنجليزي'})</span></div>
+        <dl class="facts">
+          <dt>المطلوب</dt><dd>${(b.items || []).map(i => `${i.qty} × ${esc(i.product_name)}`).join('<br>')}</dd>
+          <dt>التسليم</dt><dd>${esc(fmtDate(b.start_date))}${SLOT.ar[b.delivery_slot] ? '، ' + esc(SLOT.ar[b.delivery_slot]) : ''}</dd>
+          <dt>الاستلام</dt><dd>${esc(fmtDate(b.end_date))} <span class="muted">(${b.days} يوم)</span></dd>
+          <dt>الفندق</dt><dd>${esc(b.hotel)}${b.room ? '، غرفة ' + esc(b.room) : ''}<br><span class="muted">${esc(zoneAr(b))}</span></dd>
+          <dt>واتساب</dt><dd>${b.phone ? `<span class="ltr">${esc(b.phone)}</span>` : `<span class="muted">بعتلك رسالة الحجز على واتساب المحل، ابحث بكود ${esc(b.code)}</span>`}</dd>
+          ${b.notes ? `<dt>ملاحظة العميل</dt><dd>${esc(b.notes)}</dd>` : ''}
+        </dl>
+      </div>
+      <div>
+        <div class="cash">
+          <span>الإيجار</span>${money(b.rental_amount, b.currency)}
+          <span>التوصيل</span>${money(b.delivery_amount, b.currency)}
+          <span>التأمين (يرجع)</span>${money(b.deposit_amount, b.currency)}
+          <span class="big">تستلم كاش</span><span class="big">${money(b.total_due, b.currency)}</span>
+        </div>
+        <p class="muted small" style="margin-top:6px">رسوم التوصيل بالمصري: <span class="ltr">${Number(b.delivery_fee_egp)} EGP</span></p>
+      </div>
+      <div class="bk-actions">${acts.join('')}</div>
+      <div class="bk-notes">
+        <details class="gloss"><summary>نص الرسالة ومعناها بالعربي</summary><p dir="ltr">${esc(wa.text)}</p><p>${esc(wa.ar)}</p></details>
+        <label class="lab small" style="margin-top:6px">ملاحظاتك على الحجز
+          <textarea class="field" data-note="${esc(b.id)}" placeholder="مثلا: العميل طلب التسليم بعد 3 العصر">${esc(b.admin_notes || '')}</textarea></label>
+      </div>
+    </div></article>`;
+}
+const zoneAr = b => { const z = A.db.zones.find(z => z.id === b.zone_id); return z ? z.name_ar : b.zone_name; };
+
+/* ============================================================================
+   التوافر
+   ========================================================================== */
+function renderCalendar() {
+  const d = A.db, days = Array.from({ length: 28 }, (_, i) => addDays(A.calStart, i)), td = today();
+  const head = days.map(x => { const dt = toDate(x);
+    return `<th class="${x === td ? 'now' : ''}">${new Intl.DateTimeFormat('ar-EG-u-nu-latn', { weekday: 'short', timeZone: 'UTC' }).format(dt)}<br><span class="ltr">${dt.getUTCDate()}/${dt.getUTCMonth() + 1}</span></th>`; }).join('');
+  const body = d.products.filter(p => p.active).map(p => `<tr><td>${esc(p.name_ar)}<br><span class="muted small" style="font-weight:400">العدد ${p.stock_qty}</span></td>` +
+    days.map(x => { const free = Math.max(0, p.stock_qty - usedOn(d, p.id, x));
+      const cls = p.stock_qty === 0 ? '' : free === 0 ? 'full' : free < p.stock_qty ? 'part' : 'free';
+      return `<td class="${cls}">${p.stock_qty === 0 ? '–' : free}</td>`; }).join('') + '</tr>').join('');
+  $('#cal').innerHTML = `<thead><tr><th>المنتج</th>${head}</tr></thead><tbody>${body}</tbody>`;
+}
+
+/* ============================================================================
+   المنتجات، المناطق، الإعدادات
+   ========================================================================== */
+const inp = (label, name, val, extra = '') => `<label class="lab">${label}<input class="field" name="${name}" value="${esc(val ?? '')}" ${extra}></label>`;
+function tierRow(t = {}) {
+  return `<div class="tier"><label class="lab">أيام<input class="field ltr" name="t_days" type="number" min="1" max="90" value="${esc(t.days ?? '')}" required></label>
+    <label class="lab">GBP<input class="field ltr" name="t_gbp" type="number" min="0" step="0.01" value="${esc(t.price_gbp ?? '')}" required></label>
+    <label class="lab">EUR<input class="field ltr" name="t_eur" type="number" min="0" step="0.01" value="${esc(t.price_eur ?? '')}" required></label>
+    <button type="button" class="x" data-del-tier aria-label="حذف السعر">×</button></div>`;
+}
+function renderProducts() {
+  const d = A.db;
+  $('#productList').innerHTML = d.products.map(p => {
+    const tiers = d.tiers.filter(t => t.product_id === p.id).sort((a, b) => a.days - b.days);
+    return `<form class="panel" data-product="${esc(p.id)}">
+      <div class="section-head" style="margin:0"><h3>${esc(p.name_ar || 'منتج جديد')}</h3>
+        <label class="switch"><input type="checkbox" name="active" ${p.active ? 'checked' : ''}>ظاهر في الموقع</label></div>
+      <div class="grid2">
+        ${inp('الاسم بالعربي (للوحة)', 'name_ar', p.name_ar, 'required')}
+        <label class="lab">النوع<select class="field" name="category"><option value="scooter" ${p.category === 'scooter' ? 'selected' : ''}>سكوتر</option><option value="wheelchair" ${p.category === 'wheelchair' ? 'selected' : ''}>كرسي متحرك</option></select></label>
+        ${inp('الاسم بالإنجليزي', 'name_en', p.name_en, 'required dir="ltr"')}
+        ${inp('الاسم بالألماني', 'name_de', p.name_de, 'required dir="ltr"')}
+        <label class="lab">الوصف بالإنجليزي<textarea class="field" name="desc_en" dir="ltr">${esc(p.desc_en)}</textarea></label>
+        <label class="lab">الوصف بالألماني<textarea class="field" name="desc_de" dir="ltr">${esc(p.desc_de)}</textarea></label>
+        ${inp('رابط الصورة', 'image_url', p.image_url, 'dir="ltr" placeholder="https://res.cloudinary.com/..."')}
+        ${inp('العدد المتاح للإيجار', 'stock_qty', p.stock_qty, 'type="number" min="0" required dir="ltr"')}
+      </div>
+      <div><h3 style="margin-bottom:6px">الأسعار حسب المدة</h3>
+        <div class="tiers">${tiers.map(tierRow).join('')}</div>
+        <button type="button" class="btn line sm" data-add-tier style="margin-top:8px">+ مدة وسعر</button></div>
+      <div class="row"><button class="btn" type="submit">حفظ</button></div>
+    </form>`;
+  }).join('');
+}
+function renderZones() {
+  $('#zoneList').innerHTML = A.db.zones.map(z => `<form class="panel" data-zone="${esc(z.id)}">
+    <div class="section-head" style="margin:0"><h3>${esc(z.name_ar || 'منطقة جديدة')}</h3>
+      <label class="switch"><input type="checkbox" name="active" ${z.active ? 'checked' : ''}>ظاهرة في الموقع</label></div>
+    <div class="grid2">
+      ${inp('الاسم بالعربي', 'name_ar', z.name_ar, 'required')}
+      ${inp('رسوم التوصيل بالجنيه', 'fee_egp', z.fee_egp, 'type="number" min="0" required dir="ltr"')}
+      ${inp('الاسم بالإنجليزي', 'name_en', z.name_en, 'required dir="ltr"')}
+      ${inp('الاسم بالألماني', 'name_de', z.name_de, 'required dir="ltr"')}
+      ${inp('توضيح بالإنجليزي', 'hint_en', z.hint_en, 'dir="ltr"')}
+      ${inp('توضيح بالألماني', 'hint_de', z.hint_de, 'dir="ltr"')}
+    </div>
+    <div class="row"><button class="btn" type="submit">حفظ</button></div></form>`).join('');
+}
+const zoneOptions = sel => A.db.zones.map(z => `<option value="${esc(z.id)}" ${z.id === sel ? 'selected' : ''}>${esc(z.name_ar)}</option>`).join('') + `<option value="" ${!sel ? 'selected' : ''}>خارج التوصيل</option>`;
+function renderHotels() {
+  const d = A.db, q = A.hq.trim().toLowerCase();
+  $('#hotelAdd [name=zone]').innerHTML = zoneOptions(d.zones[0]?.id);
+  const f = $('#hotelFilter'); f.innerHTML = `<option value="all">كل المناطق</option>` + d.zones.map(z => `<option value="${esc(z.id)}">${esc(z.name_ar)}</option>`).join('') + `<option value="none">خارج التوصيل</option>`; f.value = A.hz;
+  const rows = d.hotels.filter(h => (!q || h.name.toLowerCase().includes(q)) && (A.hz === 'all' || (A.hz === 'none' ? !h.zone_id : h.zone_id === A.hz)));
+  $('#hotelCount').textContent = `${rows.length} من ${d.hotels.length} فندق`;
+  $('#hotelList').innerHTML = rows.slice(0, 80).map(h => `<div class="hrow"><b>${esc(h.name)}</b>
+    <select class="field" data-hzone="${esc(h.id)}" aria-label="منطقة ${esc(h.name)}">${zoneOptions(h.zone_id)}</select>
+    <label class="switch small"><input type="checkbox" data-hactive="${esc(h.id)}" ${h.active ? 'checked' : ''}>ظاهر</label></div>`).join('')
+    + (rows.length > 80 ? `<p class="muted small" style="padding:10px 0">ظاهر أول 80. اكتب في البحث عشان توصل للباقي.</p>` : '') || '<p class="muted" style="padding:14px 0">مفيش فنادق بالاسم ده.</p>';
+}
+const SETTINGS = [
+  ['deposit_pct', 'نسبة التأمين %', 'num'], ['min_days', 'أقل مدة إيجار (أيام)', 'num'], ['max_days', 'أطول مدة يقدر العميل يختارها (أيام)', 'num'],
+  ['lead_days', 'أقرب تسليم بعد كام يوم (0 = نفس اليوم)', 'num'], ['turnaround_days', 'أيام فاصلة بين حجزين لنفس القطعة', 'num']];
+function renderSettings() {
+  const s = A.db.settings, d = A.db, f = n => (Math.round(n * 100) / 100).toLocaleString('en-GB');
+  $('#settingsForm').innerHTML = `<div class="quote">
+      <b>العملة</b><b>بنحسبها بكام</b>
+      ${['GBP', 'EUR', 'USD'].map(c => `<span class="ltr">${c}</span><span class="ltr">${f(cashRate(d, c))} EGP</span>`).join('')}
+    </div>
+    <p class="muted small">أسعار العملة هي نفس أسعار الموقع الإنجليزي، وبتتغير من إعدادات الصيدلية. رقم الواتساب اللي بتوصله الحجوزات هو نفس رقم الموقع الإنجليزي. الفنادق ومناطقها بتيجي من قائمة فنادق الصيدلية ورسوم توصيلها.</p>
+    <div class="grid2">${SETTINGS.map(([k, l, ty]) => inp(l, k, s[k], (ty === 'num' ? 'type="number" min="0" step="1" required ' : '') + 'dir="ltr"')).join('')}</div>
+    <div class="row"><button class="btn" type="submit">حفظ الإعدادات</button></div>`;
+}
+
+/* ============================================================================
+   حجز جديد يدوي
+   ========================================================================== */
+function newPayload() {
+  return { items: $$('#nItems input').map(i => ({ product_id: i.dataset.pid, qty: Number(i.value) || 0 })).filter(i => i.qty > 0),
+    start_date: $('#nStart').value, days: Number($('#nDays').value), zone_id: $('#nZone').value, currency: $('#nCur').value, lang: $('#nLang').value,
+    name: $('#nName').value.trim(), phone: $('#nPhone').value.trim(), hotel: $('#nHotel').value.trim(), room: $('#nRoom').value.trim(),
+    slot: $('#nSlot').value, notes: $('#nNotes').value.trim() };
+}
+function renderNewQuote() {
+  const p = newPayload(), d = A.db, q = quoteFor(p, d);
+  let warn = '';
+  if (p.start_date && p.days) for (const it of p.items) {
+    const free = freeOn(d, it.product_id, p.start_date, p.days);
+    if (free < it.qty) warn = `المتاح من ${d.products.find(x => x.id === it.product_id).name_ar} في التواريخ دي: ${free} بس.`;
+  }
+  if (q.missing) warn = 'في منتج ملوش سعر للمدة دي.';
+  $('#nMsg').textContent = warn;
+  $('#nSave').disabled = !!warn || !p.items.length;
+  $('#nQuote').innerHTML = `<span>الإيجار</span>${money(q.rental, p.currency)}<span>التوصيل</span>${money(q.delivery || 0, p.currency)}
+    <span>التأمين</span>${money(q.deposit, p.currency)}<b>الإجمالي كاش</b><b>${money(q.total, p.currency)}</b>`;
+}
+function openNew() {
+  const d = A.db, priced = d.products.filter(p => p.active && d.tiers.some(t => t.product_id === p.id));
+  $('#newForm').reset();
+  $('#nItems').innerHTML = priced.map(p => `<label class="pick"><span>${esc(p.name_ar)}</span><input class="field ltr" type="number" min="0" max="10" value="0" data-pid="${esc(p.id)}"></label>`).join('')
+    || '<p class="muted">مفيش منتجات ليها أسعار.</p>';
+  const opts = [...new Set(d.tiers.map(t => Number(t.days)))].sort((a, b) => a - b);
+  $('#nDayList').innerHTML = opts.map(x => `<option value="${x}">`).join(''); $('#nDays').value = opts[0] || 7;
+  $('#nZone').innerHTML = d.zones.filter(z => z.active).map(z => `<option value="${esc(z.id)}">${esc(z.name_ar)} (${Number(z.fee_egp)} جنيه)</option>`).join('');
+  $('#nHotels').innerHTML = d.hotels.filter(h => h.active && h.zone_id).map(h => `<option value="${esc(h.name)}">`).join('');
+  $('#nStart').value = today();
+  renderNewQuote();
+  $('#newDlg').showModal();
+}
+
+/* ============================================================================
+   التشغيل
+   ========================================================================== */
+function render() {
+  $$('[data-view]').forEach(v => v.hidden = v.dataset.view !== A.tab);
+  $$('[data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === A.tab));
+  ({ bookings: renderBookings, calendar: renderCalendar, products: renderProducts, zones: renderZones, hotels: renderHotels, settings: renderSettings })[A.tab]();
+}
+let known = null;
+async function reload(silent) {
+  try {
+    A.db = await api.load();
+    A.db.tiers.forEach(t => t.days = Number(t.days));
+    const fresh = A.db.bookings.filter(b => b.status === 'pending').map(b => b.id);
+    if (known && fresh.some(id => !known.includes(id))) toast('حجز جديد وصل');
+    known = fresh;
+    // Never redraw a form the owner is typing in.
+    const typing = silent && document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+    if (!typing) render(); else renderBookingsBadge();
+  } catch (e) { if (!silent) fail(e); }
+}
+function renderBookingsBadge() {
+  const n = A.db.bookings.filter(b => b.status === 'pending').length;
+  $('#newCount').hidden = !n; $('#newCount').textContent = n;
+}
+
+function bind() {
+  $$('[data-tab]').forEach(b => b.addEventListener('click', () => { A.tab = b.dataset.tab; render(); }));
+  $('#filters').addEventListener('click', e => { const b = e.target.closest('[data-filter]'); if (b) { A.filter = b.dataset.filter; renderBookings(); } });
+  $('#search').addEventListener('input', e => { A.q = e.target.value; renderBookings(); $('#search').focus(); });
+
+  $('#bookingList').addEventListener('click', async e => {
+    const b = e.target.closest('[data-set]'); if (!b) return;
+    const to = b.dataset.set;
+    if (to === 'cancelled' && !b.dataset.sure) { b.dataset.sure = 1; b.textContent = 'اضغط تاني لتأكيد الإلغاء'; setTimeout(() => { delete b.dataset.sure; b.textContent = 'إلغاء'; }, 4000); return; }
+    b.disabled = true;
+    try {
+      await api.patchBooking(b.dataset.id, { status: to, ...(to === 'returned' ? { deposit_refunded: true } : {}) });
+      toast({ confirmed: 'اتأكد. ابعت للعميل رسالة التأكيد.', delivered: 'اتسجل التسليم.', returned: 'اتسجل الاستلام ورد التأمين.', cancelled: 'الحجز اتلغى والقطعة رجعت متاحة.' }[to]);
+      await reload();
+    } catch (err) { b.disabled = false; fail(err); }
+  });
+  $('#bookingList').addEventListener('change', async e => {
+    const ta = e.target.closest('[data-note]'); if (!ta) return;
+    try { await api.patchBooking(ta.dataset.note, { admin_notes: ta.value.trim() }); toast('الملاحظة اتحفظت'); } catch (err) { fail(err); }
+  });
+
+  $('#calPrev').addEventListener('click', () => { A.calStart = addDays(A.calStart, -14); renderCalendar(); });
+  $('#calNext').addEventListener('click', () => { A.calStart = addDays(A.calStart, 14); renderCalendar(); });
+  $('#calToday').addEventListener('click', () => { A.calStart = today(); renderCalendar(); });
+
+  $('#addProduct').addEventListener('click', () => {
+    A.db.products.push({ id: uid(), slug: 'item-' + Date.now(), category: 'scooter', name_en: '', name_de: '', name_ar: '', desc_en: '', desc_de: '', image_url: '', stock_qty: 0, active: false, sort_order: (A.db.products.length + 1) * 10 });
+    renderProducts(); $('#productList form:last-child [name="name_ar"]').focus();
+  });
+  $('#productList').addEventListener('click', e => {
+    if (e.target.closest('[data-add-tier]')) e.target.closest('form').querySelector('.tiers').insertAdjacentHTML('beforeend', tierRow());
+    if (e.target.closest('[data-del-tier]')) e.target.closest('.tier').remove();
+  });
+  $('#productList').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = e.target, old = A.db.products.find(p => p.id === f.dataset.product), v = n => f.elements[n].value.trim();
+    const tiers = $$('.tier', f).map(r => ({ days: Number($('[name=t_days]', r).value), price_gbp: Number($('[name=t_gbp]', r).value), price_eur: Number($('[name=t_eur]', r).value) }));
+    if (new Set(tiers.map(t => t.days)).size !== tiers.length) return toast('في مدة مكررة في الأسعار.', true);
+    const p = { id: old.id, slug: old.slug, sort_order: old.sort_order, category: v('category'), name_ar: v('name_ar'), name_en: v('name_en'), name_de: v('name_de'),
+      desc_en: v('desc_en'), desc_de: v('desc_de'), image_url: v('image_url'), stock_qty: Number(v('stock_qty')), active: f.elements.active.checked };
+    try { await api.saveProduct(p, tiers); toast('اتحفظ'); await reload(); } catch (err) { fail(err); }
+  });
+
+  $('#addZone').addEventListener('click', () => {
+    A.db.zones.push({ id: uid(), slug: 'zone-' + Date.now(), name_en: '', name_de: '', name_ar: '', hint_en: '', hint_de: '', fee_egp: 0, active: false, sort_order: (A.db.zones.length + 1) * 10 });
+    renderZones(); $('#zoneList form:last-child [name="name_ar"]').focus();
+  });
+  $('#zoneList').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = e.target, old = A.db.zones.find(z => z.id === f.dataset.zone), v = n => f.elements[n].value.trim();
+    const z = { id: old.id, slug: old.slug, sort_order: old.sort_order, name_ar: v('name_ar'), name_en: v('name_en'), name_de: v('name_de'),
+      hint_en: v('hint_en'), hint_de: v('hint_de'), fee_egp: Number(v('fee_egp')), active: f.elements.active.checked };
+    try { await api.saveZone(z); toast('اتحفظ'); await reload(); } catch (err) { fail(err); }
+  });
+  $('#hotelSearch').addEventListener('input', e => { A.hq = e.target.value; renderHotels(); $('#hotelSearch').focus(); });
+  $('#hotelFilter').addEventListener('change', e => { A.hz = e.target.value; renderHotels(); });
+  $('#hotelList').addEventListener('change', async e => {
+    const id = e.target.dataset.hzone || e.target.dataset.hactive; if (!id) return;
+    const h = A.db.hotels.find(x => x.id === id);
+    if (e.target.dataset.hzone !== undefined) h.zone_id = e.target.value || null; else h.active = e.target.checked;
+    try { await api.saveHotel({ id: h.id, name: h.name, zone_id: h.zone_id, active: h.active }); toast('اتحفظ'); } catch (err) { fail(err); }
+  });
+  $('#hotelAdd').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = e.target.elements.name.value.trim();
+    if (A.db.hotels.some(h => h.name.toLowerCase() === name.toLowerCase())) return toast('الفندق ده موجود قبل كده.', true);
+    try { await api.saveHotel({ id: uid(), name, zone_id: e.target.elements.zone.value || null, active: true }); toast('الفندق اتضاف'); e.target.reset(); A.hq = name; await reload(); $('#hotelSearch').value = name; } catch (err) { fail(err); }
+  });
+  $('#settingsForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const obj = {}; SETTINGS.forEach(([k, , ty]) => { const raw = e.target.elements[k].value.trim(); obj[k] = ty === 'num' ? Number(raw) : raw; });
+    try { await api.saveSettings(obj); toast('الإعدادات اتحفظت'); await reload(); } catch (err) { fail(err); }
+  });
+
+  $('#newBtn').addEventListener('click', openNew);
+  $('#newClose').addEventListener('click', () => $('#newDlg').close());
+  $('#nHotel').addEventListener('input', e => { const h = A.db.hotels.find(x => x.name.toLowerCase() === e.target.value.trim().toLowerCase()); if (h && h.zone_id) $('#nZone').value = h.zone_id; });
+  $('#newForm').addEventListener('input', renderNewQuote);
+  $('#newForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const p = newPayload();
+    if (p.phone.replace(/\D/g, '').length < 8) return $('#nMsg').textContent = 'اكتب رقم الواتساب بكود الدولة.';
+    $('#nSave').disabled = true;
+    try {
+      const b = await api.createBooking(p);
+      $('#newDlg').close(); toast('الحجز اتسجل: ' + b.code);
+      A.tab = 'bookings'; A.filter = 'active'; await reload();
+    } catch (err) {
+      $('#nSave').disabled = false;
+      $('#nMsg').textContent = /MOB_UNAVAILABLE/.test(err.message) ? 'مفيش متاح كفاية في التواريخ دي.' : 'الحجز ماتسجلش: ' + err.message;
+    }
+  });
+  $('#lockBtn').addEventListener('click', () => { PIN = ''; try { localStorage.removeItem(PIN_KEY); } catch (e) {} $('#app').hidden = true; $('#pinView').hidden = false; $('#pinInput').value = ''; });
+}
+
+let entered = false;
+async function enter() {
+  $('#pinView').hidden = true; $('#bootMsg').hidden = true; $('#app').hidden = false;
+  $('#demoNote').hidden = LIVE;
+  if (entered) return reload();
+  entered = true;
+  bind();
+  await reload();
+  setInterval(() => { if (!document.hidden && !host.hidden && host.offsetParent && !$('#newDlg').open) reload(true); }, 30000);
+}
+async function tryPin(pin) {
+  PIN = pin;
+  try { A.db = await api.load(); store.set(PIN_KEY, PIN); return true; }
+  catch (e) { if (e.denied) { PIN = ''; return false; } throw e; }
+}
+let booted = false;
+async function boot() {
+  if (booted) return; booted = true;
+  try {
+    // Are the mob_ tables there yet? (a plain read, so no PIN is spent on it)
+    const probe = await fetch(SB_URL + '/rest/v1/mob_settings?select=key&limit=1', { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
+    if (probe.status === 404) { LIVE = false; return enter(); }
+    if (PIN && await tryPin(PIN)) return enter();
+  } catch (e) { $('#bootMsg').textContent = 'مش قادر يوصل لقاعدة البيانات: ' + e.message; booted = false; return; }
+  $('#bootMsg').hidden = true; $('#pinView').hidden = false;
+}
+$('#pinForm').addEventListener('submit', async e => {
+  e.preventDefault(); $('#pinMsg').textContent = '';
+  try { if (await tryPin($('#pinInput').value.trim())) return enter(); $('#pinMsg').textContent = 'الرقم السري غلط.'; }
+  catch (err) { $('#pinMsg').textContent = 'حصل خطأ: ' + err.message; }
+});
+window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
+
+})();
+</script>
+<!-- MOBILITY ADMIN END -->
 </body>
 </html>
