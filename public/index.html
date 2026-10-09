@@ -2661,6 +2661,9 @@ function setCategory(cat){
   var mobSec=document.getElementById("sectionMobility"); if(mobSec) mobSec.classList.toggle("active",cat==="mobility");
   var mobBtn=document.getElementById("catMobility"); if(mobBtn) mobBtn.classList.toggle("active",cat==="mobility");
   if(cat==="mobility" && window.scMobAdmin) window.scMobAdmin.open();
+  var mobSec=document.getElementById("sectionMobility"); if(mobSec) mobSec.classList.toggle("active",cat==="mobility");
+  var mobBtn=document.getElementById("catMobility"); if(mobBtn) mobBtn.classList.toggle("active",cat==="mobility");
+  if(cat==="mobility" && window.scMobAdmin) window.scMobAdmin.open();
   if(cat==="stock")renderStock();
   if(cat==="products" && typeof pmLoadAll==="function"){ pmLoadAll(); }
   if(cat==="settings"){renderPreparerManager();renderCourierManager();renderHotelDeliveryFees();}
@@ -7341,6 +7344,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 
 
 
+
 <!-- MOBILITY ADMIN START -->
 <style>
 @media(min-width:431px){.category-row{grid-template-columns:repeat(5,1fr)!important}}
@@ -7541,13 +7545,13 @@ function waMessage(b) {
   const M = {
     confirm: {
       label: 'رسالة تأكيد الحجز',
-      en: `Hello ${v.name}, this is Self Care Mobility. Your booking ${v.code} is confirmed.\n\nWe will bring ${v.items} to ${v.hotel} on ${v.start}${v.slot}.\n\nPlease have ${v.total} ready in cash. ${v.dep} of that is your deposit, and you get it back when we collect on ${v.end}.`,
+      en: `Hello ${v.name}, this is Self Care Mobility. Your booking ${v.code} is confirmed.\n\nWe will bring ${v.items} to ${v.hotel} on ${v.start}${v.slot}.\n\nPlease have ${v.total} ready in cash. ${v.dep} of that is your insurance, and you get it back when we collect on ${v.end}.`,
       de: `Hallo ${v.name}, hier ist Self Care Mobility. Ihre Buchung ${v.code} ist bestätigt.\n\nWir bringen ${v.items} am ${v.start}${v.slot} ins ${v.hotel}.\n\nBitte halten Sie ${v.total} in bar bereit. Davon sind ${v.dep} Ihre Kaution, die Sie bei der Abholung am ${v.end} zurückbekommen.`,
       ar: `أهلا ${ar.name}، معاك Self Care Mobility. حجزك ${ar.code} اتأكد.\n\nهنوصل ${ar.items} لفندق ${ar.hotel} يوم ${ar.start}${ar.slot}.\n\nمن فضلك جهز ${ar.total} كاش. منهم ${ar.dep} تأمين هيرجعلك وقت الاستلام يوم ${ar.end}.`
     },
     collect: {
       label: 'رسالة تذكير بالاستلام',
-      en: `Hello ${v.name}, this is Self Care Mobility. We will collect your rental from ${v.hotel} on ${v.end} and hand back your deposit of ${v.dep}.\n\nWhat time suits you best?`,
+      en: `Hello ${v.name}, this is Self Care Mobility. We will collect your rental from ${v.hotel} on ${v.end} and hand back your insurance of ${v.dep}.\n\nWhat time suits you best?`,
       de: `Hallo ${v.name}, hier ist Self Care Mobility. Wir holen Ihre Miete am ${v.end} im ${v.hotel} ab und geben Ihnen die Kaution von ${v.dep} zurück.\n\nWelche Uhrzeit passt Ihnen am besten?`,
       ar: `أهلا ${ar.name}، معاك Self Care Mobility. هنستلم منك يوم ${ar.end} من فندق ${ar.hotel} ونرجعلك التأمين ${ar.dep}.\n\nإيه أنسب وقت ليك؟`
     },
