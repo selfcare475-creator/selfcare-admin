@@ -1201,6 +1201,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
         <option value="all">كل الأكواد</option>
         <option value="72">كود ٧٢</option>
         <option value="61">كود ٦١</option>
+        <option value="51">كود ٥١ (سلوفاكي)</option>
       </select>
     </div>
   </div>
@@ -1357,6 +1358,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
             <div class="report-box"><b id="repCard">٠</b><span>فيزا / كارت</span></div>
             <div class="report-box"><b id="rep72">٠</b><span>كود ٧٢</span></div>
             <div class="report-box"><b id="rep61">٠</b><span>كود ٦١</span></div>
+            <div class="report-box"><b id="rep51">٠</b><span>كود ٥١</span></div>
             <div class="report-box"><b id="repPrepared">٠</b><span>اتحضر</span></div>
             <div class="report-box"><b id="repTopPreparer">—</b><span>أعلى محضر</span></div>
             <div class="report-box"><b id="repDeliveryAccepted">٠</b><span>دليفري استلم</span></div>
@@ -2246,6 +2248,7 @@ function updateFilterOptionLabels(){
   setOptionText("branchSelect","all","الأكواد " + arNum(countOrdersFor(aS,aD,"all")));
   setOptionText("branchSelect","72","٧٢ " + arNum(countOrdersFor(aS,aD,"72")));
   setOptionText("branchSelect","61","٦١ " + arNum(countOrdersFor(aS,aD,"61")));
+  setOptionText("branchSelect","51","٥١ سلوفاكي " + arNum(countOrdersFor(aS,aD,"51")));
 }
 function updateActiveUI(){
   document.getElementById("statusSelect").value=activeStatus;
@@ -2260,7 +2263,7 @@ function dayPass(o){
   if(activeDay==="late")return e<today&&adminGroup(o)!=="done"&&adminGroup(o)!=="cancel";
   return true;
 }
-function branchPass(o){return activeBranch==="all"||branchCode(o.branch)===activeBranch}
+function branchPass(o){return activeBranch==="all"||branchCode(o.branch,o)===activeBranch}
 function searchPass(o){if(!orderSearch)return true;const q=normalize(orderSearch);return [o.id,...(o._ids||[]),o.hotel,o.customer_phone,o.phone,o.room,o.total,o.branch].some(v=>normalize(String(v||"")).includes(q))}
 function isDraftOrder(o){const s=String(o.status||"").toLowerCase();return s==="draft"||s.includes("draft")||s.includes("pendingwhatsapp")}
 function whatsappDigits(o){return String(clean(o.customer_phone||o.phone||"")).replace(/[^0-9]/g,"")}
@@ -2294,7 +2297,7 @@ function phoneDetailsHtml(o){
 
 function card(o){
   const group=adminGroup(o);
-  const code=branchCode(o.branch);
+  const code=branchCode(o.branch,o);
   const cls=(group==="cancel"?" cancel":(isLate(o)&&group!=="done"?" warn":""));
   const dup=o._ids&&o._ids.length>1;
   const postponeBadge=postponeBadgeHtml(o);
@@ -2628,7 +2631,7 @@ function buildSimplePdf(lines){
 }
 
 function orderLang(o){const x=String(o.customer_lang||o.lang||o.language||"").toLowerCase();if(/de|german|ألماني|الماني/.test(x))return"de";if(/cs|cz|czech|تشيك/.test(x))return"cs";if(/ru|russian|روس/.test(x))return"ru";return"en"}
-function langName(l){return {en:"إنجليزي",de:"ألماني",cs:"تشيكي",ru:"روسي"}[l]||"إنجليزي"}
+function langName(l){return {en:"إنجليزي",de:"ألماني",cs:"تشيكي",ru:"روسي",sk:"سلوفاكي",pl:"بولندي",ua:"أوكراني",uk:"أوكراني"}[l]||"إنجليزي"}
 function findOrder(id){const sid=String(id);return [...shownOrders,...orders].find(x=>String(x.id)===sid||(x._ids||[]).map(String).includes(sid))}
 
 function showModal(id){document.getElementById(id).classList.add("show");lockPageScroll()}
@@ -3400,8 +3403,9 @@ function renderReports(){
   document.getElementById("repActive").textContent=arNum(rows.filter(o=>adminGroup(o)==="new"||adminGroup(o)==="work").length);
   document.getElementById("repCash").textContent=arNum(valid.filter(o=>isCashPayment(o.payment)).length);
   document.getElementById("repCard").textContent=arNum(valid.filter(o=>!isCashPayment(o.payment)).length);
-  document.getElementById("rep72").textContent=arNum(valid.filter(o=>branchCode(o.branch)==="72").length);
-  document.getElementById("rep61").textContent=arNum(valid.filter(o=>branchCode(o.branch)==="61").length);
+  document.getElementById("rep72").textContent=arNum(valid.filter(o=>branchCode(o.branch,o)==="72").length);
+  document.getElementById("rep61").textContent=arNum(valid.filter(o=>branchCode(o.branch,o)==="61").length);
+  {const e51=document.getElementById("rep51"); if(e51) e51.textContent=arNum(valid.filter(o=>branchCode(o.branch,o)==="51").length);}
   const preparedRows=valid.filter(o=>pharmacyStatus(o)==="prepared");
   document.getElementById("repPrepared").textContent=arNum(preparedRows.length);
   const prepData=preparedReportData(preparedRows);
@@ -3781,14 +3785,14 @@ function paymentAr(p){const s=clean(p);if(!s)return"غير محدد";const x=s.t
 function isCashPayment(p){const x=clean(p).toLowerCase();if(!x)return false;if(/visa|card|كارت|فيزا|pos|karta|карт/.test(x))return false;return /cash|كاش|نقد|hotov|bar|нал|готів|عند الاستلام|استلام/.test(x)}
 function settingRate(id,fallback){const el=document.getElementById(id);const n=numberFrom(el?el.value:fallback);return n||fallback}
 function cardAmountText(o){const egpValue=numberFrom(o.total_egp||o.egp_total||o.total);return egpValue?formatMoney(egpValue)+" جنيه":"غير محدد"}
-function amountHtml(o){const egpValue=numberFrom(o.total_egp||o.egp_total||o.total);if(!egpValue)return"غير محدد";const parts=[pill(formatMoney(egpValue)+" جنيه","main")];if(isCashPayment(o.payment)){const code=branchCode(o.branch);if(code==="61")parts.push(pill(formatMoney(Math.ceil(egpValue/settingRate("rateGbp",70)))+" استرليني","gbp"));else{parts.push(pill(formatMoney(Math.ceil(egpValue/settingRate("rateUsd",50)))+" دولار","usd"));parts.push(pill(formatMoney(Math.ceil(egpValue/settingRate("rateEur",60)))+" يورو","eur"));}}return '<div class="amount-pills">'+parts.join("")+'</div>'}
+function amountHtml(o){const egpValue=numberFrom(o.total_egp||o.egp_total||o.total);if(!egpValue)return"غير محدد";const parts=[pill(formatMoney(egpValue)+" جنيه","main")];if(isCashPayment(o.payment)){const code=branchCode(o.branch,o);if(code==="61")parts.push(pill(formatMoney(Math.ceil(egpValue/settingRate("rateGbp",70)))+" استرليني","gbp"));else{parts.push(pill(formatMoney(Math.ceil(egpValue/settingRate("rateUsd",50)))+" دولار","usd"));parts.push(pill(formatMoney(Math.ceil(egpValue/settingRate("rateEur",60)))+" يورو","eur"));}}return '<div class="amount-pills">'+parts.join("")+'</div>'}
 function hasDeliveryFeeField(o){return ["delivery_fee","deliveryFee","delivery_cost","deliveryCost","delivery_amount","deliveryAmount","shipping_fee","shippingFee"].some(k=>o&&o[k]!==undefined&&o[k]!==null&&String(o[k]).trim()!=="")}
 function deliveryFeeValue(o){return numberFrom(o.delivery_fee||o.deliveryFee||o.delivery_cost||o.deliveryCost||o.delivery_amount||o.deliveryAmount||o.shipping_fee||o.shippingFee)}
 function deliveryFeeHtml(o){if(!hasDeliveryFeeField(o))return '<div class="amount-pills">'+pill("غير محدد","warn")+'</div>';return '<div class="amount-pills">'+pill(formatMoney(deliveryFeeValue(o))+" جنيه","main")+'</div>'}
 function pill(text,cls){return '<span class="amount-pill '+cls+'">'+esc(arNum(text))+'</span>'}
 function numberFrom(v){const s=String(v??"").replace(/[^\d.]/g,"");const n=parseFloat(s);return isNaN(n)?0:n}
 function formatMoney(n){return String(Math.round(n))}
-function branchCode(branch){const b=String(branch||"").toLowerCase();if(b.includes("2")||b.includes("sc2"))return"61";if(b.includes("self care"))return"72";return""}
+function branchCode(branch,o){if(o&&Number(o.source_code)===51)return"51";const b=String(branch||"").toLowerCase();if(b.includes("2")||b.includes("sc2"))return"61";if(b.includes("self care"))return"72";return""}
 function hotelArName(name){const original=clean(name);if(!original)return"فندق غير محدد";return HOTEL_LOOKUP[normalize(original)]||original}
 function normalize(s){return String(s||"").toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g,"").replace(/&/g,"and").replace(/[^a-z0-9а-яёء-ي]+/gi," ").replace(/\s+/g," ").trim()}
 function clean(v){return String(v??"").replace(/<[^>]*>/g,"").trim()}
