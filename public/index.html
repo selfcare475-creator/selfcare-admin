@@ -2350,7 +2350,7 @@ function detailsHtml(o){
     <div class="details-row"><div class="details-label">رقم الغرفة</div><div class="details-value">${esc(clean(o.room)?arNum(clean(o.room)):"غير محدد")}</div></div>
     <div class="details-row"><div class="details-label">المحضر</div><div class="details-value">${esc(preparedByName(o)||"غير محدد")}</div></div>
     <div class="details-row"><div class="details-label">الدليفري</div><div class="details-value">${esc(courierName(o)||"غير محدد")}</div></div>
-    <div class="details-row"><div class="details-label">لغة العميل</div><div class="details-value">${esc(langName(orderLang(o)))}</div></div>
+    <div class="details-row"><div class="details-label">لغة العميل</div><div class="details-value">${esc(langName(orderLangShown(o)))}</div></div>
     <div class="details-row"><div class="details-label">رقم العميل</div><div class="details-value">${phoneDetailsHtml(o)}</div></div>
   </div>`;
 }
@@ -2631,6 +2631,7 @@ function buildSimplePdf(lines){
 }
 
 function orderLang(o){const x=String(o.customer_lang||o.lang||o.language||"").toLowerCase();if(/de|german|ألماني|الماني/.test(x))return"de";if(/cs|cz|czech|تشيك/.test(x))return"cs";if(/ru|russian|روس/.test(x))return"ru";return"en"}
+function orderLangShown(o){const x=String(o.customer_lang||o.lang||o.language||"").toLowerCase().trim();if(x==="sk"||/slovak|سلوفاك/.test(x))return"sk";if(x==="pl"||/polish|بولند/.test(x))return"pl";if(x==="ua"||x==="uk"||/ukrain|أوكران|اوكران/.test(x))return"ua";return orderLang(o)}
 function langName(l){return {en:"إنجليزي",de:"ألماني",cs:"تشيكي",ru:"روسي",sk:"سلوفاكي",pl:"بولندي",ua:"أوكراني",uk:"أوكراني"}[l]||"إنجليزي"}
 function findOrder(id){const sid=String(id);return [...shownOrders,...orders].find(x=>String(x.id)===sid||(x._ids||[]).map(String).includes(sid))}
 
@@ -6385,7 +6386,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v234</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v235</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
