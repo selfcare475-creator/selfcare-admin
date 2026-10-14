@@ -1326,7 +1326,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
         <button class="report-period-btn active" data-site="en">الإنجليزي</button>
         <button class="report-period-btn" data-site="cz">التشيكي</button>
         <button class="report-period-btn" data-site="test">التجربة</button>
-        <button class="report-period-btn" id="fnRefresh">تحديث</button>
+        <button class="report-period-btn" id="fnRefresh" aria-label="تحديث">↻</button>
       </div>
       <div id="fnBody" class="fn-body">جاري التحميل…</div>
     </div>
@@ -7953,26 +7953,36 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
 </script>
 <!-- MOBILITY ADMIN END -->
 <style id="sc-funnel-admin">
-.fn-sites{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
-.fn-body{font-size:13px}
-.fn-wrap{overflow-x:auto;border:1px solid rgba(45,212,191,.35);border-radius:14px}
-.fn-table{border-collapse:collapse;width:100%;min-width:560px}
-.fn-table th,.fn-table td{padding:7px 6px;text-align:center;border-bottom:1px solid rgba(255,255,255,.07);white-space:nowrap}
-.fn-table th{font-size:11.5px;color:#9fb0c8;font-weight:700;background:rgba(255,255,255,.03)}
-.fn-table td:first-child,.fn-table th:first-child{text-align:right;position:sticky;right:0;background:#111a2b}
-.fn-table td b{display:block;font-size:14px}
-.fn-table td small{display:block;font-size:10.5px;color:#9fb0c8}
-.fn-table td small.low{color:#f87171;font-weight:700}
-.fn-table tr.today td{background:rgba(23,184,170,.08)}
-.fn-table td.conv b{color:#4ade80}
-.fn-note{color:#9fb0c8;font-size:11.5px;margin:8px 2px 0;line-height:1.6}
-.fn-probs{margin-top:12px}
-.fn-probs h4{margin:0 0 6px;font-size:13px}
-.fn-prob{display:flex;justify-content:space-between;gap:10px;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.03);margin-bottom:4px;font-size:12px}
-.fn-prob span{direction:ltr;text-align:left;overflow-wrap:anywhere}
+.fn-sites{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin:4px 0 12px}
+.fn-sites .report-period-btn{min-height:38px;padding:0 8px;font-size:13px}
+#fnRefresh{width:40px;padding:0;font-size:16px}
+.fn-days{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px}
+.fn-days::-webkit-scrollbar{display:none}
+.fn-days button{flex:none;border:1px solid rgba(255,255,255,.12);background:transparent;color:#9fb0c8;border-radius:99px;padding:4px 12px;font-size:12px}
+.fn-days button.on{background:#17b8aa;border-color:#17b8aa;color:#07101d;font-weight:700}
+.fn-steps{display:grid;gap:9px}
+.fn-step{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px}
+.fn-step span{font-size:13px;color:#dbe7f5}
+.fn-step b{font-size:15px;color:#fff}
+.fn-step i{grid-column:1/-1;display:block;height:7px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
+.fn-step i em{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#17b8aa,#23d3c4);transition:width .4s}
+.fn-drop{font-size:11px;color:#9fb0c8;margin:-4px 2px -2px}
+.fn-drop.low{color:#f87171;font-weight:700}
+.fn-kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.fn-kpi div{background:rgba(255,255,255,.04);border-radius:14px;padding:9px 10px;text-align:center}
+.fn-kpi b{display:block;font-size:20px;color:#fff}
+.fn-kpi small{font-size:11px;color:#9fb0c8}
+.fn-hist{margin-top:14px;border-top:1px solid rgba(255,255,255,.08);padding-top:10px}
+.fn-hist h4,.fn-probs h4{margin:0 0 6px;font-size:13px;color:#dbe7f5}
+.fn-hrow{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;padding:6px 2px;border-bottom:1px solid rgba(255,255,255,.05);font-size:12.5px;text-align:center}
+.fn-hrow:first-of-type{color:#9fb0c8;font-size:11px}
+.fn-hrow span:first-child{text-align:right}
+.fn-hrow .g{color:#4ade80;font-weight:700}
+.fn-note{color:#9fb0c8;font-size:11.5px;margin:6px 2px 0;line-height:1.6}
+.fn-probs{margin-top:14px;border-top:1px solid rgba(255,255,255,.08);padding-top:10px}
+.fn-prob{padding:7px 9px;border-radius:10px;background:rgba(255,255,255,.04);margin-bottom:5px;font-size:12px;line-height:1.5}
 .fn-prob em{font-style:normal;color:#fbbf24;font-weight:700}
-.fn-devs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.fn-devs span{background:rgba(255,255,255,.05);border-radius:99px;padding:3px 10px;font-size:11.5px}
+.fn-prob span{display:block;direction:ltr;text-align:left;color:#9fb0c8;font-size:11px;overflow-wrap:anywhere}
 </style>
 <script id="sc-funnel-admin-js">
 (function(){
@@ -7984,38 +7994,44 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
   function rpc(fn, body){ return fetch(SB_URL + "/rest/v1/rpc/" + fn, {method:"POST", headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"}, body:JSON.stringify(body)}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }); }
   function esc(v){ return String(v==null?"":v).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   function siteMatch(s){ return site === "test" ? /-test$/.test(s) : s === site; }
+  var dayPick = null;
   function render(){
     var body = document.getElementById("fnBody"); if(!body) return;
     if(!cache){ body.textContent = "جاري التحميل…"; return; }
     if(cache.error){ body.innerHTML = '<p class="fn-note">' + esc(cache.error) + '</p>'; return; }
     var days = {}, today = new Date(Date.now() + 3*3600e3).toISOString().slice(0,10);
     cache.rows.forEach(function(r){ if(!siteMatch(r.site)) return; var d = days[r.day] || (days[r.day] = {}); d[r.event] = (d[r.event]||0) + Number(r.sessions); });
-    var keys = Object.keys(days).sort().reverse().slice(0,10);
-    if(!keys.length){ body.innerHTML = '<p class="fn-note">لسه مفيش بيانات للموقع ده. التسجيل بيبدأ من أول ما التحديث يترفع على الموقع.</p>'; return; }
-    var h = '<div class="fn-wrap"><table class="fn-table"><thead><tr><th>اليوم</th>' + STEPS.map(function(s){return "<th>"+s[1]+"</th>";}).join("") + '<th>نسبة الشراء</th></tr></thead><tbody>';
-    keys.forEach(function(k){
-      var d = days[k], prev = null;
-      h += '<tr class="' + (k===today?"today":"") + '"><td>' + (k===today?"النهارده":k.slice(5).split("-").reverse().join("/")) + '</td>';
-      STEPS.forEach(function(s, i){
-        var v = d[s[0]] || 0, pct = "";
-        if(i > 0 && i < 6 && prev){ var q = Math.round(v*100/prev); pct = '<small class="' + (q < 35 ? "low" : "") + '">' + q + '%</small>'; }
-        h += '<td><b>' + v + '</b>' + pct + '</td>';
-        if(i < 6) prev = v;
-      });
-      var conv = d.visit ? ((d.order||0)*100/d.visit).toFixed(1) : "0";
-      h += '<td class="conv"><b>' + conv + '%</b><small>من الزوار</small></td></tr>';
+    var keys = Object.keys(days).sort().reverse().slice(0,7);
+    if(!keys.length){ body.innerHTML = '<p class="fn-note">لسه مفيش بيانات للموقع ده.</p>'; return; }
+    if(!dayPick || keys.indexOf(dayPick) < 0) dayPick = keys[0];
+    var label = function(k){ return k === today ? "النهارده" : k.slice(5).split("-").reverse().join("/"); };
+    var d = days[dayPick], top = d.visit || 0;
+    var h = '<div class="fn-days">' + keys.map(function(k){ return '<button data-day="' + k + '" class="' + (k===dayPick?"on":"") + '">' + label(k) + '</button>'; }).join("") + '</div>';
+    var conv = top ? ((d.order||0)*100/top).toFixed(1) : "0";
+    h += '<div class="fn-kpi"><div><b>' + top + '</b><small>زائر</small></div><div><b>' + (d.order||0) + ' <span style="font-size:13px;color:#4ade80">(' + conv + '%)</span></b><small>أوردر</small></div></div>';
+    h += '<div class="fn-steps">';
+    var prev = null;
+    STEPS.slice(0,6).forEach(function(st, i){
+      var v = d[st[0]] || 0;
+      if(i > 0 && prev){ var q = Math.round(v*100/prev); h += '<div class="fn-drop' + (q < 35 ? " low" : "") + '">↓ كمّل ' + q + '٪</div>'; }
+      var w = top ? Math.max(2, Math.round(v*100/top)) : 0;
+      h += '<div class="fn-step"><span>' + st[1] + '</span><b>' + v + '</b><i><em style="width:' + w + '%"></em></i></div>';
+      prev = v;
     });
-    h += '</tbody></table></div><p class="fn-note">الأرقام عدد الزوار (مش عدد المرات). النسبة الصغيرة تحت كل رقم = كام في المية من الخطوة اللي قبلها كمّلوا، والأحمر يعني أقل من ٣٥٪. "داس اطلب" بيتحسب لما الزرار يكون شغال بس.</p>';
+    h += '</div>';
+    if(keys.length > 1){
+      h += '<div class="fn-hist"><h4>آخر الأيام</h4><div class="fn-hrow"><span>اليوم</span><span>زوار</span><span>أوردرات</span><span>نسبة</span></div>' + keys.map(function(k){
+        var x = days[k], c = x.visit ? ((x.order||0)*100/x.visit).toFixed(1) : "0";
+        return '<div class="fn-hrow"><span>' + label(k) + '</span><span>' + (x.visit||0) + '</span><span>' + (x.order||0) + '</span><span class="g">' + c + '%</span></div>'; }).join("") + '</div>';
+    }
     var det = details[site] || [];
     if(det.length){
-      var devs = {};
-      det.forEach(function(r){ devs[r.device] = (devs[r.device]||0) + Number(r.n); });
-      h += '<div class="fn-probs"><h4>المشاكل آخر ٣ أيام</h4>' + det.slice(0,25).map(function(r){
-        return '<div class="fn-prob"><div><em>' + esc(EVN[r.event]||r.event) + '</em> · ' + esc(devName(r.device)) + '</div><span>' + esc(r.info||"") + ' ×' + r.n + '</span></div>'; }).join("")
-        + '<div class="fn-devs">' + Object.keys(devs).map(function(k){ return '<span>' + esc(devName(k)) + ': ' + devs[k] + '</span>'; }).join("") + '</div></div>';
-    } else h += '<p class="fn-note">مفيش مشاكل متسجلة آخر ٣ أيام.</p>';
+      h += '<div class="fn-probs"><h4>مشاكل آخر ٣ أيام</h4>' + det.slice(0,12).map(function(r){
+        return '<div class="fn-prob"><em>' + esc(EVN[r.event]||r.event) + '</em> · ' + esc(devName(r.device)) + ' · ' + r.n + ' مرة' + (r.info ? '<span>' + esc(r.info) + '</span>' : '') + '</div>'; }).join("") + '</div>';
+    }
     body.innerHTML = h;
   }
+  document.addEventListener("click", function(e){ var b = e.target.closest && e.target.closest(".fn-days button"); if(!b) return; dayPick = b.dataset.day; render(); });
   function load(){
     cache = null; render();
     var ps = site === "test" ? [null] : [site];
