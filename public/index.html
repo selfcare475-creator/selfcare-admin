@@ -8024,7 +8024,7 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
         var x = days[k], c = x.visit ? ((x.order||0)*100/x.visit).toFixed(1) : "0";
         return '<div class="fn-hrow"><span>' + label(k) + '</span><span>' + (x.visit||0) + '</span><span>' + (x.order||0) + '</span><span class="g">' + c + '%</span></div>'; }).join("") + '</div>';
     }
-    var det = details[site] || [];
+    var det = (details[site] || []).filter(function(r){ return !/Script error|ethereum|web3|Java object is gone|postMessage|webkit|__gCrWeb|ResizeObserver/i.test(r.info||""); });
     if(det.length){
       h += '<div class="fn-probs"><h4>مشاكل آخر ٣ أيام</h4>' + det.slice(0,12).map(function(r){
         return '<div class="fn-prob"><em>' + esc(EVN[r.event]||r.event) + '</em> · ' + esc(devName(r.device)) + ' · ' + r.n + ' مرة' + (r.info ? '<span>' + esc(r.info) + '</span>' : '') + '</div>'; }).join("") + '</div>';
