@@ -1320,6 +1320,16 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
   </section>
 
   <section class="section" id="sectionReports">
+    <div class="panel-card" id="funnelCard">
+      <div class="panel-title-main">رحلة العميل على الموقع</div>
+      <div class="fn-sites" id="fnSites">
+        <button class="report-period-btn active" data-site="en">الإنجليزي</button>
+        <button class="report-period-btn" data-site="cz">التشيكي</button>
+        <button class="report-period-btn" data-site="test">التجربة</button>
+        <button class="report-period-btn" id="fnRefresh">تحديث</button>
+      </div>
+      <div id="fnBody" class="fn-body">جاري التحميل…</div>
+    </div>
     <div class="panel-card">
       <div class="panel-title-main">Reports</div>
       <div class="report-period-row">
@@ -7942,5 +7952,88 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
 })();
 </script>
 <!-- MOBILITY ADMIN END -->
+<style id="sc-funnel-admin">
+.fn-sites{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.fn-body{font-size:13px}
+.fn-wrap{overflow-x:auto;border:1px solid rgba(45,212,191,.35);border-radius:14px}
+.fn-table{border-collapse:collapse;width:100%;min-width:560px}
+.fn-table th,.fn-table td{padding:7px 6px;text-align:center;border-bottom:1px solid rgba(255,255,255,.07);white-space:nowrap}
+.fn-table th{font-size:11.5px;color:#9fb0c8;font-weight:700;background:rgba(255,255,255,.03)}
+.fn-table td:first-child,.fn-table th:first-child{text-align:right;position:sticky;right:0;background:#111a2b}
+.fn-table td b{display:block;font-size:14px}
+.fn-table td small{display:block;font-size:10.5px;color:#9fb0c8}
+.fn-table td small.low{color:#f87171;font-weight:700}
+.fn-table tr.today td{background:rgba(23,184,170,.08)}
+.fn-table td.conv b{color:#4ade80}
+.fn-note{color:#9fb0c8;font-size:11.5px;margin:8px 2px 0;line-height:1.6}
+.fn-probs{margin-top:12px}
+.fn-probs h4{margin:0 0 6px;font-size:13px}
+.fn-prob{display:flex;justify-content:space-between;gap:10px;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.03);margin-bottom:4px;font-size:12px}
+.fn-prob span{direction:ltr;text-align:left;overflow-wrap:anywhere}
+.fn-prob em{font-style:normal;color:#fbbf24;font-weight:700}
+.fn-devs{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.fn-devs span{background:rgba(255,255,255,.05);border-radius:99px;padding:3px 10px;font-size:11.5px}
+</style>
+<script id="sc-funnel-admin-js">
+(function(){
+  var site = "en", cache = null, details = {};
+  var STEPS = [["visit","دخل الموقع"],["cart","ضاف للسلة"],["checkout","فتح صفحة الطلب"],["tap_order","داس اطلب"],["confirmed","أكّد"],["order","الأوردر اتبعت"],["wa_open","فتح الواتساب"]];
+  var EVN = {tap_blocked:"داس والزرار مقفول",order_error:"خطأ وهو بيبعت الأوردر",js_error:"خطأ في الصفحة",confirm_cancel:"رجع من رسالة التأكيد"};
+  var DEVN = {ios:"آيفون",android:"أندرويد",desktop:"كمبيوتر"};
+  function devName(d){ d = String(d||""); var p = d.split("-"); return (DEVN[p[0]]||p[0]) + (p[1] ? " من جوه " + p[1] : ""); }
+  function rpc(fn, body){ return fetch(SB_URL + "/rest/v1/rpc/" + fn, {method:"POST", headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"}, body:JSON.stringify(body)}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }); }
+  function esc(v){ return String(v==null?"":v).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  function siteMatch(s){ return site === "test" ? /-test$/.test(s) : s === site; }
+  function render(){
+    var body = document.getElementById("fnBody"); if(!body) return;
+    if(!cache){ body.textContent = "جاري التحميل…"; return; }
+    if(cache.error){ body.innerHTML = '<p class="fn-note">' + esc(cache.error) + '</p>'; return; }
+    var days = {}, today = new Date(Date.now() + 3*3600e3).toISOString().slice(0,10);
+    cache.rows.forEach(function(r){ if(!siteMatch(r.site)) return; var d = days[r.day] || (days[r.day] = {}); d[r.event] = (d[r.event]||0) + Number(r.sessions); });
+    var keys = Object.keys(days).sort().reverse().slice(0,10);
+    if(!keys.length){ body.innerHTML = '<p class="fn-note">لسه مفيش بيانات للموقع ده. التسجيل بيبدأ من أول ما التحديث يترفع على الموقع.</p>'; return; }
+    var h = '<div class="fn-wrap"><table class="fn-table"><thead><tr><th>اليوم</th>' + STEPS.map(function(s){return "<th>"+s[1]+"</th>";}).join("") + '<th>نسبة الشراء</th></tr></thead><tbody>';
+    keys.forEach(function(k){
+      var d = days[k], prev = null;
+      h += '<tr class="' + (k===today?"today":"") + '"><td>' + (k===today?"النهارده":k.slice(5).split("-").reverse().join("/")) + '</td>';
+      STEPS.forEach(function(s, i){
+        var v = d[s[0]] || 0, pct = "";
+        if(i > 0 && i < 6 && prev){ var q = Math.round(v*100/prev); pct = '<small class="' + (q < 35 ? "low" : "") + '">' + q + '%</small>'; }
+        h += '<td><b>' + v + '</b>' + pct + '</td>';
+        if(i < 6) prev = v;
+      });
+      var conv = d.visit ? ((d.order||0)*100/d.visit).toFixed(1) : "0";
+      h += '<td class="conv"><b>' + conv + '%</b><small>من الزوار</small></td></tr>';
+    });
+    h += '</tbody></table></div><p class="fn-note">الأرقام عدد الزوار (مش عدد المرات). النسبة الصغيرة تحت كل رقم = كام في المية من الخطوة اللي قبلها كمّلوا، والأحمر يعني أقل من ٣٥٪. "داس اطلب" بيتحسب لما الزرار يكون شغال بس.</p>';
+    var det = details[site] || [];
+    if(det.length){
+      var devs = {};
+      det.forEach(function(r){ devs[r.device] = (devs[r.device]||0) + Number(r.n); });
+      h += '<div class="fn-probs"><h4>المشاكل آخر ٣ أيام</h4>' + det.slice(0,25).map(function(r){
+        return '<div class="fn-prob"><div><em>' + esc(EVN[r.event]||r.event) + '</em> · ' + esc(devName(r.device)) + '</div><span>' + esc(r.info||"") + ' ×' + r.n + '</span></div>'; }).join("")
+        + '<div class="fn-devs">' + Object.keys(devs).map(function(k){ return '<span>' + esc(devName(k)) + ': ' + devs[k] + '</span>'; }).join("") + '</div></div>';
+    } else h += '<p class="fn-note">مفيش مشاكل متسجلة آخر ٣ أيام.</p>';
+    body.innerHTML = h;
+  }
+  function load(){
+    cache = null; render();
+    var ps = site === "test" ? [null] : [site];
+    Promise.all([rpc("funnel_report", {p_days:14}), rpc("funnel_details", {p_days:3, p_site: site === "test" ? null : site})])
+      .then(function(res){ cache = {rows: res[0]}; details[site] = site === "test" ? res[1] : res[1]; render(); })
+      .catch(function(e){ cache = {error: "مش قادر أجيب البيانات (" + e.message + "). لو الجدول لسه ما اتعملش في الداتابيز، ده طبيعي."}; render(); });
+  }
+  document.addEventListener("click", function(e){
+    var b = e.target.closest && e.target.closest("#fnSites button"); if(!b) return;
+    if(b.id === "fnRefresh"){ load(); return; }
+    site = b.dataset.site;
+    document.querySelectorAll("#fnSites [data-site]").forEach(function(x){ x.classList.toggle("active", x === b); });
+    load();
+  });
+  var _sc = window.setCategory;
+  if(typeof _sc === "function") window.setCategory = function(cat){ var r = _sc.apply(this, arguments); if(cat === "reports") load(); return r; };
+  if(document.readyState !== "loading") setTimeout(function(){ if(document.getElementById("sectionReports").classList.contains("active")) load(); }, 500);
+})();
+</script>
 </body>
 </html>
