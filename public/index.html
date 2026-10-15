@@ -1206,6 +1206,26 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
 .report-period-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .report-period-row .report-period-btn{min-width:0;padding:0 4px;font-size:13px}
 .rp-loading b{opacity:.35}
+.rp-ins{display:grid;gap:14px}
+.rp-ins-block{border-top:1px solid rgba(255,255,255,.06);padding-top:12px}
+.rp-ins-block:first-child{border-top:0;padding-top:0}
+.rp-ins-h{font-size:13px;color:#9fb0c8;margin-bottom:6px}
+.rp-ins-big{display:flex;align-items:baseline;gap:8px}
+.rp-ins-big b{font-size:26px;color:#2ee6d2}
+.rp-ins-big span{font-size:12px;color:#dbe7f5}
+.rp-ins-sub{font-size:12px;color:#8fa3bf;margin-top:4px}
+.rp-ins-sub2{font-size:11px;color:#6f839f;margin:8px 0 2px}
+.rp-ins-two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.rp-ins-two div{background:rgba(255,255,255,.04);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column}
+.rp-ins-two span{font-size:12px;color:#9fb0c8}.rp-ins-two b{font-size:20px;color:#fff}.rp-ins-two small{font-size:11px;color:#6f839f}
+.rp-hours{display:flex;align-items:flex-end;gap:2px;height:56px;direction:ltr}
+.rp-hours i{flex:1;background:rgba(23,184,170,.4);border-radius:2px 2px 0 0}
+.rp-hours i.pk{background:#2ee6d2}
+.rp-hours-ax span{direction:rtl;unicode-bidi:isolate}
+.rp-hours-ax{display:flex;justify-content:space-between;direction:ltr;font-size:10px;color:#6f839f;margin-top:3px}
+.rp-hot{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#dbe7f5;padding:4px 0}
+.rp-hot b{direction:ltr;font-size:13px;white-space:nowrap}.rp-hot b.dn{color:#ff7a7a}.rp-hot b.up{color:#2ee6d2}
+
 .rp-chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .rp-chart-head .rp-title{margin:0}
 .rp-seg{display:flex;background:rgba(255,255,255,.06);border-radius:99px;padding:3px}
@@ -1431,6 +1451,11 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
         <div class="rp-chart-info" id="rpChartInfo">جاري التحميل…</div>
         <div class="rp-chart" id="rpChart"></div>
         <div class="rp-chart-cmp" id="rpChartCmp"></div>
+      </div>
+
+      <div class="rp-card" id="rpInsights">
+        <div class="rp-title">مؤشرات مهمة</div>
+        <div id="rpInsBody" class="rp-ins">جاري التحميل…</div>
       </div>
 
       <div class="rp-card">
@@ -6547,11 +6572,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v243";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v244";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v243</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v244</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -8281,6 +8306,49 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
   if(typeof _sc==="function")window.setCategory=function(c){const r=_sc.apply(this,arguments);if(c==="reports")load();return r};
   setTimeout(()=>{const s=document.getElementById("sectionReports");if(s&&s.classList.contains("active"))load()},800);
   window.rpChartLoad=load;
+})();
+</script>
+
+<script>
+(function(){
+  let key="", data=null, busy="";
+  const fmt=n=>Math.round(n||0).toLocaleString("en-US");
+  const e=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  function range(){const f=document.getElementById("reportFrom"),t=document.getElementById("reportTo");return [f&&f.value,t&&t.value]}
+  async function load(){
+    const [a,b]=range(); if(!a||!b)return; const k=a+"|"+b;
+    if(k===key&&data){draw();return} if(busy===k)return; busy=k;
+    try{const r=await fetch(SB_URL+"/rest/v1/rpc/report_insights",{method:"POST",headers:SB_HEADERS,body:JSON.stringify({p_from:a,p_to:b})});
+      const d=await r.json(); if(!r.ok)throw 0; data=d; key=k;}catch(_){const x=document.getElementById("rpInsBody");if(x)x.textContent="مش قادر أجيب المؤشرات";}
+    busy=""; draw();
+  }
+  function draw(){
+    const box=document.getElementById("rpInsBody"); if(!box||!data)return;
+    const r=data.repeat||{}, L={}; (data.lang||[]).forEach(x=>L[x.site]=x);
+    const pct=r.n?Math.round(r.ret_orders*100/r.n):0, ppct=r.prod?Math.round(r.ret_prod*100/r.prod):0;
+    let h=`<div class="rp-ins-block"><div class="rp-ins-h">العملاء اللي بيرجعوا</div>
+      <div class="rp-ins-big"><b>${pct}%</b><span>من الأوردرات من عملاء طلبوا قبل كده</span></div>
+      <div class="rp-ins-sub">${r.ret_custs||0} عميل راجع من ${r.custs||0} · منتجاتهم ${fmt(r.ret_prod)} (${ppct}%)</div></div>`;
+    const cz=L.cz||{}, en=L.en||{};
+    h+=`<div class="rp-ins-block"><div class="rp-ins-h">متوسط الأوردر (منتجات)</div><div class="rp-ins-two">
+      <div><span>التشيكي</span><b>${fmt(cz.avg_p)}</b><small>${cz.n||0} أوردر</small></div>
+      <div><span>الإنجليزي</span><b>${fmt(en.avg_p)}</b><small>${en.n||0} أوردر</small></div></div></div>`;
+    const H=Array(24).fill(0); (data.hours||[]).forEach(x=>H[x.h]=x.n); const mx=Math.max(1,...H), tot=H.reduce((a,b)=>a+b,0);
+    let best=0,bi=0; for(let i=0;i<22;i++){const s3=H[i]+H[i+1]+H[i+2]; if(s3>best){best=s3;bi=i}}
+    const bars=H.map((v,i)=>`<i class="${i>=bi&&i<bi+3?"pk":""}" style="height:${Math.max(v?6:2,Math.round(v/mx*100))}%"></i>`).join("");
+    h+=`<div class="rp-ins-block"><div class="rp-ins-h">ساعات الطلب</div>
+      <div class="rp-hours">${bars}</div><div class="rp-hours-ax"><span>12 ص</span><span>6 ص</span><span>12 ظ</span><span>6 م</span><span>11 م</span></div>
+      <div class="rp-ins-sub">أكتر وقت: من ${bi} لـ ${bi+3} · ${tot?Math.round(best*100/tot):0}% من الأوردرات</div></div>`;
+    const li=(a,cls)=>(a||[]).map(x=>`<div class="rp-hot"><span>${e(x.hotel)}</span><b class="${cls}">${x.prev30} → ${x.last30}</b></div>`).join("")||'<div class="rp-ins-sub">مفيش</div>';
+    h+=`<div class="rp-ins-block"><div class="rp-ins-h">فنادق اتغيرت (آخر 30 يوم قصاد اللي قبله)</div>
+      <div class="rp-ins-sub2">نزلت</div>${li(data.hotels_down,"dn")}
+      <div class="rp-ins-sub2">طلعت</div>${li(data.hotels_up,"up")}</div>`;
+    box.innerHTML=h;
+  }
+  const _r=window.renderReports;
+  if(typeof _r==="function")window.renderReports=function(){const x=_r.apply(this,arguments);try{const s=document.getElementById("sectionReports");if(s&&s.classList.contains("active"))load()}catch(_){}return x};
+  const _sc=window.setCategory;
+  if(typeof _sc==="function")window.setCategory=function(c){const x=_sc.apply(this,arguments);if(c==="reports")load();return x};
 })();
 </script>
 </body>
