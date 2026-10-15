@@ -1203,6 +1203,25 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
 .report-period-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .report-period-row .report-period-btn{min-width:0;padding:0 4px;font-size:13px}
 .rp-loading b{opacity:.35}
+.rp-chart-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.rp-chart-head .rp-title{margin:0}
+.rp-seg{display:flex;background:rgba(255,255,255,.06);border-radius:99px;padding:3px}
+.rp-seg button{border:0;background:transparent;color:#9fb0c8;font:inherit;font-size:12px;padding:4px 12px;border-radius:99px}
+.rp-seg button.on{background:#17b8aa;color:#07101d;font-weight:800}
+.rp-chart-info{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:12px;color:#9fb0c8;min-height:22px}
+.rp-chart-info b{font-size:18px;color:#fff}
+.rp-chart-info em{font-style:normal}
+.rp-chart svg{width:100%;height:120px;display:block}
+.rp-chart rect{fill:rgba(23,184,170,.45)}
+.rp-chart rect.now{fill:rgba(23,184,170,.25)}
+.rp-chart rect.on{fill:#2ee6d2}
+.rp-chart text{fill:#6f839f;font-size:9px}
+.rp-chart line.avg{stroke:#f0a35e;stroke-dasharray:3 3;stroke-width:1}
+.rp-chart-cmp{font-size:12px;color:#9fb0c8;margin-top:4px}
+.rp-chart-cmp b{color:#fff}
+.rp-chart-cmp i{font-style:normal;font-weight:800}
+.rp-chart-cmp i.up{color:#2ee6d2}.rp-chart-cmp i.down{color:#ff7a7a}
+
 </style>
 </head>
 <body>
@@ -1401,6 +1420,14 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
         </div>
         <div class="rp-total"><span id="rpTotalLbl">الإجمالي</span><b id="rpTotal">0</b></div>
         <div class="rp-note" id="rpExcluded"></div>
+      </div>
+
+      <div class="rp-card rp-chart-card">
+        <div class="rp-chart-head"><div class="rp-title">المقارنة</div>
+          <div class="rp-seg"><button type="button" data-cm="day" class="on">يومي</button><button type="button" data-cm="month">شهري</button></div></div>
+        <div class="rp-chart-info" id="rpChartInfo">جاري التحميل…</div>
+        <div class="rp-chart" id="rpChart"></div>
+        <div class="rp-chart-cmp" id="rpChartCmp"></div>
       </div>
 
       <div class="rp-card">
@@ -3480,7 +3507,7 @@ const RP_COLS="id,created_at,delivery_day,delivery_date,status,pharmacy_status,d
 let rpCache={key:"",rows:null,at:0},rpBusy="";
 function rpSource(range){
   let oldest=Infinity; orders.forEach(o=>{const t=new Date(o.created_at).getTime(); if(t<oldest)oldest=t});
-  if(orders.length<700||range.from>=oldest+3*864e5) return orders;
+  if(range.from>=oldest+3*864e5) return orders;
   const key=range.from+"-"+range.to;
   if(rpCache.key===key&&rpCache.rows&&Date.now()-rpCache.at<120000) return rpCache.rows;
   if(rpBusy!==key){ rpBusy=key; rpFetch(range,key); }
@@ -3492,10 +3519,10 @@ async function rpFetch(range,key){
     const d1=dayKey(new Date(range.from)), d2=dayKey(new Date(range.to));
     const f="or=(and(created_at.gte."+a+",created_at.lte."+b+"),and(delivery_date.gte."+d1+",delivery_date.lte."+d2+"))";
     let all=[];
-    for(let off=0;off<20000;off+=1000){
+    for(let off=0;off<30000;off+=1000){
       const r=await fetch(SB_URL+"/rest/v1/orders?select="+RP_COLS+"&"+f+"&order=id.desc&limit=1000&offset="+off,{headers:SB_HEADERS});
       const d=await r.json(); if(!r.ok)throw new Error(d&&d.message||"load failed");
-      all=all.concat(d); if(d.length<1000)break;
+      all=all.concat(d); if(!d.length)break;
     }
     rpCache={key,rows:dedupeOrders(all),at:Date.now()};
   }catch(e){ toast("تعذر تحميل التقرير للفترة دي"); }
@@ -6501,11 +6528,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v238";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v240";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v238</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v240</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -8167,6 +8194,73 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
     document.getElementById("fnWrap").hidden = !fnOpen;
     if(fnOpen) load();
   });
+})();
+</script>
+
+<script>
+(function(){
+  let data=null, at=0, mode="day", sel=-1, busy=false;
+  const fmt=n=>Math.round(n||0).toLocaleString("en-US");
+  const AR_M=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+  const AR_D=["الأحد","الاتنين","التلات","الأربع","الخميس","الجمعة","السبت"];
+  function key(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+  async function load(){
+    if(busy)return; if(data&&Date.now()-at<300000){draw();return}
+    busy=true;
+    try{
+      const t=new Date(); const r=await fetch(SB_URL+"/rest/v1/rpc/report_daily",{method:"POST",headers:SB_HEADERS,body:JSON.stringify({p_from:"2026-06-01",p_to:key(t)})});
+      const d=await r.json(); if(!r.ok)throw new Error(d&&d.message||"err");
+      data={}; d.forEach(x=>data[x.d]={n:+x.n,p:+x.products,f:+x.fees,v:+x.visa}); at=Date.now();
+    }catch(e){ const i=document.getElementById("rpChartInfo"); if(i)i.textContent="مش قادر أجيب بيانات الشارت"; busy=false; return }
+    busy=false; draw();
+  }
+  function series(){
+    const out=[], t=new Date(); t.setHours(0,0,0,0);
+    if(mode==="day"){
+      for(let i=89;i>=0;i--){const d=new Date(t);d.setDate(t.getDate()-i);const k=key(d),x=data[k]||{n:0,p:0,f:0,v:0};out.push({label:AR_D[d.getDay()]+" "+d.getDate()+"/"+(d.getMonth()+1),short:d.getDate()===1?AR_M[d.getMonth()]:"",...x,today:i===0})}
+    }else{
+      const s=new Date(2026,5,1);
+      for(let d=new Date(s);d<=t;d.setMonth(d.getMonth()+1)){const y=d.getFullYear(),m=d.getMonth();let a={n:0,p:0,f:0,v:0};Object.keys(data).forEach(k=>{const [ky,km]=k.split("-").map(Number);if(ky===y&&km===m+1){const x=data[k];a.n+=x.n;a.p+=x.p;a.f+=x.f;a.v+=x.v}});out.push({label:AR_M[m]+" "+y,short:AR_M[m],...a,today:y===t.getFullYear()&&m===t.getMonth()})}
+    }
+    return out;
+  }
+  function draw(){
+    const box=document.getElementById("rpChart"); if(!box||!data)return;
+    const S=series(); if(sel<0||sel>=S.length)sel=S.length-1;
+    const W=340,H=110,n=S.length,gap=mode==="day"?1:10,bw=(W-gap*(n-1))/n;
+    const max=Math.max(1,...S.map(x=>x.p));
+    const days=S.filter(x=>!x.today&&x.p>0), avg=days.length?days.reduce((a,x)=>a+x.p,0)/days.length:0;
+    let g="";
+    S.forEach((x,i)=>{const h=Math.max(x.p?2:0,x.p/max*(H-6));const xx=i*(bw+gap);
+      g+=`<rect x="${xx.toFixed(1)}" y="${(H-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${mode==="day"?1:4}" class="${i===sel?"on":""}${x.today?" now":""}" data-i="${i}"/>`;
+      if(x.short)g+=`<text x="${(xx+bw/2).toFixed(1)}" y="${H+13}" text-anchor="middle">${x.short}</text>`;});
+    if(mode==="day"&&avg){const y=H-avg/max*(H-6);g+=`<line x1="0" x2="${W}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" class="avg"/>`}
+    box.innerHTML=`<svg viewBox="0 0 ${W} ${H+16}" preserveAspectRatio="none">${g}</svg>`;
+    const x=S[sel];
+    document.getElementById("rpChartInfo").innerHTML=`<span>${x.label}</span><b>${fmt(x.p)}</b><em>توصيل ${fmt(x.f)} · ${x.n} أوردر</em>`;
+    // comparison line
+    const t=new Date(), dn=t.getDate();
+    let cur=0,prev=0;
+    Object.keys(data).forEach(k=>{const [y,m,d]=k.split("-").map(Number);if(d>dn)return;
+      if(y===t.getFullYear()&&m===t.getMonth()+1)cur+=data[k].p;
+      const pm=new Date(t.getFullYear(),t.getMonth()-1,1); if(y===pm.getFullYear()&&m===pm.getMonth()+1)prev+=data[k].p;});
+    const pct=prev?Math.round((cur-prev)/prev*100):0;
+    document.getElementById("rpChartCmp").innerHTML=mode==="day"
+      ?`متوسط اليوم آخر ٣ شهور: <b>${fmt(avg)}</b>`
+      :`من 1 لـ ${dn} الشهر ده <b>${fmt(cur)}</b> مقابل <b>${fmt(prev)}</b> نفس الفترة الشهر اللي فات <i class="${pct>=0?"up":"down"}">${pct>=0?"+":""}${pct}%</i>`;
+  }
+  document.addEventListener("click",e=>{
+    const b=e.target.closest&&e.target.closest(".rp-seg button");
+    if(b){mode=b.dataset.cm;sel=-1;document.querySelectorAll(".rp-seg button").forEach(x=>x.classList.toggle("on",x===b));draw();return}
+    const r=e.target.closest&&e.target.closest("#rpChart rect");
+    if(r){sel=+r.dataset.i;draw()}
+  });
+  const box=()=>document.getElementById("rpChart");
+  document.addEventListener("touchmove",e=>{},{passive:true});
+  const _sc=window.setCategory;
+  if(typeof _sc==="function")window.setCategory=function(c){const r=_sc.apply(this,arguments);if(c==="reports")load();return r};
+  setTimeout(()=>{const s=document.getElementById("sectionReports");if(s&&s.classList.contains("active"))load()},800);
+  window.rpChartLoad=load;
 })();
 </script>
 </body>
