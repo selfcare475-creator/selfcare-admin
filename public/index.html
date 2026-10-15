@@ -1417,8 +1417,8 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
     <div class="report-accordion">
       <div class="rp-card rp-hero">
         <div class="rp-hero-grid">
-          <div class="rp-hero-box rp-main"><span>المنتجات</span><b id="rpProducts">0</b><small>حق الصيدلية</small></div>
-          <div class="rp-hero-box"><span>خدمة التوصيل</span><b id="rpDelivery">0</b><small>حق الطيارين</small></div>
+          <div class="rp-hero-box rp-main"><span>المنتجات</span><b id="rpProducts">0</b><small>إيراد الصيدلية</small></div>
+          <div class="rp-hero-box"><span>خدمة التوصيل</span><b id="rpDelivery">0</b><small>مستحقات الطيارين</small></div>
           <div class="rp-hero-box"><span>رسوم الفيزا</span><b id="rpVisaFee">0</b><small>فرق الكارت</small></div>
         </div>
         <div class="rp-total"><span id="rpTotalLbl">الإجمالي</span><b id="rpTotal">0</b></div>
@@ -3587,11 +3587,11 @@ function renderReports(){
   const pl=[...byPrep.entries()].sort((a,b)=>b[1].length-a[1].length);
   document.getElementById("rpPreparers").innerHTML=
     `<div class="rp-chip"><b>${preparedRows.length}</b><span>اتحضر</span></div>`+
-    `<div class="rp-chip"><b>${fm(waitMed)}</b><span>لحد ما حد يمسكه</span></div>`+
-    `<div class="rp-chip"><b>${fm(workMed)}</b><span>التحضير نفسه</span></div>`+
-    `<div class="rp-chip"><b>${fm(totMed)}</b><span>من الوصول للتجهيز</span></div>`+
-    `<div class="rp-prep-list">`+pl.map(([n,a])=>`<div class="rp-row"><div class="rp-row-name">${esc(n)}<small>${a.length} أوردر</small></div><div class="rp-row-val">${fm(med(a))}<small>تحضير معتاد</small></div></div>`).join("")+`</div>`+
-    `<p class="rp-hint">الأوقات هي المعتاد (نص الأوردرات أسرع منه ونصها أبطأ). وقت الانتظار محسوب لأوردرات نفس اليوم بس.</p>`;
+    `<div class="rp-chip"><b>${fm(waitMed)}</b><span>انتظار قبل التحضير</span></div>`+
+    `<div class="rp-chip"><b>${fm(workMed)}</b><span>مدة التحضير</span></div>`+
+    `<div class="rp-chip"><b>${fm(totMed)}</b><span>الوقت الكلي</span></div>`+
+    `<div class="rp-prep-list">`+pl.map(([n,a])=>`<div class="rp-row"><div class="rp-row-name">${esc(n)}<small>${a.length} أوردر</small></div><div class="rp-row-val">${fm(med(a))}<small>مدة التحضير</small></div></div>`).join("")+`</div>`+
+    `<p class="rp-hint">الأوقات هي الوقت المعتاد: نص الأوردرات أسرع منه ونصها أبطأ. الانتظار محسوب لأوردرات نفس اليوم بس.</p>`;
   renderTopProducts(valid);
   renderReportDetails(valid,rows);
 }
@@ -6547,11 +6547,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v242";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v243";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v242</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v243</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
