@@ -6528,11 +6528,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v240";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v241";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v240</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v241</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -8159,6 +8159,7 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
       prev = v;
     });
     h += '</div>';
+    if(d.cart_restored) h += '<p class="fn-note">🛒 ' + d.cart_restored + ' زائر رجع وسلته فيها حاجات من زيارة قبل كده (مش محسوبين في "ضاف للسلة")</p>';
     if(keys.length > 1){
       h += '<div class="fn-hist"><h4>آخر الأيام</h4><div class="fn-hrow"><span>اليوم</span><span>زوار</span><span>أوردرات</span><span>نسبة</span></div>' + keys.map(function(k){
         var x = days[k], c = x.visit ? ((x.order||0)*100/x.visit).toFixed(1) : "0";
