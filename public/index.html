@@ -1197,6 +1197,9 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
 .rp-chip b{font-size:17px;color:#fff}
 .rp-chip span{font-size:11px;color:#9fb0c8}
 #sectionReports #funnelCard{margin-top:12px}
+.rp-prep-list{flex-basis:100%;margin-top:4px}
+.rp-hint{flex-basis:100%;font-size:11px;color:#6f839f;margin:6px 0 0;line-height:1.6}
+.rp-chip b{white-space:nowrap}
 .report-date-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;margin-top:10px}
 .report-date-row .setting-row{min-width:0;padding:10px;box-sizing:border-box}
 .report-date-row .setting-input{width:100%;min-width:0;box-sizing:border-box;font-size:14px;padding:0 8px}
@@ -3503,7 +3506,7 @@ function rpMoney(o){
 }
 function rpSum(rows){return rows.reduce((a,o)=>{const m=rpMoney(o);a.prod+=m.prod;a.fee+=m.fee;a.visa+=m.visa;a.total+=m.total;a.n++;return a},{prod:0,fee:0,visa:0,total:0,n:0})}
 const RP_START="2026-06-01";
-const RP_COLS="id,created_at,delivery_day,delivery_date,status,pharmacy_status,delivery_status,courier_name,branch,source_code,payment,product_total,delivery_fee,total,hotel,pharmacy_prepared_by,items,customer_phone,room,delivery_time";
+const RP_COLS="id,created_at,delivery_day,delivery_date,status,pharmacy_status,delivery_status,courier_name,branch,source_code,payment,product_total,delivery_fee,total,hotel,pharmacy_prepared_by,pharmacy_preparing_at,pharmacy_prepared_at,items,customer_phone,room,delivery_time";
 let rpCache={key:"",rows:null,at:0},rpBusy="";
 function rpSource(range){
   let oldest=Infinity; orders.forEach(o=>{const t=new Date(o.created_at).getTime(); if(t<oldest)oldest=t});
@@ -3572,7 +3575,23 @@ function renderReports(){
   document.getElementById("rpStatus").innerHTML=chips.map(c=>`<div class="rp-chip"><b>${c[1]}</b><span>${c[0]}</span></div>`).join("");
   const preparedRows=valid.filter(o=>pharmacyStatus(o)==="prepared");
   const prep=preparedReportData(preparedRows);
-  document.getElementById("rpPreparers").innerHTML=`<div class="rp-chip"><b>${preparedRows.length}</b><span>اتحضر</span></div>`+prep.filter(x=>x[1]>0).map(x=>`<div class="rp-chip"><b>${x[1]}</b><span>${esc(x[0])}</span></div>`).join("");
+  const mins=(a,b)=>{const x=new Date(a).getTime(),y=new Date(b).getTime();return isFinite(x)&&isFinite(y)&&y>=x?(y-x)/60000:null};
+  const med=a=>{a=a.filter(v=>v!=null).sort((x,y)=>x-y);if(!a.length)return null;const m=a.length>>1;return a.length%2?a[m]:(a[m-1]+a[m])/2};
+  const fm=v=>v==null?"—":(v<60?Math.round(v)+" د":(Math.floor(v/60)+" س "+Math.round(v%60)+" د"));
+  const work=o=>mins(o.pharmacy_preparing_at,o.pharmacy_prepared_at);
+  const sameDay=preparedRows.filter(o=>!isTomorrowWord(o.delivery_day));
+  const waitMed=med(sameDay.map(o=>mins(o.created_at,o.pharmacy_preparing_at)));
+  const workMed=med(preparedRows.map(work));
+  const totMed=med(sameDay.map(o=>mins(o.created_at,o.pharmacy_prepared_at)));
+  const byPrep=new Map();preparedRows.forEach(o=>{const n=preparedByName(o)||"غير محدد";if(!byPrep.has(n))byPrep.set(n,[]);byPrep.get(n).push(work(o))});
+  const pl=[...byPrep.entries()].sort((a,b)=>b[1].length-a[1].length);
+  document.getElementById("rpPreparers").innerHTML=
+    `<div class="rp-chip"><b>${preparedRows.length}</b><span>اتحضر</span></div>`+
+    `<div class="rp-chip"><b>${fm(waitMed)}</b><span>لحد ما حد يمسكه</span></div>`+
+    `<div class="rp-chip"><b>${fm(workMed)}</b><span>التحضير نفسه</span></div>`+
+    `<div class="rp-chip"><b>${fm(totMed)}</b><span>من الوصول للتجهيز</span></div>`+
+    `<div class="rp-prep-list">`+pl.map(([n,a])=>`<div class="rp-row"><div class="rp-row-name">${esc(n)}<small>${a.length} أوردر</small></div><div class="rp-row-val">${fm(med(a))}<small>تحضير معتاد</small></div></div>`).join("")+`</div>`+
+    `<p class="rp-hint">الأوقات هي المعتاد (نص الأوردرات أسرع منه ونصها أبطأ). وقت الانتظار محسوب لأوردرات نفس اليوم بس.</p>`;
   renderTopProducts(valid);
   renderReportDetails(valid,rows);
 }
@@ -6528,11 +6547,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v241";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v242";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v241</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v242</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
