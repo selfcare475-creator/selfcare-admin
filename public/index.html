@@ -1154,6 +1154,50 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
 
 <!-- v221: SortableJS for drag-drop reordering -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+
+<style id="rp-v237">
+.rp-card{background:#111c2e;border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:16px;margin:0 0 12px}
+.rp-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:12px}
+.rp-sub{font-size:13px;color:#8fa3bf;margin:14px 0 8px}
+.rp-hero{border-color:rgba(23,184,170,.45);background:linear-gradient(160deg,#10283a,#0e1a2c)}
+.rp-hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rp-hero-box{background:rgba(255,255,255,.04);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:2px}
+.rp-hero-box span{font-size:13px;color:#9fb0c8}
+.rp-hero-box b{font-size:22px;color:#fff;font-weight:800;direction:ltr;text-align:right}
+.rp-hero-box small{font-size:11px;color:#6f839f}
+.rp-hero-box.rp-main{grid-column:1/-1;background:rgba(23,184,170,.14)}
+.rp-hero-box.rp-main b{font-size:32px;color:#2ee6d2}
+.rp-total{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px dashed rgba(255,255,255,.12);font-size:14px;color:#9fb0c8}
+.rp-total b{color:#fff;font-size:15px}
+.rp-note{font-size:12px;color:#f0a35e;margin-top:6px}
+.rp-note:empty{display:none}
+.rp-pay{display:grid;gap:10px}
+.rp-pay-box{border-radius:14px;padding:12px;background:rgba(255,255,255,.04);border-inline-start:4px solid #17b8aa}
+.rp-pay-box.rp-visa{border-inline-start-color:#7c8cff}
+.rp-pay-head{display:flex;justify-content:space-between;font-size:13px;color:#9fb0c8}
+.rp-pay-head em{font-style:normal}
+.rp-pay-box b{display:block;font-size:24px;color:#fff;margin:4px 0 8px;direction:ltr;text-align:right}
+.rp-split{display:flex;flex-wrap:wrap;gap:6px}
+.rp-split span{font-size:12px;color:#9fb0c8;background:rgba(255,255,255,.05);border-radius:99px;padding:4px 10px}
+.rp-split i{font-style:normal;color:#fff;font-weight:700;margin-inline-start:4px}
+.rp-list{display:grid;gap:2px}
+.rp-row{display:flex;justify-content:space-between;align-items:center;padding:10px 2px;border-bottom:1px solid rgba(255,255,255,.06)}
+.rp-row:last-child{border-bottom:0}
+.rp-row.muted{opacity:.6}
+.rp-row-name{font-size:15px;color:#fff;font-weight:700;display:flex;flex-direction:column}
+.rp-row-name small,.rp-row-val small{font-size:11px;color:#8fa3bf;font-weight:400}
+.rp-row-val{font-size:17px;color:#2ee6d2;font-weight:800;text-align:left;display:flex;flex-direction:column;align-items:flex-end}
+.rp-codes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rp-code{background:rgba(255,255,255,.04);border-radius:14px;padding:10px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.rp-code span{font-size:12px;color:#9fb0c8}
+.rp-code b{font-size:17px;color:#fff}
+.rp-code small{font-size:11px;color:#6f839f}
+.rp-chips{display:flex;flex-wrap:wrap;gap:8px}
+.rp-chip{background:rgba(255,255,255,.05);border-radius:12px;padding:8px 12px;display:flex;flex-direction:column;align-items:center;min-width:64px}
+.rp-chip b{font-size:17px;color:#fff}
+.rp-chip span{font-size:11px;color:#9fb0c8}
+#sectionReports #funnelCard{margin-top:12px}
+</style>
 </head>
 <body>
 <div class="top">
@@ -1320,20 +1364,8 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
   </section>
 
   <section class="section" id="sectionReports">
-    <div class="panel-card" id="funnelCard">
-      <button type="button" class="fn-toggle" id="fnToggle" aria-expanded="false"><span>رحلة العميل على الموقع</span><b>▾</b></button>
-      <div id="fnWrap" hidden>
-      <div class="fn-sites" id="fnSites">
-        <button class="report-period-btn active" data-site="en">الإنجليزي</button>
-        <button class="report-period-btn" data-site="cz">التشيكي</button>
-        <button class="report-period-btn" data-site="test">التجربة</button>
-        <button class="report-period-btn" id="fnRefresh" aria-label="تحديث">↻</button>
-      </div>
-      <div id="fnBody" class="fn-body">جاري التحميل…</div>
-      </div>
-    </div>
     <div class="panel-card">
-      <div class="panel-title-main">Reports</div>
+      <div class="panel-title-main">التقارير</div>
       <div class="report-period-row">
         <button class="report-period-btn active" id="periodToday" onclick="setReportPeriod('today')">اليوم</button>
         <button class="report-period-btn" id="periodWeek" onclick="setReportPeriod('week')">الأسبوع</button>
@@ -1354,34 +1386,40 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
     </div>
 
     <div class="report-accordion">
-      <button class="report-toggle active" id="repToggleSales" onclick="toggleReportPanel('sales')">
-        <span>تقرير المبيعات</span><span class="arrow">⌄</span>
-      </button>
-      <div class="report-panel active" id="reportPanelSales">
-        <div class="panel-card">
-          <div class="report-grid">
-            <div class="report-box"><b id="repOrders">٠</b><span>عدد الطلبات</span></div>
-            <div class="report-box"><b id="repSales">٠</b><span>إجمالي المبيعات</span></div>
-            <div class="report-box"><b id="repAvg">٠</b><span>متوسط الأوردر</span></div>
-            <div class="report-box"><b id="repDelivered">٠</b><span>تم التسليم</span></div>
-            <div class="report-box"><b id="repCancelled">٠</b><span>ملغي</span></div>
-            <div class="report-box"><b id="repActive">٠</b><span>قيد التشغيل</span></div>
-            <div class="report-box"><b id="repCash">٠</b><span>كاش</span></div>
-            <div class="report-box"><b id="repCard">٠</b><span>فيزا / كارت</span></div>
-            <div class="report-box"><b id="rep72">٠</b><span>كود ٧٢</span></div>
-            <div class="report-box"><b id="rep61">٠</b><span>كود ٦١</span></div>
-            <div class="report-box"><b id="rep51">٠</b><span>كود ٥١</span></div>
-            <div class="report-box"><b id="repPrepared">٠</b><span>اتحضر</span></div>
-            <div class="report-box"><b id="repTopPreparer">—</b><span>أعلى محضر</span></div>
-            <div class="report-box"><b id="repDeliveryAccepted">٠</b><span>دليفري استلم</span></div>
-          </div>
-          <div class="preparer-report-list" id="preparerReportList"></div>
-          <div class="delivery-report-list" id="deliveryReportList"></div>
+      <div class="rp-card rp-hero">
+        <div class="rp-hero-grid">
+          <div class="rp-hero-box rp-main"><span>المنتجات</span><b id="rpProducts">0</b><small>حق الصيدلية</small></div>
+          <div class="rp-hero-box"><span>خدمة التوصيل</span><b id="rpDelivery">0</b><small>حق الطيارين</small></div>
+          <div class="rp-hero-box"><span>رسوم الفيزا</span><b id="rpVisaFee">0</b><small>فرق الكارت</small></div>
         </div>
+        <div class="rp-total"><span id="rpTotalLbl">الإجمالي</span><b id="rpTotal">0</b></div>
+        <div class="rp-note" id="rpExcluded"></div>
+      </div>
+
+      <div class="rp-card">
+        <div class="rp-title">الفلوس</div>
+        <div class="rp-pay" id="rpPay"></div>
+      </div>
+
+      <div class="rp-card">
+        <div class="rp-title">الطيارين</div>
+        <div class="rp-list" id="rpCouriers"></div>
+      </div>
+
+      <div class="rp-card">
+        <div class="rp-title">الأكواد</div>
+        <div class="rp-codes" id="rpCodes"></div>
+      </div>
+
+      <div class="rp-card">
+        <div class="rp-title">الطلبات</div>
+        <div class="rp-chips" id="rpStatus"></div>
+        <div class="rp-sub">التحضير</div>
+        <div class="rp-chips" id="rpPreparers"></div>
       </div>
 
       <button class="report-toggle" id="repToggleProducts" onclick="toggleReportPanel('products')">
-        <span>أكتر ١٠٠ صنف مبيعًا</span><span class="arrow">⌄</span>
+        <span>أكتر المنتجات مبيعًا</span><span class="arrow">⌄</span>
       </button>
       <div class="report-panel" id="reportPanelProducts">
         <div class="panel-card">
@@ -1390,12 +1428,24 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
       </div>
 
       <button class="report-toggle" id="repToggleDetails" onclick="toggleReportPanel('details')">
-        <span>تفاصيل إضافية</span><span class="arrow">⌄</span>
+        <span>الفنادق وتفاصيل تانية</span><span class="arrow">⌄</span>
       </button>
       <div class="report-panel" id="reportPanelDetails">
         <div class="panel-card">
           <table class="report-table" id="reportDetails"></table>
         </div>
+      </div>
+    </div>
+    <div class="panel-card" id="funnelCard">
+      <button type="button" class="fn-toggle" id="fnToggle" aria-expanded="false"><span>رحلة العميل على الموقع</span><b>▾</b></button>
+      <div id="fnWrap" hidden>
+      <div class="fn-sites" id="fnSites">
+        <button class="report-period-btn active" data-site="en">الإنجليزي</button>
+        <button class="report-period-btn" data-site="cz">التشيكي</button>
+        <button class="report-period-btn" data-site="test">التجربة</button>
+        <button class="report-period-btn" id="fnRefresh" aria-label="تحديث">↻</button>
+      </div>
+      <div id="fnBody" class="fn-body">جاري التحميل…</div>
       </div>
     </div>
   </section>
@@ -3364,7 +3414,7 @@ function renderHotelDeliveryFees(){
   }).join("");
 }
 function toggleReportPanel(name){
-  const ids={sales:["repToggleSales","reportPanelSales"],products:["repToggleProducts","reportPanelProducts"],details:["repToggleDetails","reportPanelDetails"]};
+  const ids={products:["repToggleProducts","reportPanelProducts"],details:["repToggleDetails","reportPanelDetails"]};
   const pair=ids[name];
   if(!pair)return;
   const btn=document.getElementById(pair[0]);
@@ -3399,35 +3449,61 @@ function setReportPeriod(period){
   document.getElementById("periodCustom").classList.toggle("active",period==="custom");
   renderReports();
 }
+function rpFmt(n){return Math.round(n||0).toLocaleString("en-US")}
+const RP_FAKE_COURIERS=["متكنسل","متاجل","متأجل","مكرار","مكرر"];
+function rpMoney(o){
+  const items=getItems(o);
+  const total=numberFrom(o.total_egp||o.egp_total||o.total);
+  const fee=hasDeliveryFeeField(o)?deliveryFeeValue(o):0;
+  let prod=numberFrom(o.product_total||o.products_total||o.subtotal||o.items_total);
+  if(!prod)prod=items.reduce((s,it)=>s+itemQty(it)*itemPrice(it),0);
+  if(!prod&&total)prod=Math.max(0,total-fee);
+  const grand=total||prod+fee;
+  const visa=Math.max(0,grand-prod-fee);
+  return {prod,fee,visa,total:grand};
+}
+function rpSum(rows){return rows.reduce((a,o)=>{const m=rpMoney(o);a.prod+=m.prod;a.fee+=m.fee;a.visa+=m.visa;a.total+=m.total;a.n++;return a},{prod:0,fee:0,visa:0,total:0,n:0})}
 function renderReports(){
   const range=reportRange();
   const rows=orders.filter(o=>{
+    if(adminGroup(o)==="draft")return false;
     const d=effectiveDate(o).getTime();
     return d>=range.from&&d<=range.to;
   });
-  const valid=rows.filter(o=>adminGroup(o)!=="cancel");
-  const sales=valid.reduce((s,o)=>s+numberFrom(o.total_egp||o.egp_total||o.total),0);
-  const avg=valid.length?sales/valid.length:0;
-  document.getElementById("repOrders").textContent=arNum(rows.length);
-  document.getElementById("repSales").textContent=arNum(formatMoney(sales));
-  document.getElementById("repAvg").textContent=arNum(formatMoney(avg));
-  document.getElementById("repDelivered").textContent=arNum(rows.filter(o=>adminGroup(o)==="done").length);
-  document.getElementById("repCancelled").textContent=arNum(rows.filter(o=>adminGroup(o)==="cancel").length);
-  document.getElementById("repActive").textContent=arNum(rows.filter(o=>adminGroup(o)==="new"||adminGroup(o)==="work").length);
-  document.getElementById("repCash").textContent=arNum(valid.filter(o=>isCashPayment(o.payment)).length);
-  document.getElementById("repCard").textContent=arNum(valid.filter(o=>!isCashPayment(o.payment)).length);
-  document.getElementById("rep72").textContent=arNum(valid.filter(o=>branchCode(o.branch,o)==="72").length);
-  document.getElementById("rep61").textContent=arNum(valid.filter(o=>branchCode(o.branch,o)==="61").length);
-  {const e51=document.getElementById("rep51"); if(e51) e51.textContent=arNum(valid.filter(o=>branchCode(o.branch,o)==="51").length);}
+  const cancelled=rows.filter(o=>adminGroup(o)==="cancel");
+  const fake=rows.filter(o=>adminGroup(o)!=="cancel"&&RP_FAKE_COURIERS.includes(courierName(o)));
+  const valid=rows.filter(o=>adminGroup(o)!=="cancel"&&!RP_FAKE_COURIERS.includes(courierName(o)));
+  const T=rpSum(valid);
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  set("rpProducts",rpFmt(T.prod));
+  set("rpDelivery",rpFmt(T.fee));
+  set("rpVisaFee",rpFmt(T.visa));
+  set("rpTotal",rpFmt(T.total));set("rpTotalLbl","الإجمالي · "+T.n+" أوردر");
+  const ex=[];
+  if(cancelled.length)ex.push(cancelled.length+" ملغي");
+  const fk={};fake.forEach(o=>{const n=courierName(o);fk[n]=(fk[n]||0)+1});
+  Object.keys(fk).forEach(k=>ex.push(fk[k]+" "+k));
+  set("rpExcluded",ex.length?"مش محسوب: "+ex.join(" · "):"");
+  // payments
+  const cash=rpSum(valid.filter(o=>isCashPayment(o.payment)));
+  const card=rpSum(valid.filter(o=>!isCashPayment(o.payment)));
+  const payRow=(label,x,cls)=>`<div class="rp-pay-box ${cls}"><div class="rp-pay-head"><span>${label}</span><em>${x.n} أوردر</em></div><b>${rpFmt(x.total)}</b><div class="rp-split"><span>منتجات <i>${rpFmt(x.prod)}</i></span><span>توصيل <i>${rpFmt(x.fee)}</i></span>${x.visa?`<span>فيزا <i>${rpFmt(x.visa)}</i></span>`:""}</div></div>`;
+  document.getElementById("rpPay").innerHTML=payRow("كاش",cash,"rp-cash")+payRow("فيزا / كارت",card,"rp-visa");
+  // couriers
+  const cm=new Map();
+  valid.forEach(o=>{const n=courierName(o)||"لسه من غير طيار";if(!cm.has(n))cm.set(n,[]);cm.get(n).push(o)});
+  const cl=[...cm.entries()].map(([n,list])=>{const x=rpSum(list);const c=rpSum(list.filter(o=>isCashPayment(o.payment)));return {n,x,cash:c.total,none:n==="لسه من غير طيار"}}).sort((a,b)=>(a.none-b.none)||b.x.fee-a.x.fee);
+  document.getElementById("rpCouriers").innerHTML=cl.length?cl.map(c=>`<div class="rp-row${c.none?" muted":""}"><div class="rp-row-name">${esc(c.n)}<small>${c.x.n} أوردر${c.cash?` · كاش معاه ${rpFmt(c.cash)}`:""}</small></div><div class="rp-row-val">${rpFmt(c.x.fee)}<small>توصيل</small></div></div>`).join(""):'<div class="empty">مفيش أوردرات</div>';
+  // codes
+  const codes=[["72","كود 72"],["61","كود 61"],["51","كود 51"]];
+  document.getElementById("rpCodes").innerHTML=codes.map(([k,l])=>{const x=rpSum(valid.filter(o=>branchCode(o.branch,o)===k));return `<div class="rp-code"><span>${l}</span><b>${rpFmt(x.prod)}</b><small>${x.n} أوردر</small></div>`}).join("");
+  // status
+  const g=k=>valid.filter(o=>adminGroup(o)===k).length;
+  const chips=[["عدد الطلبات",valid.length],["جديد",g("new")],["شغال",g("work")],["اتسلم",g("done")],["ملغي",cancelled.length],["متوسط المنتجات",rpFmt(valid.length?T.prod/valid.length:0)]];
+  document.getElementById("rpStatus").innerHTML=chips.map(c=>`<div class="rp-chip"><b>${c[1]}</b><span>${c[0]}</span></div>`).join("");
   const preparedRows=valid.filter(o=>pharmacyStatus(o)==="prepared");
-  document.getElementById("repPrepared").textContent=arNum(preparedRows.length);
-  const prepData=preparedReportData(preparedRows);
-  const topPrep=prepData.filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1])[0];
-  const topPrepEl=document.getElementById("repTopPreparer");
-  if(topPrepEl)topPrepEl.textContent=topPrep?`${topPrep[0]} ${arNum(topPrep[1])}`:"—";
-  document.getElementById("repDeliveryAccepted").textContent=arNum(valid.filter(o=>deliveryStatus(o)==="accepted"||deliveryStatus(o)==="delivered").length);
-  renderPreparerReport(preparedRows);
-  renderDeliveryReport(valid);
+  const prep=preparedReportData(preparedRows);
+  document.getElementById("rpPreparers").innerHTML=`<div class="rp-chip"><b>${preparedRows.length}</b><span>اتحضر</span></div>`+prep.filter(x=>x[1]>0).map(x=>`<div class="rp-chip"><b>${x[1]}</b><span>${esc(x[0])}</span></div>`).join("");
   renderTopProducts(valid);
   renderReportDetails(valid,rows);
 }
@@ -3446,7 +3522,7 @@ function renderTopProducts(rows){
     el.innerHTML='<div class="empty">لا توجد أصناف في الفترة المحددة</div>';
     return;
   }
-  el.innerHTML=products.map((p,i)=>`<div class="top-product-row"><div class="top-product-num">${arNum(i+1)}</div><div class="top-product-name">${esc(p[0])}</div><div class="top-product-qty">${arNum(p[1])}</div></div>`).join("");
+  el.innerHTML=products.map((p,i)=>`<div class="top-product-row"><div class="top-product-num">${i+1}</div><div class="top-product-name">${esc(p[0])}</div><div class="top-product-qty">${p[1]}</div></div>`).join("");
 }
 function preparedByName(o){
   return clean(o.pharmacy_prepared_by||o.pharmacy_preparing_by||o.prepared_by||"");
@@ -3486,20 +3562,9 @@ function renderDeliveryReport(rows){
   el.innerHTML=data.map(x=>`<div class="delivery-report-row"><span>دليفري ${esc(x[0])}</span><b>${arNum(x[1])}</b></div>`).join("");
 }
 function renderReportDetails(valid,allRows){
-  const hotels=topCounts(valid.map(o=>hotelArName(o.hotel)).filter(Boolean),5);
-  const products=topProducts(valid,5);
-  const totalBefore=allRows.reduce((s,o)=>s+numberFrom(o.total_egp||o.egp_total||o.total),0);
-  const totalAfter=valid.reduce((s,o)=>s+numberFrom(o.total_egp||o.egp_total||o.total),0);
-  const prep=preparedReportData(valid.filter(o=>pharmacyStatus(o)==="prepared"));
-  const lines=[
-    ["إجمالي قبل الإلغاء", arNum(formatMoney(totalBefore))+" جنيه"],
-    ["إجمالي بعد الإلغاء", arNum(formatMoney(totalAfter))+" جنيه"],
-    ["أعلى فندق", hotels[0]?`${hotels[0][0]} (${arNum(hotels[0][1])})`:"—"],
-    ["أعلى منتج", products[0]?`${products[0][0]} (${arNum(products[0][1])})`:"—"],
-    ...prep.map(x=>["تحضير "+x[0], arNum(x[1])]),
-    ...deliveryReportData(valid).map(x=>["دليفري "+x[0], arNum(x[1])]),
-    ["طلبات متأخرة", arNum(allRows.filter(o=>isLate(o)&&adminGroup(o)!=="done"&&adminGroup(o)!=="cancel").length)]
-  ];
+  const hotels=topCounts(valid.map(o=>hotelArName(o.hotel)).filter(Boolean),10);
+  const late=allRows.filter(o=>isLate(o)&&adminGroup(o)!=="done"&&adminGroup(o)!=="cancel").length;
+  const lines=[["طلبات متأخرة",String(late)],...hotels.map((h,i)=>[(i?"":"أعلى الفنادق: ")+h[0],h[1]+" أوردر"])];
   document.getElementById("reportDetails").innerHTML=lines.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("");
 }
 function topCounts(arr,limit){
@@ -6394,11 +6459,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v236";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v237";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v236</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v237</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
