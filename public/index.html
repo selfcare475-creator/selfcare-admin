@@ -1321,7 +1321,8 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
 
   <section class="section" id="sectionReports">
     <div class="panel-card" id="funnelCard">
-      <div class="panel-title-main">رحلة العميل على الموقع</div>
+      <button type="button" class="fn-toggle" id="fnToggle" aria-expanded="false"><span>رحلة العميل على الموقع</span><b>▾</b></button>
+      <div id="fnWrap" hidden>
       <div class="fn-sites" id="fnSites">
         <button class="report-period-btn active" data-site="en">الإنجليزي</button>
         <button class="report-period-btn" data-site="cz">التشيكي</button>
@@ -1329,6 +1330,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
         <button class="report-period-btn" id="fnRefresh" aria-label="تحديث">↻</button>
       </div>
       <div id="fnBody" class="fn-body">جاري التحميل…</div>
+      </div>
     </div>
     <div class="panel-card">
       <div class="panel-title-main">Reports</div>
@@ -6392,11 +6394,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v234";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v236";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v235</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v236</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -7956,6 +7958,10 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
 .fn-sites{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin:4px 0 12px}
 .fn-sites .report-period-btn{min-height:38px;padding:0 8px;font-size:13px}
 #fnRefresh{width:40px;padding:0;font-size:16px}
+.fn-toggle{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;background:transparent;border:0;color:inherit;font:inherit;font-size:18px;font-weight:800;padding:2px 0;cursor:pointer;text-align:start}
+.fn-toggle b{font-size:16px;color:#17b8aa;transition:transform .2s}
+.fn-toggle[aria-expanded="true"]{margin-bottom:12px}
+.fn-toggle[aria-expanded="true"] b{transform:rotate(180deg)}
 .fn-days{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px}
 .fn-days::-webkit-scrollbar{display:none}
 .fn-days button{flex:none;border:1px solid rgba(255,255,255,.12);background:transparent;color:#9fb0c8;border-radius:99px;padding:4px 12px;font-size:12px}
@@ -8046,9 +8052,14 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
     document.querySelectorAll("#fnSites [data-site]").forEach(function(x){ x.classList.toggle("active", x === b); });
     load();
   });
-  var _sc = window.setCategory;
-  if(typeof _sc === "function") window.setCategory = function(cat){ var r = _sc.apply(this, arguments); if(cat === "reports") load(); return r; };
-  if(document.readyState !== "loading") setTimeout(function(){ if(document.getElementById("sectionReports").classList.contains("active")) load(); }, 500);
+  var fnOpen = false;
+  document.addEventListener("click", function(e){
+    var t = e.target.closest && e.target.closest("#fnToggle"); if(!t) return;
+    fnOpen = !fnOpen;
+    t.setAttribute("aria-expanded", fnOpen ? "true" : "false");
+    document.getElementById("fnWrap").hidden = !fnOpen;
+    if(fnOpen) load();
+  });
 })();
 </script>
 </body>
