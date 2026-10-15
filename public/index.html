@@ -1197,6 +1197,12 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
 .rp-chip b{font-size:17px;color:#fff}
 .rp-chip span{font-size:11px;color:#9fb0c8}
 #sectionReports #funnelCard{margin-top:12px}
+.report-date-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;margin-top:10px}
+.report-date-row .setting-row{min-width:0;padding:10px;box-sizing:border-box}
+.report-date-row .setting-input{width:100%;min-width:0;box-sizing:border-box;font-size:14px;padding:0 8px}
+.report-period-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.report-period-row .report-period-btn{min-width:0;padding:0 4px;font-size:13px}
+.rp-loading b{opacity:.35}
 </style>
 </head>
 <body>
@@ -1369,6 +1375,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
       <div class="report-period-row">
         <button class="report-period-btn active" id="periodToday" onclick="setReportPeriod('today')">اليوم</button>
         <button class="report-period-btn" id="periodWeek" onclick="setReportPeriod('week')">الأسبوع</button>
+        <button class="report-period-btn" id="periodAll" onclick="setReportPeriod('all')">من الأول</button>
         <button class="report-period-btn" id="periodCustom" onclick="setReportPeriod('custom')">تاريخ مخصص</button>
       </div>
       <div class="report-controls">
@@ -3437,6 +3444,10 @@ function setReportPeriod(period){
     document.getElementById("reportFrom").value=`${yyyy}-${mm}-${dd}`;
     document.getElementById("reportTo").value=`${yyyy}-${mm}-${dd}`;
   }
+  if(period==="all"){
+    document.getElementById("reportFrom").value=RP_START;
+    document.getElementById("reportTo").value=`${yyyy}-${mm}-${dd}`;
+  }
   if(period==="week"){
     const start=new Date(now);
     start.setDate(now.getDate()-6);
@@ -3447,6 +3458,7 @@ function setReportPeriod(period){
   document.getElementById("periodToday").classList.toggle("active",period==="today");
   document.getElementById("periodWeek").classList.toggle("active",period==="week");
   document.getElementById("periodCustom").classList.toggle("active",period==="custom");
+  {const pa=document.getElementById("periodAll"); if(pa) pa.classList.toggle("active",period==="all");}
   renderReports();
 }
 function rpFmt(n){return Math.round(n||0).toLocaleString("en-US")}
@@ -3463,9 +3475,39 @@ function rpMoney(o){
   return {prod,fee,visa,total:grand};
 }
 function rpSum(rows){return rows.reduce((a,o)=>{const m=rpMoney(o);a.prod+=m.prod;a.fee+=m.fee;a.visa+=m.visa;a.total+=m.total;a.n++;return a},{prod:0,fee:0,visa:0,total:0,n:0})}
+const RP_START="2026-06-01";
+const RP_COLS="id,created_at,delivery_day,delivery_date,status,pharmacy_status,delivery_status,courier_name,branch,source_code,payment,product_total,delivery_fee,total,hotel,pharmacy_prepared_by,items,customer_phone,room,delivery_time";
+let rpCache={key:"",rows:null,at:0},rpBusy="";
+function rpSource(range){
+  let oldest=Infinity; orders.forEach(o=>{const t=new Date(o.created_at).getTime(); if(t<oldest)oldest=t});
+  if(orders.length<700||range.from>=oldest+3*864e5) return orders;
+  const key=range.from+"-"+range.to;
+  if(rpCache.key===key&&rpCache.rows&&Date.now()-rpCache.at<120000) return rpCache.rows;
+  if(rpBusy!==key){ rpBusy=key; rpFetch(range,key); }
+  return rpCache.key===key&&rpCache.rows?rpCache.rows:null;
+}
+async function rpFetch(range,key){
+  try{
+    const a=new Date(range.from-7*864e5).toISOString(), b=new Date(range.to+864e5).toISOString();
+    const d1=dayKey(new Date(range.from)), d2=dayKey(new Date(range.to));
+    const f="or=(and(created_at.gte."+a+",created_at.lte."+b+"),and(delivery_date.gte."+d1+",delivery_date.lte."+d2+"))";
+    let all=[];
+    for(let off=0;off<20000;off+=1000){
+      const r=await fetch(SB_URL+"/rest/v1/orders?select="+RP_COLS+"&"+f+"&order=id.desc&limit=1000&offset="+off,{headers:SB_HEADERS});
+      const d=await r.json(); if(!r.ok)throw new Error(d&&d.message||"load failed");
+      all=all.concat(d); if(d.length<1000)break;
+    }
+    rpCache={key,rows:dedupeOrders(all),at:Date.now()};
+  }catch(e){ toast("تعذر تحميل التقرير للفترة دي"); }
+  finally{ rpBusy=""; renderReports(); }
+}
 function renderReports(){
   const range=reportRange();
-  const rows=orders.filter(o=>{
+  const src=rpSource(range);
+  const hero=document.querySelector(".rp-hero");
+  if(hero)hero.classList.toggle("rp-loading",!src);
+  if(!src){const e=document.getElementById("rpExcluded");if(e)e.textContent="جاري تحميل الفترة…";return;}
+  const rows=src.filter(o=>{
     if(adminGroup(o)==="draft")return false;
     const d=effectiveDate(o).getTime();
     return d>=range.from&&d<=range.to;
@@ -6459,11 +6501,11 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 </script>
 
 <script>window.SELFCARE_ADMIN_AUTO_PRODUCT_FORM_VERSION="v203";</script>
-<script>window.SELFCARE_ADMIN_BUILD="v237";</script>
+<script>window.SELFCARE_ADMIN_BUILD="v238";</script>
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v237</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v238</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
