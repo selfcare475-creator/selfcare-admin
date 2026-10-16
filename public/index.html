@@ -8351,5 +8351,71 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
   if(typeof _sc==="function")window.setCategory=function(c){const x=_sc.apply(this,arguments);if(c==="reports")load();return x};
 })();
 </script>
+<style id="sc-role-gate-css">
+#scGate{position:fixed;inset:0;z-index:2147483600;background:#0b1220;display:flex;align-items:center;justify-content:center;padding:20px}
+#scGate[hidden]{display:none!important}
+#scGate form{width:100%;max-width:340px;background:#121d31;border:1px solid rgba(45,212,191,.5);border-radius:22px;padding:22px 18px;display:grid;gap:12px;text-align:center;color:#eef6ff;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
+#scGate h2{margin:0;font-size:19px}
+#scGate p{margin:0;color:#9fb0c8;font-size:13px}
+#scGate input{min-height:50px;border-radius:14px;border:1px solid rgba(45,212,191,.7);background:#0b1526;color:#fff;font-size:22px;text-align:center;letter-spacing:.3em}
+#scGate button{min-height:48px;border:0;border-radius:14px;background:#17b8aa;color:#07101d;font-weight:800;font-size:16px}
+#scGate .err{color:#f87171;font-weight:700;min-height:1.2em}
+#scRoleBar{position:fixed;left:8px;bottom:8px;z-index:9999;display:flex;gap:6px;align-items:center;background:rgba(18,29,49,.92);border:1px solid rgba(255,255,255,.12);border-radius:99px;padding:4px 6px 4px 10px;font:700 11px system-ui;color:#cfe3f5}
+#scRoleBar button{border:0;border-radius:99px;padding:4px 10px;background:#24324d;color:#fff;font:700 11px system-ui}
+body.sc-role-manager #catReports,body.sc-role-manager #sectionReports{display:none!important}
+</style>
+<div id="scGate" hidden><form id="scGateForm" autocomplete="off">
+<h2>Self care admin</h2><p>اكتب الباسورد عشان تفتح</p>
+<input id="scGatePass" type="password" inputmode="numeric" autocomplete="off" required>
+<button type="submit">دخول</button><div class="err" id="scGateErr"></div>
+</form></div>
+<div id="scRoleBar" hidden><span id="scRoleName"></span><button type="button" id="scLogout">خروج</button></div>
+<script id="sc-role-gate">
+/* Two roles: full admin, and pharmacy manager (everything except Reports). Passwords are kept only as PBKDF2 hashes. */
+(function(){
+  var ROLES = {
+    "343b9b86794eb6e8cf9844549fa58b4e9f3b8ffbc9757ce91b5a86bf6f689027": {role:"admin", label:"الأدمن"},
+    "eba6cabcdc8fcc0e64ec23938e38422bb98eff532579f57ba7702251c6a3833b": {role:"manager", label:"مدير الصيدلية"}
+  };
+  var KEY = "sc_admin_role_v1";
+  async function hash(p){
+    var enc = new TextEncoder();
+    var key = await crypto.subtle.importKey("raw", enc.encode(p), "PBKDF2", false, ["deriveBits"]);
+    var bits = await crypto.subtle.deriveBits({name:"PBKDF2", hash:"SHA-256", salt:enc.encode("selfcare-admin-v1"), iterations:150000}, key, 256);
+    return Array.from(new Uint8Array(bits)).map(function(b){return b.toString(16).padStart(2,"0");}).join("");
+  }
+  function apply(h){
+    var r = ROLES[h]; if(!r) return false;
+    window.SC_ROLE = r.role;
+    document.body.classList.toggle("sc-role-manager", r.role === "manager");
+    document.getElementById("scGate").hidden = true;
+    document.getElementById("scRoleBar").hidden = false;
+    document.getElementById("scRoleName").textContent = r.label;
+    if(r.role === "manager"){
+      var sec = document.getElementById("sectionReports");
+      if(sec && sec.classList.contains("active") && typeof window.setCategory === "function") window.setCategory("orders");
+    }
+    return true;
+  }
+  function lock(){ try{ localStorage.removeItem(KEY); }catch(e){} window.SC_ROLE = ""; document.body.classList.remove("sc-role-manager"); document.getElementById("scRoleBar").hidden = true; document.getElementById("scGate").hidden = false; setTimeout(function(){ document.getElementById("scGatePass").focus(); }, 50); }
+  function init(){
+    var saved = ""; try{ saved = localStorage.getItem(KEY) || ""; }catch(e){}
+    if(!apply(saved)) lock();
+    document.getElementById("scGateForm").addEventListener("submit", async function(e){
+      e.preventDefault();
+      var inp = document.getElementById("scGatePass"), err = document.getElementById("scGateErr");
+      err.textContent = "";
+      var h = await hash(inp.value.trim());
+      if(apply(h)){ try{ localStorage.setItem(KEY, h); }catch(_){} inp.value = ""; }
+      else { err.textContent = "الباسورد غلط"; inp.select(); }
+    });
+    document.getElementById("scLogout").addEventListener("click", lock);
+    /* The manager can never open Reports, even by calling it directly. */
+    var _sc = window.setCategory;
+    if(typeof _sc === "function") window.setCategory = function(cat){ if(cat === "reports" && window.SC_ROLE !== "admin") cat = "orders"; return _sc.apply(this, [cat].concat([].slice.call(arguments,1))); };
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+})();
+</script>
 </body>
 </html>
