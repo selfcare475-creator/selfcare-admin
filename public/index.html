@@ -7643,7 +7643,9 @@ const fail = e => { console.error(e); toast('حصل خطأ: ' + (e.message || e)
 const demoDb = () => store.get(DEMO_KEY) || JSON.parse(JSON.stringify(SEED));
 const ok = r => { if (r.error) throw new Error(r.error.message); return r.data; };
 const PIN_KEY = 'scm_admin_pin';
-let PIN = store.get(PIN_KEY) || '';
+// The scooter section has no PIN of its own any more: the admin's main login covers it.
+const PIN = 'scm-61c1c7e5a9e54a312557d3bd';
+try { localStorage.removeItem(PIN_KEY); } catch (e) {}
 // The pharmacy admin's own connection (SB_URL / SB_KEY), through the PIN-checked functions only.
 async function rpc(fn, args) {
   const r = await fetch(SB_URL + '/rest/v1/rpc/' + fn, { method: 'POST',
@@ -8093,7 +8095,7 @@ function bind() {
       $('#nMsg').textContent = /MOB_UNAVAILABLE/.test(err.message) ? 'مفيش متاح كفاية في التواريخ دي.' : 'الحجز ماتسجلش: ' + err.message;
     }
   });
-  $('#lockBtn').addEventListener('click', () => { PIN = ''; try { localStorage.removeItem(PIN_KEY); } catch (e) {} $('#app').hidden = true; $('#pinView').hidden = false; $('#pinInput').value = ''; });
+  $('#lockBtn').hidden = true;
 }
 
 let entered = false;
@@ -8106,10 +8108,9 @@ async function enter() {
   await reload();
   setInterval(() => { if (!document.hidden && !host.hidden && host.offsetParent && !$('#newDlg').open) reload(true); }, 30000);
 }
-async function tryPin(pin) {
-  PIN = pin;
-  try { A.db = await api.load(); store.set(PIN_KEY, PIN); return true; }
-  catch (e) { if (e.denied) { PIN = ''; return false; } throw e; }
+async function tryPin() {
+  try { A.db = await api.load(); return true; }
+  catch (e) { if (e.denied) return false; throw e; }
 }
 let booted = false;
 async function boot() {
@@ -8118,13 +8119,14 @@ async function boot() {
     // Are the mob_ tables there yet? (a plain read, so no PIN is spent on it)
     const probe = await fetch(SB_URL + '/rest/v1/mob_settings?select=key&limit=1', { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
     if (probe.status === 404) { LIVE = false; return enter(); }
-    if (PIN && await tryPin(PIN)) return enter();
+    if (await tryPin()) return enter();
+    throw new Error('مفتاح قسم الاسكوتر مش متطابق');
   } catch (e) { $('#bootMsg').textContent = 'مش قادر يوصل لقاعدة البيانات: ' + e.message; booted = false; return; }
   $('#bootMsg').hidden = true; $('#pinView').hidden = false;
 }
 $('#pinForm').addEventListener('submit', async e => {
   e.preventDefault(); $('#pinMsg').textContent = '';
-  try { if (await tryPin($('#pinInput').value.trim())) return enter(); $('#pinMsg').textContent = 'الرقم السري غلط.'; }
+  try { if (await tryPin()) return enter(); $('#pinMsg').textContent = 'الرقم السري غلط.'; }
   catch (err) { $('#pinMsg').textContent = 'حصل خطأ: ' + err.message; }
 });
 window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
