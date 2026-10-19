@@ -1521,8 +1521,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
       <option value="all">من الأول</option>
       <option value="custom">تاريخ معيّن</option>
     </select>
-    <button type="button" id="prReload">تحديث</button>
-    <span></span>
+    <button type="button" id="prReload" class="pr-reload" aria-label="تحديث">↻</button>
     <button type="button" class="pr-add" id="prAdd">+ مروّج جديد</button>
     <div class="pr-dates" id="prDates"><input type="date" id="prFrom"><input type="date" id="prTo"></div>
   </div>
@@ -6592,7 +6591,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v246</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v247</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -8448,26 +8447,34 @@ body.sc-role-manager #catReports,body.sc-role-manager #sectionReports{display:no
 @media(max-width:430px){#catMobility{grid-column:auto!important}}
 body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{display:none!important}
 #sectionPromoters{color:#eef6ff;font-family:inherit}
-.pr-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.pr-bar{display:grid;grid-template-columns:1fr 52px;gap:8px;margin-bottom:12px}
+.pr-bar .pr-add{grid-column:1/-1;min-height:50px;font-size:15px}
+.pr-bar .pr-reload{font-size:20px;padding:0}
+@media(min-width:700px){.pr-bar{grid-template-columns:1fr 52px 1fr}.pr-bar .pr-add{grid-column:auto}}
 .pr-bar select,.pr-bar input,.pr-bar button{min-height:44px;border-radius:14px;border:1px solid #2a3955;background:#121d31;color:#eef6ff;font:800 13px inherit;padding:0 8px;width:100%}
 .pr-bar button.pr-add{background:#17b8aa;color:#07101d;border-color:#23d3c4}
 .pr-dates{display:none;grid-column:1/-1;grid-template-columns:1fr 1fr;gap:8px}
 .pr-dates.on{display:grid}
-.pr-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.pr-sum{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px}
+@media(min-width:700px){.pr-sum{grid-template-columns:repeat(4,1fr)}}
+.pr-sum div{padding:12px 6px!important}.pr-sum b{font-size:20px!important}
 .pr-sum div,.pr-stats div{background:#0b1526;border:1px solid #26344d;border-radius:14px;padding:8px 6px;text-align:center}
 .pr-sum b,.pr-stats b{display:block;font-size:17px;color:#2dd4bf}
 .pr-sum span,.pr-stats span{font-size:11px;color:#9aa8bd;font-weight:800}
-.pr-card{background:#111a2b;border:1px solid #26344d;border-radius:20px;padding:12px;margin-bottom:10px}
+.pr-card{background:#111a2b;border:1px solid #26344d;border-radius:20px;padding:14px;margin-bottom:12px}
 .pr-card.off{opacity:.6}
-.pr-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-.pr-name{font-size:16px;font-weight:1000}
+.pr-head{display:grid;gap:8px}
+.pr-name{font-size:18px;font-weight:1000;line-height:1.3}
 .pr-chips{display:flex;gap:6px;flex-wrap:wrap}
 .pr-chip{border-radius:99px;padding:3px 9px;font-size:11px;font-weight:900;background:#24324d;color:#cbd5e1}
 .pr-chip.code{background:#f59e0b;color:#07101d}.pr-chip.off{background:#ef4444;color:#fff}
 .pr-link{display:flex;gap:6px;margin:10px 0}
 .pr-link input{flex:1;min-width:0;min-height:40px;border-radius:12px;border:1px solid #2a3955;background:#0b1526;color:#9fe7dc;font:700 13px monospace;padding:0 10px;direction:ltr}
 .pr-link button,.pr-actions button{min-height:40px;border-radius:12px;border:0;padding:0 12px;font:900 12px inherit;background:#24324d;color:#fff}
-.pr-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.pr-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.pr-stats div{grid-column:span 2}.pr-stats div.big{grid-column:span 3;padding:10px 6px}
+.pr-stats div.big b{font-size:20px}.pr-stats div.big.money b{color:#fbbf24}
+.pr-note{margin-top:10px;color:#9aa8bd;font-size:12px;background:#0b1526;border-radius:10px;padding:8px 10px}
 .pr-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .pr-actions .pr-orders-btn{background:#3b82f6}
 .pr-olist{margin-top:10px;display:grid;gap:6px}
@@ -8543,7 +8550,7 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
   function render(){
     var t = {visits:0, orders:0, sales:0, commission:0};
     data.forEach(function(p){ t.visits += +p.visits; t.orders += +p.orders; t.sales += +p.sales; t.commission += +p.commission; });
-    $("prSum").innerHTML = '<div><b>' + n(t.visits) + '</b><span>زيارات</span></div><div><b>' + n(t.orders) + '</b><span>طلبات</span></div><div><b>' + money(t.sales) + '</b><span>مبيعات</span></div><div><b>' + money(t.commission) + '</b><span>عمولة مستحقة</span></div>';
+    $("prSum").innerHTML = '<div><b>' + n(t.visits) + '</b><span>زيارات</span></div><div><b>' + n(t.orders) + '</b><span>طلبات</span></div><div><b>' + money(t.sales) + '</b><span>مبيعات</span></div><div><b style="color:#fbbf24">' + money(t.commission) + '</b><span>عمولة مستحقة</span></div>';
     if(!data.length){ $("prList").innerHTML = '<div class="pr-empty">مفيش مروّجين لسه. دوس "+ مروّج جديد".</div>'; return; }
     $("prList").innerHTML = data.map(function(p){
       var link = SITE + p.code;
@@ -8553,8 +8560,8 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
           (p.active ? '' : '<span class="pr-chip off">موقوف</span>') + (p.phone ? '<span class="pr-chip" dir="ltr">' + esc(p.phone) + '</span>' : '') +
         '</div></div>' +
         '<div class="pr-link"><input readonly value="' + esc(link) + '"><button type="button" data-copy="' + esc(link) + '">نسخ</button></div>' +
-        '<div class="pr-stats"><div><b>' + n(p.visits) + '</b><span>زيارات</span></div><div><b>' + n(p.new_orders) + '</b><span>عملاء جداد</span></div><div><b>' + n(p.old_orders) + '</b><span>عملاء قدام</span></div><div><b>' + money(p.sales) + '</b><span>مبيعات</span></div><div><b>' + money(p.commission) + '</b><span>عمولته</span></div></div>' +
-        (p.notes ? '<div style="margin-top:8px;color:#9aa8bd;font-size:12px">' + esc(p.notes) + '</div>' : '') +
+        '<div class="pr-stats"><div><b>' + n(p.visits) + '</b><span>زيارات</span></div><div><b>' + n(p.new_orders) + '</b><span>عملاء جداد</span></div><div><b>' + n(p.old_orders) + '</b><span>عملاء قدام</span></div><div class="big"><b>' + money(p.sales) + '</b><span>مبيعات</span></div><div class="big money"><b>' + money(p.commission) + '</b><span>عمولته</span></div></div>' +
+        (p.notes ? '<div class="pr-note" dir="auto">' + esc(p.notes) + '</div>' : '') +
         '<div class="pr-actions"><button type="button" class="pr-orders-btn" data-orders="' + p.code + '">' + (openOrders[p.code] ? 'إخفاء الطلبات' : 'الطلبات') + '</button><button type="button" data-edit="' + p.id + '">تعديل</button></div>' +
         '<div class="pr-olist" id="prO' + p.code + '"></div></div>';
     }).join("");
