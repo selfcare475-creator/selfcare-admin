@@ -6591,7 +6591,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v247</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v248</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -8493,6 +8493,7 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
 #prModal .btns{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:4px}
 #prModal .btns button{min-height:46px;border-radius:14px;border:0;font:900 14px inherit}
 #prModal .save{background:#17b8aa;color:#07101d}#prModal .cancel{background:#24324d;color:#fff}
+#prModal .del{min-height:42px;border-radius:14px;border:1px solid #7f1d1d;background:transparent;color:#f87171;font:900 13px inherit}
 #prModal .err{color:#f87171;font-weight:800;min-height:1em;font-size:13px}
 </style>
 <div id="prModal" dir="rtl"><form id="prForm" autocomplete="off">
@@ -8514,6 +8515,7 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
   <label class="chk"><input type="checkbox" id="prActive" checked> شغال (لو اتقفل اللينك بتاعه يفتح الموقع عادي من غير ما يتحسب له)</label>
   <div class="err" id="prErr"></div>
   <div class="btns"><button type="submit" class="save">حفظ</button><button type="button" class="cancel" id="prCancel">إلغاء</button></div>
+  <button type="button" class="del" id="prDelete">🗑 حذف المروّج</button>
 </form></div>
 <script id="sc-promoters-js">
 (function(){
@@ -8591,6 +8593,7 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
     $("prNotes").value = p ? (p.notes || "") : "";
     $("prActive").checked = p ? !!p.active : true;
     $("prErr").textContent = "";
+    $("prDelete").style.display = p ? "" : "none";
     $("prModal").classList.add("on");
   }
   function init(){
@@ -8600,6 +8603,15 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
     $("prReload").addEventListener("click", load);
     $("prAdd").addEventListener("click", function(){ openForm(null); });
     $("prCancel").addEventListener("click", function(){ $("prModal").classList.remove("on"); });
+    $("prDelete").addEventListener("click", async function(){
+      var id = $("prId").value, nm = $("prName").value; if(!id) return;
+      if(!confirm("حذف المروّج \"" + nm + "\" نهائياً؟")) return;
+      try{
+        var r = await rpc("promoter_delete_admin", {p_key:key(), p_id:Number(id)});
+        if(r && r.ok){ $("prModal").classList.remove("on"); load(); }
+        else $("prErr").textContent = (r && r.reason === "has_orders") ? "المروّج ده عليه طلبات، مينفعش يتمسح. شيل علامة \"شغال\" عشان توقفه." : "مقدرتش أمسحه";
+      }catch(err){ $("prErr").textContent = "مقدرتش أمسحه: " + err.message; }
+    });
     $("prList").addEventListener("click", function(e){
       var b = e.target.closest("button"); if(!b) return;
       if(b.dataset.copy){ var done = function(){ b.textContent = "اتنسخ ✓"; setTimeout(function(){ b.textContent = "نسخ"; }, 1500); };
