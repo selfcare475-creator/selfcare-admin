@@ -8624,7 +8624,10 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
       g.fillStyle = "#ffffff"; g.fillRect(x0, y0, q, q); g.fillStyle = "#0b1220";
       for(var r = 0; r < n; r++) for(var c = 0; c < n; c++) if(qr.isDark(r, c)) g.fillRect(x0 + (c + 1) * cell, y0 + (r + 1) * cell, cell, cell);
       var yt = y0 + q + 70;
-      g.fillStyle = "#0b1220"; g.font = "900 54px system-ui, Arial"; g.fillText("Scan to order · delivery to your hotel", W / 2, yt);
+      var TAG = {en:"Scan to order · Hotel delivery", cs:"Naskenujte a objednejte · Doručení do hotelu", sk:"Naskenujte a objednajte · Doručenie do hotela", pl:"Zeskanuj i zamów · Dostawa do hotelu", de:"Scannen & bestellen · Lieferung ins Hotel", ru:"Сканируйте и заказывайте · Доставка в отель", uk:"Скануйте та замовляйте · Доставка в готель"};
+      var tag = TAG[p.lang] || TAG.en, fs = 54; g.fillStyle = "#0b1220";
+      do { g.font = "900 " + fs + "px system-ui, Arial"; fs -= 2; } while(g.measureText(tag).width > W - 70 && fs > 24);
+      g.fillText(tag, W / 2, yt);
       g.fillStyle = "#0b7285"; g.font = "800 44px monospace"; g.fillText(link.replace("https://", ""), W / 2, yt + 70);
       g.fillStyle = "#64748b"; g.font = "700 34px system-ui, Arial"; g.fillText(p.name + " · " + p.code, W / 2, yt + 125);
     }catch(e){ g.fillStyle = "#b91c1c"; g.font = "800 40px system-ui"; g.fillText("مقدرتش أحمّل مولّد الـ QR — جرّب تاني", W / 2, 500); }
