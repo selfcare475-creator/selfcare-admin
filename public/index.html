@@ -6591,7 +6591,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v248</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v249</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -8494,6 +8494,24 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
 #prModal .btns button{min-height:46px;border-radius:14px;border:0;font:900 14px inherit}
 #prModal .save{background:#17b8aa;color:#07101d}#prModal .cancel{background:#24324d;color:#fff}
 #prModal .del{min-height:42px;border-radius:14px;border:1px solid #7f1d1d;background:transparent;color:#f87171;font:900 13px inherit}
+.pr-due{margin-top:10px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;background:linear-gradient(135deg,#1f1a07,#2a2108);border:1px solid #a16207;border-radius:14px;padding:10px 12px}
+.pr-due b{font-size:22px;color:#fbbf24;display:block}.pr-due small{color:#d6c48f;font-size:11px;font-weight:800}
+.pr-due button{min-height:42px;border-radius:12px;border:0;padding:0 12px;font:900 13px inherit;background:#f59e0b;color:#1a1204}
+.pr-actions{grid-template-columns:repeat(4,1fr)!important}
+.pr-actions .pr-qr-btn{background:#0f766e}
+.pr-pay{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;background:#0b1526;border:1px solid #3b2f0a;border-radius:12px;padding:8px 10px;font-size:12px}
+.pr-pay b.amt{color:#fbbf24}
+#prQrModal,#prPayModal{position:fixed;inset:0;z-index:100001;background:rgba(3,8,16,.82);display:none;align-items:center;justify-content:center;padding:14px}
+#prQrModal.on,#prPayModal.on{display:flex}
+#prQrModal .box,#prPayModal form{width:100%;max-width:380px;background:#121d31;border:1px solid rgba(45,212,191,.5);border-radius:22px;padding:16px;display:grid;gap:10px;color:#eef6ff;text-align:center}
+#prQrCanvas{width:100%;height:auto;border-radius:16px;background:#fff}
+#prQrModal .btns,#prPayModal .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#prQrModal .btns button,#prPayModal .btns button{min-height:46px;border-radius:14px;border:0;font:900 14px inherit}
+#prQrModal .dl,#prPayModal .ok{background:#17b8aa;color:#07101d}#prQrModal .x,#prPayModal .x{background:#24324d;color:#fff}
+#prPayModal label{font-size:12px;font-weight:900;color:#9aa8bd;display:grid;gap:4px;text-align:right}
+#prPayModal input{min-height:46px;border-radius:12px;border:1px solid #2a3955;background:#0b1526;color:#fff;font:800 16px inherit;padding:0 10px}
+#prPayModal .sum{background:#0b1526;border-radius:12px;padding:10px;font-size:13px;line-height:1.8;text-align:right}
+#prPayModal .err{color:#f87171;font-weight:800;min-height:1em;font-size:13px}
 #prModal .err{color:#f87171;font-weight:800;min-height:1em;font-size:13px}
 </style>
 <div id="prModal" dir="rtl"><form id="prForm" autocomplete="off">
@@ -8564,7 +8582,10 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
         '<div class="pr-link"><input readonly value="' + esc(link) + '"><button type="button" data-copy="' + esc(link) + '">نسخ</button></div>' +
         '<div class="pr-stats"><div><b>' + n(p.visits) + '</b><span>زيارات</span></div><div><b>' + n(p.new_orders) + '</b><span>عملاء جداد</span></div><div><b>' + n(p.old_orders) + '</b><span>عملاء قدام</span></div><div class="big"><b>' + money(p.sales) + '</b><span>مبيعات</span></div><div class="big money"><b>' + money(p.commission) + '</b><span>عمولته</span></div></div>' +
         (p.notes ? '<div class="pr-note" dir="auto">' + esc(p.notes) + '</div>' : '') +
-        '<div class="pr-actions"><button type="button" class="pr-orders-btn" data-orders="' + p.code + '">' + (openOrders[p.code] ? 'إخفاء الطلبات' : 'الطلبات') + '</button><button type="button" data-edit="' + p.id + '">تعديل</button></div>' +
+        '<div class="pr-due"><div><small>المستحق حالياً ' + (p.last_period_to ? 'من آخر تصفية ' + new Date(p.last_period_to).toLocaleDateString("ar-EG", {day:"numeric", month:"short"}) : 'من البداية') + ' · ' + n(p.unpaid_new_orders) + ' طلب جديد</small><b>' + money(p.unpaid_commission) + '</b>' +
+          (p.last_paid_at ? '<small>آخر دفعة: ' + money(p.last_paid_amount) + ' يوم ' + new Date(p.last_paid_at).toLocaleDateString("ar-EG", {day:"numeric", month:"short", year:"numeric"}) + '</small>' : '') + '</div>' +
+          '<button type="button" data-pay="' + p.code + '">💰 تصفية</button></div>' +
+        '<div class="pr-actions"><button type="button" class="pr-orders-btn" data-orders="' + p.code + '">' + (openOrders[p.code] ? 'إخفاء' : 'الطلبات') + '</button><button type="button" data-hist="' + p.code + '">السجل' + (+p.payouts_count ? ' (' + n(p.payouts_count) + ')' : '') + '</button><button type="button" class="pr-qr-btn" data-qr="' + p.code + '">QR</button><button type="button" data-edit="' + p.id + '">تعديل</button></div>' +
         '<div class="pr-olist" id="prO' + p.code + '"></div></div>';
     }).join("");
     Object.keys(openOrders).forEach(function(c){ if(openOrders[c]) showOrders(+c); });
@@ -8580,6 +8601,56 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
         var tag = o.status === "Cancelled" ? '<span class="cx">ملغي</span>' : (o.old_customer ? '<span class="old">عميل قديم</span>' : '<span>عميل جديد</span>');
         return '<div class="pr-o"><b>#' + o.id + '</b><span>' + esc(o.hotel || "") + ' · ' + d.toLocaleDateString("ar-EG", {day:"numeric", month:"short"}) + ' · ' + tag + '</span><b>' + money(o.product_total) + '</b></div>';
       }).join("") : '<div class="pr-empty">مفيش طلبات في الفترة دي</div>';
+    }catch(e){ box.innerHTML = '<div class="pr-empty">' + esc(e.message) + '</div>'; }
+  }
+  /* ---------- QR ---------- */
+  var qrLib = null, qrP = null;
+  function loadQrLib(){
+    if(window.qrcode) return Promise.resolve(window.qrcode);
+    if(qrLib) return qrLib;
+    qrLib = new Promise(function(res, rej){ var sc = document.createElement("script"); sc.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"; sc.onload = function(){ res(window.qrcode); }; sc.onerror = rej; document.head.appendChild(sc); });
+    return qrLib;
+  }
+  async function showQr(p){
+    if(!p) return; qrP = p;
+    $("prQrModal").classList.add("on");
+    var cv = $("prQrCanvas"), g = cv.getContext("2d"), W = cv.width, H = cv.height, link = SITE + p.code;
+    g.fillStyle = "#ffffff"; g.fillRect(0, 0, W, H);
+    g.fillStyle = "#0b7285"; g.fillRect(0, 0, W, 150);
+    g.fillStyle = "#ffffff"; g.textAlign = "center"; g.font = "900 64px system-ui, Arial"; g.fillText("Self Care Pharmacy", W / 2, 98);
+    try{
+      var Q = await loadQrLib(); var qr = Q(0, "M"); qr.addData(link); qr.make();
+      var n = qr.getModuleCount(), size = 700, cell = Math.floor(size / (n + 2)), q = cell * (n + 2), x0 = (W - q) / 2, y0 = 190;
+      g.fillStyle = "#ffffff"; g.fillRect(x0, y0, q, q); g.fillStyle = "#0b1220";
+      for(var r = 0; r < n; r++) for(var c = 0; c < n; c++) if(qr.isDark(r, c)) g.fillRect(x0 + (c + 1) * cell, y0 + (r + 1) * cell, cell, cell);
+      var yt = y0 + q + 70;
+      g.fillStyle = "#0b1220"; g.font = "900 54px system-ui, Arial"; g.fillText("Scan to order · delivery to your hotel", W / 2, yt);
+      g.fillStyle = "#0b7285"; g.font = "800 44px monospace"; g.fillText(link.replace("https://", ""), W / 2, yt + 70);
+      g.fillStyle = "#64748b"; g.font = "700 34px system-ui, Arial"; g.fillText(p.name + " · " + p.code, W / 2, yt + 125);
+    }catch(e){ g.fillStyle = "#b91c1c"; g.font = "800 40px system-ui"; g.fillText("مقدرتش أحمّل مولّد الـ QR — جرّب تاني", W / 2, 500); }
+  }
+  /* ---------- payouts ---------- */
+  var payP = null;
+  function openPay(p){
+    if(!p) return; payP = p;
+    $("prPayTitle").textContent = "تصفية حساب " + p.name;
+    $("prPaySum").innerHTML = "من: <b>" + (p.last_period_to ? new Date(p.last_period_to).toLocaleString("ar-EG", {day:"numeric", month:"short", hour:"numeric", minute:"2-digit"}) : "البداية") + "</b> لحد دلوقتي<br>" +
+      "الطلبات: <b>" + n(p.unpaid_orders) + "</b> (جداد " + n(p.unpaid_new_orders) + ")<br>المبيعات: <b>" + money(p.unpaid_sales) + "</b><br>العمولة المحسوبة (" + n(p.commission_pct) + "%): <b style=\"color:#fbbf24\">" + money(p.unpaid_commission) + "</b>";
+    $("prPayAmt").value = Math.round(Number(p.unpaid_commission || 0));
+    $("prPayNote").value = ""; $("prPayErr").textContent = "";
+    $("prPayModal").classList.add("on");
+  }
+  async function showHist(code){
+    var box = $("prO" + code); if(!box) return;
+    if(box.dataset.mode === "hist"){ box.innerHTML = ""; box.dataset.mode = ""; return; }
+    openOrders[code] = false; box.dataset.mode = "hist";
+    box.innerHTML = '<div class="pr-empty">جاري التحميل...</div>';
+    try{
+      var list = await rpc("promoter_payouts_admin", {p_key:key(), p_code:code}) || [];
+      box.innerHTML = list.length ? list.map(function(q){
+        var d = new Date(q.paid_at).toLocaleDateString("ar-EG", {day:"numeric", month:"short", year:"numeric"});
+        return '<div class="pr-pay"><b>' + d + '</b><span>' + n(q.orders) + ' طلب (' + n(q.new_orders) + ' جديد) · مبيعات ' + money(q.sales) + (q.note ? ' · ' + esc(q.note) : '') + '</span><b class="amt">' + money(q.amount) + '</b></div>';
+      }).join("") : '<div class="pr-empty">لسه مفيش تصفيات للمروّج ده</div>';
     }catch(e){ box.innerHTML = '<div class="pr-empty">' + esc(e.message) + '</div>'; }
   }
   function openForm(p){
@@ -8603,6 +8674,16 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
     $("prReload").addEventListener("click", load);
     $("prAdd").addEventListener("click", function(){ openForm(null); });
     $("prCancel").addEventListener("click", function(){ $("prModal").classList.remove("on"); });
+    $("prQrClose").addEventListener("click", function(){ $("prQrModal").classList.remove("on"); });
+    $("prQrDl").addEventListener("click", function(){ var a = document.createElement("a"); a.download = "QR-" + (qrP ? qrP.code + "-" + qrP.name : "promoter").replace(/[^\w\u0600-\u06FF-]+/g, "_") + ".png"; a.href = $("prQrCanvas").toDataURL("image/png"); document.body.appendChild(a); a.click(); a.remove(); });
+    $("prPayClose").addEventListener("click", function(){ $("prPayModal").classList.remove("on"); });
+    $("prPayForm").addEventListener("submit", async function(e){
+      e.preventDefault(); if(!payP) return;
+      var amt = Number($("prPayAmt").value || 0);
+      if(!confirm("تأكيد تصفية حساب " + payP.name + " بمبلغ " + Math.round(amt) + " جنيه؟ العدّاد هيبدأ من صفر بعدها.")) return;
+      try{ await rpc("promoter_payout_admin", {p_key:key(), p_code:payP.code, p_amount:amt, p_note:$("prPayNote").value.trim()}); $("prPayModal").classList.remove("on"); load(); }
+      catch(err){ $("prPayErr").textContent = "مقدرتش أسجّل التصفية: " + err.message; }
+    });
     $("prDelete").addEventListener("click", async function(){
       var id = $("prId").value, nm = $("prName").value; if(!id) return;
       if(!confirm("حذف المروّج \"" + nm + "\" نهائياً؟")) return;
@@ -8616,8 +8697,11 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
       var b = e.target.closest("button"); if(!b) return;
       if(b.dataset.copy){ var done = function(){ b.textContent = "اتنسخ ✓"; setTimeout(function(){ b.textContent = "نسخ"; }, 1500); };
         if(navigator.clipboard) navigator.clipboard.writeText(b.dataset.copy).then(done, function(){}); else { b.previousElementSibling.select(); document.execCommand("copy"); done(); } }
-      if(b.dataset.orders){ var c = +b.dataset.orders; openOrders[c] = !openOrders[c]; b.textContent = openOrders[c] ? "إخفاء الطلبات" : "الطلبات"; if(openOrders[c]) showOrders(c); else $("prO" + c).innerHTML = ""; }
+      if(b.dataset.orders){ var c = +b.dataset.orders; openOrders[c] = !openOrders[c]; b.textContent = openOrders[c] ? "إخفاء" : "الطلبات"; $("prO" + c).dataset.mode = ""; if(openOrders[c]) showOrders(c); else $("prO" + c).innerHTML = ""; }
       if(b.dataset.edit){ openForm(data.find(function(x){ return String(x.id) === b.dataset.edit; })); }
+      if(b.dataset.qr){ showQr(data.find(function(x){ return String(x.code) === b.dataset.qr; })); }
+      if(b.dataset.pay){ openPay(data.find(function(x){ return String(x.code) === b.dataset.pay; })); }
+      if(b.dataset.hist){ showHist(+b.dataset.hist); }
     });
     $("prForm").addEventListener("submit", async function(e){
       e.preventDefault();
@@ -8638,6 +8722,18 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
 </script>
+<div id="prQrModal" dir="rtl"><div class="box">
+  <canvas id="prQrCanvas" width="900" height="1150"></canvas>
+  <div class="btns"><button type="button" class="dl" id="prQrDl">⬇ تحميل الصورة</button><button type="button" class="x" id="prQrClose">قفل</button></div>
+</div></div>
+<div id="prPayModal" dir="rtl"><form id="prPayForm" autocomplete="off">
+  <h3 style="margin:0" id="prPayTitle">تصفية الحساب</h3>
+  <div class="sum" id="prPaySum"></div>
+  <label>المبلغ اللي دفعته (جنيه)<input id="prPayAmt" type="number" inputmode="decimal" min="0" step="1" required></label>
+  <label>ملاحظة<input id="prPayNote" placeholder="مثلاً: اتدفع كاش / فودافون كاش"></label>
+  <div class="err" id="prPayErr"></div>
+  <div class="btns"><button type="submit" class="ok">تأكيد التصفية</button><button type="button" class="x" id="prPayClose">إلغاء</button></div>
+</form></div>
 <!-- PROMOTERS ADMIN END -->
 </body>
 </html>
