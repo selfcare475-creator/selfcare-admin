@@ -1266,6 +1266,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
     <button class="category-btn" id="catReports" onclick="setCategory('reports')">Reports</button>
     <button class="category-btn" id="catSettings" onclick="setCategory('settings')">Settings</button>
     <button class="category-btn" id="catMobility" onclick="setCategory('mobility')">Scooter</button>
+    <button class="category-btn" id="catPromoters" onclick="setCategory('promoters')">Promoters</button>
   </div>
   <div class="filter-row" id="ordersFilters">
     <div class="filter-box">
@@ -6576,7 +6577,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v244</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v245</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -8419,5 +8420,200 @@ body.sc-role-manager #catReports,body.sc-role-manager #sectionReports{display:no
   if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();
 </script>
+
+<!-- PROMOTERS ADMIN START -->
+<style id="sc-promoters-css">
+@media(min-width:431px){.category-row{grid-template-columns:repeat(6,1fr)!important}}
+@media(max-width:430px){#catMobility{grid-column:auto!important}}
+body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{display:none!important}
+#sectionPromoters{color:#eef6ff;font-family:inherit}
+.pr-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.pr-bar select,.pr-bar input,.pr-bar button{min-height:44px;border-radius:14px;border:1px solid #2a3955;background:#121d31;color:#eef6ff;font:800 13px inherit;padding:0 8px;width:100%}
+.pr-bar button.pr-add{background:#17b8aa;color:#07101d;border-color:#23d3c4}
+.pr-dates{display:none;grid-column:1/-1;grid-template-columns:1fr 1fr;gap:8px}
+.pr-dates.on{display:grid}
+.pr-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.pr-sum div,.pr-stats div{background:#0b1526;border:1px solid #26344d;border-radius:14px;padding:8px 6px;text-align:center}
+.pr-sum b,.pr-stats b{display:block;font-size:17px;color:#2dd4bf}
+.pr-sum span,.pr-stats span{font-size:11px;color:#9aa8bd;font-weight:800}
+.pr-card{background:#111a2b;border:1px solid #26344d;border-radius:20px;padding:12px;margin-bottom:10px}
+.pr-card.off{opacity:.6}
+.pr-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.pr-name{font-size:16px;font-weight:1000}
+.pr-chips{display:flex;gap:6px;flex-wrap:wrap}
+.pr-chip{border-radius:99px;padding:3px 9px;font-size:11px;font-weight:900;background:#24324d;color:#cbd5e1}
+.pr-chip.code{background:#f59e0b;color:#07101d}.pr-chip.off{background:#ef4444;color:#fff}
+.pr-link{display:flex;gap:6px;margin:10px 0}
+.pr-link input{flex:1;min-width:0;min-height:40px;border-radius:12px;border:1px solid #2a3955;background:#0b1526;color:#9fe7dc;font:700 13px monospace;padding:0 10px;direction:ltr}
+.pr-link button,.pr-actions button{min-height:40px;border-radius:12px;border:0;padding:0 12px;font:900 12px inherit;background:#24324d;color:#fff}
+.pr-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.pr-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pr-actions .pr-orders-btn{background:#3b82f6}
+.pr-olist{margin-top:10px;display:grid;gap:6px}
+.pr-o{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;background:#0b1526;border:1px solid #26344d;border-radius:12px;padding:8px 10px;font-size:12px}
+.pr-o .old{color:#f59e0b;font-weight:900}.pr-o .cx{color:#ef4444;font-weight:900}
+.pr-empty{text-align:center;color:#9aa8bd;padding:24px 8px;font-weight:800}
+#prModal{position:fixed;inset:0;z-index:100000;background:rgba(3,8,16,.78);display:none;align-items:center;justify-content:center;padding:14px}
+#prModal.on{display:flex}
+#prModal form{width:100%;max-width:420px;background:#121d31;border:1px solid rgba(45,212,191,.5);border-radius:22px;padding:16px;display:grid;gap:9px;color:#eef6ff;max-height:92vh;overflow:auto}
+#prModal label{font-size:12px;font-weight:900;color:#9aa8bd;display:grid;gap:4px}
+#prModal input,#prModal select,#prModal textarea{min-height:44px;border-radius:12px;border:1px solid #2a3955;background:#0b1526;color:#fff;font:700 14px inherit;padding:0 10px}
+#prModal textarea{min-height:60px;padding:8px 10px}
+#prModal .row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#prModal .chk{display:flex;align-items:center;gap:8px;font-size:14px;color:#eef6ff}
+#prModal .chk input{min-height:auto;width:20px;height:20px}
+#prModal .btns{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-top:4px}
+#prModal .btns button{min-height:46px;border-radius:14px;border:0;font:900 14px inherit}
+#prModal .save{background:#17b8aa;color:#07101d}#prModal .cancel{background:#24324d;color:#fff}
+#prModal .err{color:#f87171;font-weight:800;min-height:1em;font-size:13px}
+</style>
+<section class="section" id="sectionPromoters" dir="rtl">
+  <div class="pr-bar">
+    <select id="prRange">
+      <option value="month">الشهر ده</option>
+      <option value="last">الشهر اللي فات</option>
+      <option value="all">من الأول</option>
+      <option value="custom">تاريخ معيّن</option>
+    </select>
+    <button type="button" id="prReload">تحديث</button>
+    <span></span>
+    <button type="button" class="pr-add" id="prAdd">+ مروّج جديد</button>
+    <div class="pr-dates" id="prDates"><input type="date" id="prFrom"><input type="date" id="prTo"></div>
+  </div>
+  <div class="pr-sum" id="prSum"></div>
+  <div id="prList"><div class="pr-empty">جاري التحميل...</div></div>
+</section>
+<div id="prModal" dir="rtl"><form id="prForm" autocomplete="off">
+  <h3 style="margin:0" id="prFormTitle">مروّج جديد</h3>
+  <input type="hidden" id="prId">
+  <div class="row2">
+    <label>الكود (رقم)<input id="prCode" type="number" inputmode="numeric" min="1" max="999999" required></label>
+    <label>العمولة %<input id="prPct" type="number" inputmode="decimal" min="0" max="100" step="0.5" required></label>
+  </div>
+  <label>الاسم<input id="prName" required></label>
+  <div class="row2">
+    <label>لغة الموقع لما يفتح اللينك<select id="prLang">
+      <option value="en">English</option><option value="cs">Čeština</option><option value="de">Deutsch</option>
+      <option value="ru">Русский</option><option value="uk">Українська</option><option value="pl">Polski</option><option value="sk">Slovenčina</option>
+    </select></label>
+    <label>رقم المروّج<input id="prPhone" inputmode="tel" dir="ltr"></label>
+  </div>
+  <label>ملاحظات<textarea id="prNotes"></textarea></label>
+  <label class="chk"><input type="checkbox" id="prActive" checked> شغال (لو اتقفل اللينك بتاعه يفتح الموقع عادي من غير ما يتحسب له)</label>
+  <div class="err" id="prErr"></div>
+  <div class="btns"><button type="submit" class="save">حفظ</button><button type="button" class="cancel" id="prCancel">إلغاء</button></div>
+</form></div>
+<script id="sc-promoters-js">
+(function(){
+  var SBU = "https://lbeuqkerbenrpycuvohl.supabase.co", SBK = window.SB_KEY || "sb_publishable_Lbqjl73U7lqbFNVB5Sj64A_vEe6z5cB";
+  var SITE = "https://selfcare-en.com/";
+  var LANGS = {en:"English", cs:"Čeština", de:"Deutsch", ru:"Русский", uk:"Українська", pl:"Polski", sk:"Slovenčina", ar:"عربي"};
+  var data = [], openOrders = {};
+  function $(id){ return document.getElementById(id); }
+  function key(){ try{ return localStorage.getItem("sc_admin_role_v1") || ""; }catch(e){ return ""; } }
+  function n(v){ return Number(v || 0).toLocaleString("ar-EG"); }
+  function money(v){ return n(Math.round(Number(v || 0))) + " ج"; }
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function ymd(d){ return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function range(){
+    var v = $("prRange").value, now = new Date();
+    if(v === "month") return [ymd(new Date(now.getFullYear(), now.getMonth(), 1)), ymd(now)];
+    if(v === "last") return [ymd(new Date(now.getFullYear(), now.getMonth() - 1, 1)), ymd(new Date(now.getFullYear(), now.getMonth(), 0))];
+    if(v === "all") return ["2026-01-01", ymd(now)];
+    return [$("prFrom").value || ymd(now), $("prTo").value || ymd(now)];
+  }
+  async function rpc(fn, body){
+    var r = await fetch(SBU + "/rest/v1/rpc/" + fn, {method:"POST", headers:{apikey:SBK, Authorization:"Bearer " + SBK, "Content-Type":"application/json"}, body:JSON.stringify(body)});
+    var j = await r.json().catch(function(){ return null; });
+    if(!r.ok) throw new Error((j && (j.message || j.hint)) || ("HTTP " + r.status));
+    return j;
+  }
+  async function load(){
+    var rg = range();
+    $("prList").innerHTML = '<div class="pr-empty">جاري التحميل...</div>';
+    try{ data = await rpc("promoters_admin", {p_key:key(), p_from:rg[0], p_to:rg[1]}) || []; }
+    catch(e){ $("prList").innerHTML = '<div class="pr-empty">مقدرتش أحمّل المروّجين: ' + esc(e.message) + '</div>'; $("prSum").innerHTML = ""; return; }
+    render();
+  }
+  function render(){
+    var t = {visits:0, orders:0, sales:0, commission:0};
+    data.forEach(function(p){ t.visits += +p.visits; t.orders += +p.orders; t.sales += +p.sales; t.commission += +p.commission; });
+    $("prSum").innerHTML = '<div><b>' + n(t.visits) + '</b><span>زيارات</span></div><div><b>' + n(t.orders) + '</b><span>طلبات</span></div><div><b>' + money(t.sales) + '</b><span>مبيعات</span></div><div><b>' + money(t.commission) + '</b><span>عمولة مستحقة</span></div>';
+    if(!data.length){ $("prList").innerHTML = '<div class="pr-empty">مفيش مروّجين لسه. دوس "+ مروّج جديد".</div>'; return; }
+    $("prList").innerHTML = data.map(function(p){
+      var link = SITE + p.code;
+      return '<div class="pr-card' + (p.active ? '' : ' off') + '" data-code="' + p.code + '">' +
+        '<div class="pr-head"><div class="pr-name">' + esc(p.name) + '</div><div class="pr-chips">' +
+          '<span class="pr-chip code">كود ' + p.code + '</span><span class="pr-chip">' + esc(LANGS[p.lang] || p.lang) + '</span><span class="pr-chip">' + n(p.commission_pct) + '%</span>' +
+          (p.active ? '' : '<span class="pr-chip off">موقوف</span>') + (p.phone ? '<span class="pr-chip" dir="ltr">' + esc(p.phone) + '</span>' : '') +
+        '</div></div>' +
+        '<div class="pr-link"><input readonly value="' + esc(link) + '"><button type="button" data-copy="' + esc(link) + '">نسخ</button></div>' +
+        '<div class="pr-stats"><div><b>' + n(p.visits) + '</b><span>زيارات</span></div><div><b>' + n(p.new_orders) + '</b><span>عملاء جداد</span></div><div><b>' + n(p.old_orders) + '</b><span>عملاء قدام</span></div><div><b>' + money(p.sales) + '</b><span>مبيعات</span></div><div><b>' + money(p.commission) + '</b><span>عمولته</span></div></div>' +
+        (p.notes ? '<div style="margin-top:8px;color:#9aa8bd;font-size:12px">' + esc(p.notes) + '</div>' : '') +
+        '<div class="pr-actions"><button type="button" class="pr-orders-btn" data-orders="' + p.code + '">' + (openOrders[p.code] ? 'إخفاء الطلبات' : 'الطلبات') + '</button><button type="button" data-edit="' + p.id + '">تعديل</button></div>' +
+        '<div class="pr-olist" id="prO' + p.code + '"></div></div>';
+    }).join("");
+    Object.keys(openOrders).forEach(function(c){ if(openOrders[c]) showOrders(+c); });
+  }
+  async function showOrders(code){
+    var box = $("prO" + code); if(!box) return;
+    box.innerHTML = '<div class="pr-empty">جاري التحميل...</div>';
+    var rg = range();
+    try{
+      var list = await rpc("promoter_orders_admin", {p_key:key(), p_code:code, p_from:rg[0], p_to:rg[1]}) || [];
+      box.innerHTML = list.length ? list.map(function(o){
+        var d = new Date(o.created_at);
+        var tag = o.status === "Cancelled" ? '<span class="cx">ملغي</span>' : (o.old_customer ? '<span class="old">عميل قديم</span>' : '<span>عميل جديد</span>');
+        return '<div class="pr-o"><b>#' + o.id + '</b><span>' + esc(o.hotel || "") + ' · ' + d.toLocaleDateString("ar-EG", {day:"numeric", month:"short"}) + ' · ' + tag + '</span><b>' + money(o.product_total) + '</b></div>';
+      }).join("") : '<div class="pr-empty">مفيش طلبات في الفترة دي</div>';
+    }catch(e){ box.innerHTML = '<div class="pr-empty">' + esc(e.message) + '</div>'; }
+  }
+  function openForm(p){
+    $("prFormTitle").textContent = p ? "تعديل مروّج" : "مروّج جديد";
+    $("prId").value = p ? p.id : "";
+    $("prCode").value = p ? p.code : (data.reduce(function(m, x){ return Math.max(m, +x.code < 900 ? +x.code : 0); }, 100) + 1);
+    $("prName").value = p ? p.name : "";
+    $("prPct").value = p ? p.commission_pct : 10;
+    $("prLang").value = p ? p.lang : "en";
+    $("prPhone").value = p ? (p.phone || "") : "";
+    $("prNotes").value = p ? (p.notes || "") : "";
+    $("prActive").checked = p ? !!p.active : true;
+    $("prErr").textContent = "";
+    $("prModal").classList.add("on");
+  }
+  function init(){
+    if(!$("sectionPromoters")) return;
+    $("prRange").addEventListener("change", function(){ $("prDates").classList.toggle("on", this.value === "custom"); load(); });
+    $("prFrom").addEventListener("change", load); $("prTo").addEventListener("change", load);
+    $("prReload").addEventListener("click", load);
+    $("prAdd").addEventListener("click", function(){ openForm(null); });
+    $("prCancel").addEventListener("click", function(){ $("prModal").classList.remove("on"); });
+    $("prList").addEventListener("click", function(e){
+      var b = e.target.closest("button"); if(!b) return;
+      if(b.dataset.copy){ var done = function(){ b.textContent = "اتنسخ ✓"; setTimeout(function(){ b.textContent = "نسخ"; }, 1500); };
+        if(navigator.clipboard) navigator.clipboard.writeText(b.dataset.copy).then(done, function(){}); else { b.previousElementSibling.select(); document.execCommand("copy"); done(); } }
+      if(b.dataset.orders){ var c = +b.dataset.orders; openOrders[c] = !openOrders[c]; b.textContent = openOrders[c] ? "إخفاء الطلبات" : "الطلبات"; if(openOrders[c]) showOrders(c); else $("prO" + c).innerHTML = ""; }
+      if(b.dataset.edit){ openForm(data.find(function(x){ return String(x.id) === b.dataset.edit; })); }
+    });
+    $("prForm").addEventListener("submit", async function(e){
+      e.preventDefault();
+      var body = {id:$("prId").value, code:$("prCode").value, name:$("prName").value.trim(), commission_pct:$("prPct").value, lang:$("prLang").value, phone:$("prPhone").value.trim(), notes:$("prNotes").value.trim(), active:$("prActive").checked};
+      try{ await rpc("promoter_save_admin", {p_key:key(), p:body}); $("prModal").classList.remove("on"); load(); }
+      catch(err){ $("prErr").textContent = /duplicate|unique/i.test(err.message) ? "الكود ده مستخدم لمروّج تاني" : ("مقدرتش أحفظ: " + err.message); }
+    });
+    var _sc = window.setCategory;
+    if(typeof _sc === "function") window.setCategory = function(cat){
+      if(cat === "promoters" && window.SC_ROLE !== "admin") cat = "orders";
+      var r = _sc.apply(this, [cat === "promoters" ? "__promoters" : cat].concat([].slice.call(arguments, 1)));
+      $("sectionPromoters").classList.toggle("active", cat === "promoters");
+      $("catPromoters").classList.toggle("active", cat === "promoters");
+      if(cat === "promoters") load();
+      return r;
+    };
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+})();
+</script>
+<!-- PROMOTERS ADMIN END -->
 </body>
 </html>
