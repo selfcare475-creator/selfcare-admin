@@ -6591,7 +6591,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v249</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v250</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -8497,7 +8497,8 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
 .pr-due{margin-top:10px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px;background:linear-gradient(135deg,#1f1a07,#2a2108);border:1px solid #a16207;border-radius:14px;padding:10px 12px}
 .pr-due b{font-size:22px;color:#fbbf24;display:block}.pr-due small{color:#d6c48f;font-size:11px;font-weight:800}
 .pr-due button{min-height:42px;border-radius:12px;border:0;padding:0 12px;font:900 13px inherit;background:#f59e0b;color:#1a1204}
-.pr-actions{grid-template-columns:repeat(4,1fr)!important}
+.pr-actions{grid-template-columns:repeat(5,1fr)!important}.pr-actions button{padding:0 4px!important;font-size:11.5px!important}
+.pr-actions .pr-dash-btn{background:#7c3aed}
 .pr-actions .pr-qr-btn{background:#0f766e}
 .pr-pay{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;background:#0b1526;border:1px solid #3b2f0a;border-radius:12px;padding:8px 10px;font-size:12px}
 .pr-pay b.amt{color:#fbbf24}
@@ -8519,8 +8520,13 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
   <input type="hidden" id="prId">
   <div class="row2">
     <label>الكود (رقم)<input id="prCode" type="number" inputmode="numeric" min="1" max="999999" required></label>
-    <label>العمولة %<input id="prPct" type="number" inputmode="decimal" min="0" max="100" step="0.5" required></label>
+    <label>نقاط لكل 100 ج مبيعات<input id="prPpp" type="number" inputmode="decimal" min="0" step="0.01" required></label>
   </div>
+  <div class="row2">
+    <label>قيمة النقطة (ج) — ليك بس<input id="prPv" type="number" inputmode="decimal" min="0" step="0.01" required></label>
+    <label>&nbsp;<span id="prRateHint" style="min-height:44px;display:flex;align-items:center;color:#fbbf24;font-size:12px"></span></label>
+  </div>
+  <button type="button" class="del" id="prNewTok" style="border-color:#2a3955;color:#9fe7dc">🔄 لينك داشبورد جديد (القديم يقف)</button>
   <label>الاسم<input id="prName" required></label>
   <div class="row2">
     <label>لغة الموقع لما يفتح اللينك<select id="prLang">
@@ -8576,16 +8582,16 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
       var link = SITE + p.code;
       return '<div class="pr-card' + (p.active ? '' : ' off') + '" data-code="' + p.code + '">' +
         '<div class="pr-head"><div class="pr-name">' + esc(p.name) + '</div><div class="pr-chips">' +
-          '<span class="pr-chip code">كود ' + p.code + '</span><span class="pr-chip">' + esc(LANGS[p.lang] || p.lang) + '</span><span class="pr-chip">' + n(p.commission_pct) + '%</span>' +
+          '<span class="pr-chip code">كود ' + p.code + '</span><span class="pr-chip">' + esc(LANGS[p.lang] || p.lang) + '</span><span class="pr-chip">' + n(p.points_per_100) + ' نقطة/100ج</span><span class="pr-chip">النقطة ' + n(p.point_value) + ' ج</span>' +
           (p.active ? '' : '<span class="pr-chip off">موقوف</span>') + (p.phone ? '<span class="pr-chip" dir="ltr">' + esc(p.phone) + '</span>' : '') +
         '</div></div>' +
         '<div class="pr-link"><input readonly value="' + esc(link) + '"><button type="button" data-copy="' + esc(link) + '">نسخ</button></div>' +
-        '<div class="pr-stats"><div><b>' + n(p.visits) + '</b><span>زيارات</span></div><div><b>' + n(p.new_orders) + '</b><span>عملاء جداد</span></div><div><b>' + n(p.old_orders) + '</b><span>عملاء قدام</span></div><div class="big"><b>' + money(p.sales) + '</b><span>مبيعات</span></div><div class="big money"><b>' + money(p.commission) + '</b><span>عمولته</span></div></div>' +
+        '<div class="pr-stats"><div><b>' + n(p.visits) + '</b><span>زيارات</span></div><div><b>' + n(p.new_orders) + '</b><span>عملاء جداد</span></div><div><b>' + n(p.old_orders) + '</b><span>عملاء قدام</span></div><div class="big"><b>' + money(p.sales) + '</b><span>مبيعات</span></div><div class="big money"><b>' + n(p.points) + ' نقطة</b><span>= ' + money(p.commission) + '</span></div></div>' +
         (p.notes ? '<div class="pr-note" dir="auto">' + esc(p.notes) + '</div>' : '') +
-        '<div class="pr-due"><div><small>المستحق حالياً ' + (p.last_period_to ? 'من آخر تصفية ' + new Date(p.last_period_to).toLocaleDateString("ar-EG", {day:"numeric", month:"short"}) : 'من البداية') + ' · ' + n(p.unpaid_new_orders) + ' طلب جديد</small><b>' + money(p.unpaid_commission) + '</b>' +
+        '<div class="pr-due"><div><small>المستحق حالياً ' + (p.last_period_to ? 'من آخر تصفية ' + new Date(p.last_period_to).toLocaleDateString("ar-EG", {day:"numeric", month:"short"}) : 'من البداية') + ' · ' + n(p.unpaid_new_orders) + ' طلب جديد</small><b>' + n(p.unpaid_points) + ' نقطة = ' + money(p.unpaid_commission) + '</b>' +
           (p.last_paid_at ? '<small>آخر دفعة: ' + money(p.last_paid_amount) + ' يوم ' + new Date(p.last_paid_at).toLocaleDateString("ar-EG", {day:"numeric", month:"short", year:"numeric"}) + '</small>' : '') + '</div>' +
           '<button type="button" data-pay="' + p.code + '">💰 تصفية</button></div>' +
-        '<div class="pr-actions"><button type="button" class="pr-orders-btn" data-orders="' + p.code + '">' + (openOrders[p.code] ? 'إخفاء' : 'الطلبات') + '</button><button type="button" data-hist="' + p.code + '">السجل' + (+p.payouts_count ? ' (' + n(p.payouts_count) + ')' : '') + '</button><button type="button" class="pr-qr-btn" data-qr="' + p.code + '">QR</button><button type="button" data-edit="' + p.id + '">تعديل</button></div>' +
+        '<div class="pr-actions"><button type="button" class="pr-orders-btn" data-orders="' + p.code + '">' + (openOrders[p.code] ? 'إخفاء' : 'الطلبات') + '</button><button type="button" data-hist="' + p.code + '">السجل' + (+p.payouts_count ? ' (' + n(p.payouts_count) + ')' : '') + '</button><button type="button" class="pr-qr-btn" data-qr="' + p.code + '">QR</button><button type="button" class="pr-dash-btn" data-dash="' + esc(p.access_token || '') + '">داشبورد</button><button type="button" data-edit="' + p.id + '">تعديل</button></div>' +
         '<div class="pr-olist" id="prO' + p.code + '"></div></div>';
     }).join("");
     Object.keys(openOrders).forEach(function(c){ if(openOrders[c]) showOrders(+c); });
@@ -8638,7 +8644,7 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
     if(!p) return; payP = p;
     $("prPayTitle").textContent = "تصفية حساب " + p.name;
     $("prPaySum").innerHTML = "من: <b>" + (p.last_period_to ? new Date(p.last_period_to).toLocaleString("ar-EG", {day:"numeric", month:"short", hour:"numeric", minute:"2-digit"}) : "البداية") + "</b> لحد دلوقتي<br>" +
-      "الطلبات: <b>" + n(p.unpaid_orders) + "</b> (جداد " + n(p.unpaid_new_orders) + ")<br>المبيعات: <b>" + money(p.unpaid_sales) + "</b><br>العمولة المحسوبة (" + n(p.commission_pct) + "%): <b style=\"color:#fbbf24\">" + money(p.unpaid_commission) + "</b>";
+      "الطلبات: <b>" + n(p.unpaid_orders) + "</b> (جداد " + n(p.unpaid_new_orders) + ")<br>المبيعات: <b>" + money(p.unpaid_sales) + "</b><br>النقاط: <b>" + n(p.unpaid_points) + "</b> × " + n(p.point_value) + " ج = <b style=\"color:#fbbf24\">" + money(p.unpaid_commission) + "</b>";
     $("prPayAmt").value = Math.round(Number(p.unpaid_commission || 0));
     $("prPayNote").value = ""; $("prPayErr").textContent = "";
     $("prPayModal").classList.add("on");
@@ -8656,12 +8662,16 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
       }).join("") : '<div class="pr-empty">لسه مفيش تصفيات للمروّج ده</div>';
     }catch(e){ box.innerHTML = '<div class="pr-empty">' + esc(e.message) + '</div>'; }
   }
+  function rateHint(){ var ppp = Number($("prPpp").value || 0), pv = Number($("prPv").value || 0); $("prRateHint").textContent = "= " + (Math.round(ppp * pv * 100) / 100) + "% فعلياً من مبيعات العملاء الجداد"; }
   function openForm(p){
     $("prFormTitle").textContent = p ? "تعديل مروّج" : "مروّج جديد";
     $("prId").value = p ? p.id : "";
     $("prCode").value = p ? p.code : (data.reduce(function(m, x){ return Math.max(m, +x.code < 900 ? +x.code : 0); }, 100) + 1);
     $("prName").value = p ? p.name : "";
-    $("prPct").value = p ? p.commission_pct : 10;
+    $("prPpp").value = p ? p.points_per_100 : 1;
+    $("prPv").value = p ? p.point_value : 4;
+    $("prNewTok").style.display = p ? "" : "none";
+    rateHint();
     $("prLang").value = p ? p.lang : "en";
     $("prPhone").value = p ? (p.phone || "") : "";
     $("prNotes").value = p ? (p.notes || "") : "";
@@ -8677,6 +8687,12 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
     $("prReload").addEventListener("click", load);
     $("prAdd").addEventListener("click", function(){ openForm(null); });
     $("prCancel").addEventListener("click", function(){ $("prModal").classList.remove("on"); });
+    $("prPpp").addEventListener("input", rateHint); $("prPv").addEventListener("input", rateHint);
+    $("prNewTok").addEventListener("click", async function(){
+      var c = Number($("prCode").value); if(!c || !confirm("عمل لينك داشبورد جديد؟ اللينك القديم اللي مع المروّج هيقف.")) return;
+      try{ var t = await rpc("promoter_new_token_admin", {p_key:key(), p_code:c}); var u = "https://selfcare-en.com/partner?k=" + t; if(navigator.clipboard) navigator.clipboard.writeText(u).catch(function(){}); $("prErr").textContent = ""; alert("اتعمل لينك جديد واتنسخ:\n" + u); load(); }
+      catch(err){ $("prErr").textContent = "مقدرتش: " + err.message; }
+    });
     $("prQrClose").addEventListener("click", function(){ $("prQrModal").classList.remove("on"); });
     $("prQrDl").addEventListener("click", function(){ var a = document.createElement("a"); a.download = "QR-" + (qrP ? qrP.code + "-" + qrP.name : "promoter").replace(/[^\w\u0600-\u06FF-]+/g, "_") + ".png"; a.href = $("prQrCanvas").toDataURL("image/png"); document.body.appendChild(a); a.click(); a.remove(); });
     $("prPayClose").addEventListener("click", function(){ $("prPayModal").classList.remove("on"); });
@@ -8702,13 +8718,16 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
         if(navigator.clipboard) navigator.clipboard.writeText(b.dataset.copy).then(done, function(){}); else { b.previousElementSibling.select(); document.execCommand("copy"); done(); } }
       if(b.dataset.orders){ var c = +b.dataset.orders; openOrders[c] = !openOrders[c]; b.textContent = openOrders[c] ? "إخفاء" : "الطلبات"; $("prO" + c).dataset.mode = ""; if(openOrders[c]) showOrders(c); else $("prO" + c).innerHTML = ""; }
       if(b.dataset.edit){ openForm(data.find(function(x){ return String(x.id) === b.dataset.edit; })); }
+      if(b.dataset.dash !== undefined){ var u = "https://selfcare-en.com/partner?k=" + b.dataset.dash; var done2 = function(){ b.textContent = "اتنسخ ✓"; setTimeout(function(){ b.textContent = "داشبورد"; }, 1600); };
+        if(!b.dataset.dash){ alert("اللينك لسه بيتجهز — دوس تحديث"); return; }
+        if(navigator.clipboard) navigator.clipboard.writeText(u).then(done2, function(){ prompt("لينك داشبورد المروّج:", u); }); else prompt("لينك داشبورد المروّج:", u); }
       if(b.dataset.qr){ showQr(data.find(function(x){ return String(x.code) === b.dataset.qr; })); }
       if(b.dataset.pay){ openPay(data.find(function(x){ return String(x.code) === b.dataset.pay; })); }
       if(b.dataset.hist){ showHist(+b.dataset.hist); }
     });
     $("prForm").addEventListener("submit", async function(e){
       e.preventDefault();
-      var body = {id:$("prId").value, code:$("prCode").value, name:$("prName").value.trim(), commission_pct:$("prPct").value, lang:$("prLang").value, phone:$("prPhone").value.trim(), notes:$("prNotes").value.trim(), active:$("prActive").checked};
+      var body = {id:$("prId").value, code:$("prCode").value, name:$("prName").value.trim(), points_per_100:$("prPpp").value, point_value:$("prPv").value, lang:$("prLang").value, phone:$("prPhone").value.trim(), notes:$("prNotes").value.trim(), active:$("prActive").checked};
       try{ await rpc("promoter_save_admin", {p_key:key(), p:body}); $("prModal").classList.remove("on"); load(); }
       catch(err){ $("prErr").textContent = /duplicate|unique/i.test(err.message) ? "الكود ده مستخدم لمروّج تاني" : ("مقدرتش أحفظ: " + err.message); }
     });
