@@ -1514,6 +1514,22 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
   </section>
 
   <section class="section" id="sectionMobility"><div id="mobAdminHost"></div></section>
+  <section class="section" id="sectionPromoters" dir="rtl">
+  <div class="pr-bar">
+    <select id="prRange">
+      <option value="month">الشهر ده</option>
+      <option value="last">الشهر اللي فات</option>
+      <option value="all">من الأول</option>
+      <option value="custom">تاريخ معيّن</option>
+    </select>
+    <button type="button" id="prReload">تحديث</button>
+    <span></span>
+    <button type="button" class="pr-add" id="prAdd">+ مروّج جديد</button>
+    <div class="pr-dates" id="prDates"><input type="date" id="prFrom"><input type="date" id="prTo"></div>
+  </div>
+  <div class="pr-sum" id="prSum"></div>
+  <div id="prList"><div class="pr-empty">جاري التحميل...</div></div>
+</section>
   <section class="section" id="sectionSettings">
     <div class="settings-accordion">
       <button class="settings-toggle" id="settingsToggleMain" onclick="toggleSettingsPanel('main')"><span>Settings</span><span class="arrow">⌄</span></button>
@@ -8467,22 +8483,6 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
 #prModal .save{background:#17b8aa;color:#07101d}#prModal .cancel{background:#24324d;color:#fff}
 #prModal .err{color:#f87171;font-weight:800;min-height:1em;font-size:13px}
 </style>
-<section class="section" id="sectionPromoters" dir="rtl">
-  <div class="pr-bar">
-    <select id="prRange">
-      <option value="month">الشهر ده</option>
-      <option value="last">الشهر اللي فات</option>
-      <option value="all">من الأول</option>
-      <option value="custom">تاريخ معيّن</option>
-    </select>
-    <button type="button" id="prReload">تحديث</button>
-    <span></span>
-    <button type="button" class="pr-add" id="prAdd">+ مروّج جديد</button>
-    <div class="pr-dates" id="prDates"><input type="date" id="prFrom"><input type="date" id="prTo"></div>
-  </div>
-  <div class="pr-sum" id="prSum"></div>
-  <div id="prList"><div class="pr-empty">جاري التحميل...</div></div>
-</section>
 <div id="prModal" dir="rtl"><form id="prForm" autocomplete="off">
   <h3 style="margin:0" id="prFormTitle">مروّج جديد</h3>
   <input type="hidden" id="prId">
