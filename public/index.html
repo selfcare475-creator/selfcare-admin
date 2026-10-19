@@ -1314,7 +1314,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
       <div class="panel-title-main">Products / Stock</div>
       <div class="quick-add-card">
         <div class="quick-add-head">
-          <button class="quick-add-toggle" id="quickAddToggleBtn" onclick="toggleQuickAddProduct()"><span class="plus">＋</span><span>إضافة منتج جديد للموقعين</span></button>
+          <button class="quick-add-toggle" id="quickAddToggleBtn" onclick="toggleQuickAddProduct()"><span class="plus">＋</span><span>إضافة منتج جديد للموقع</span></button>
         </div>
         <div class="quick-add-form" id="quickAddProductForm">
           <div class="quick-add-grid">
@@ -1503,8 +1503,7 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
       <button type="button" class="fn-toggle" id="fnToggle" aria-expanded="false"><span>رحلة العميل على الموقع</span><b>▾</b></button>
       <div id="fnWrap" hidden>
       <div class="fn-sites" id="fnSites">
-        <button class="report-period-btn active" data-site="en">الإنجليزي</button>
-        <button class="report-period-btn" data-site="cz">التشيكي</button>
+        <button class="report-period-btn active" data-site="all">الموقع</button>
         <button class="report-period-btn" data-site="test">التجربة</button>
         <button class="report-period-btn" id="fnRefresh" aria-label="تحديث">↻</button>
       </div>
@@ -2876,7 +2875,7 @@ function toggleQuickAddProduct(){
   const isOpen=el.classList.toggle("open");
   if(btn){
     btn.classList.toggle("open",isOpen);
-    btn.innerHTML=isOpen?'<span class="plus">−</span><span>إغلاق إضافة المنتج</span>':'<span class="plus">＋</span><span>إضافة منتج جديد للموقعين</span>';
+    btn.innerHTML=isOpen?'<span class="plus">−</span><span>إغلاق إضافة المنتج</span>':'<span class="plus">＋</span><span>إضافة منتج جديد للموقع</span>';
   }
 }
 const CARD_TEXT_LIBRARY={"Nasal congestion.":{"en":"Nasal congestion.","cs":"Ucpaný nos.","ru":"Заложенность носа.","pl":"Zatkany nos.","ua":"Закладеність носа.","de":"Verstopfte Nase."},"Sore throat relief.":{"en":"Sore throat relief.","cs":"Úleva při bolesti v krku.","ru":"От боли в горле.","pl":"Ulga przy bólu gardła.","ua":"Полегшення болю в горлі.","de":"Linderung bei Halsschmerzen."},"Parasitic infections.":{"en":"Parasitic infections.","cs":"Parazitární infekce.","ru":"Паразитарные инфекции.","pl":"Infekcje pasożytnicze.","ua":"Паразитарні інфекції.","de":"Parasitäre Infektionen."},"Hemorrhoid care.":{"en":"Hemorrhoid care.","cs":"Péče při hemoroidech.","ru":"Уход при геморрое.","pl":"Pielęgnacja przy hemoroidach.","ua":"Догляд при геморої.","de":"Hämorrhoidenpflege."},"Dry eye relief.":{"en":"Dry eye relief.","cs":"Úleva pro suché oči.","ru":"От сухости глаз.","pl":"Ulga dla suchych oczu.","ua":"Полегшення сухості очей.","de":"Linderung bei trockenen Augen."},"Skin inflammation & itching.":{"en":"Skin inflammation & itching.","cs":"Zánět a svědění kůže.","ru":"Воспаление и зуд кожи.","pl":"Stan zapalny i świąd skóry.","ua":"Запалення та свербіж шкіри.","de":"Hautentzündung und Juckreiz."},"Diarrhea & intestinal infection.":{"en":"Diarrhea & intestinal infection.","cs":"Průjem a střevní infekce.","ru":"Диарея и кишечная инфекция.","pl":"Biegunka i infekcja jelitowa.","ua":"Діарея та кишкова інфекція.","de":"Durchfall und Darminfekt."},"Hair & nail support.":{"en":"Hair & nail support.","cs":"Podpora vlasů a nehtů.","ru":"Поддержка волос и ногтей.","pl":"Wsparcie włosów i paznokci.","ua":"Підтримка волосся та нігтів.","de":"Unterstützung für Haare und Nägel."},"Bacterial infections.":{"en":"Bacterial infections.","cs":"Bakteriální infekce.","ru":"Бактериальные инфекции.","pl":"Infekcje bakteryjne.","ua":"Бактеріальні інфекції.","de":"Bakterielle Infektionen."},"Nervous system support.":{"en":"Nervous system support.","cs":"Podpora nervového systému.","ru":"Поддержка нервной системы.","pl":"Wsparcie układu nerwowego.","ua":"Підтримка нервової системи.","de":"Unterstützung des Nervensystems."},"Weight management.":{"en":"Weight management.","cs":"Kontrola hmotnosti.","ru":"Контроль веса.","pl":"Kontrola masy ciała.","ua":"Контроль ваги.","de":"Gewichtsmanagement."},"Memory support.":{"en":"Memory support.","cs":"Podpora paměti.","ru":"Поддержка памяти.","pl":"Wsparcie pamięci.","ua":"Підтримка пам’яті.","de":"Unterstützung des Gedächtnisses."},"Sleep support.":{"en":"Sleep support.","cs":"Podpora spánku.","ru":"Поддержка сна.","pl":"Wsparcie snu.","ua":"Підтримка сну.","de":"Schlafunterstützung."},"Liver & gallbladder support.":{"en":"Liver & gallbladder support.","cs":"Podpora jater a žlučníku.","ru":"Поддержка печени и желчного пузыря.","pl":"Wsparcie wątroby i pęcherzyka żółciowego.","ua":"Підтримка печінки та жовчного міхура.","de":"Leber- und Gallenunterstützung."},"Immune support.":{"en":"Immune support.","cs":"Podpora imunity.","ru":"Поддержка иммунитета.","pl":"Wsparcie odporności.","ua":"Підтримка імунітету.","de":"Immunsystem-Unterstützung."},"Bones & joints support.":{"en":"Bones & joints support.","cs":"Podpora kostí a kloubů.","ru":"Поддержка костей и суставов.","pl":"Wsparcie kości i stawów.","ua":"Підтримка кісток і суглобів.","de":"Knochen- und Gelenkunterstützung."},"Pain & fever relief.":{"en":"Pain & fever relief.","cs":"Úleva od bolesti a horečky.","ru":"От боли и температуры.","pl":"Na ból i gorączkę.","ua":"Від болю та температури.","de":"Gegen Schmerzen und Fieber."},"Pain & inflammation.":{"en":"Pain & inflammation.","cs":"Bolest a zánět.","ru":"Боль и воспаление.","pl":"Ból i stan zapalny.","ua":"Біль і запалення.","de":"Schmerzen und Entzündung."},"Joint support.":{"en":"Joint support.","cs":"Podpora kloubů.","ru":"Поддержка суставов.","pl":"Wsparcie stawów.","ua":"Підтримка суглобів.","de":"Gelenkunterstützung."},"Skin repair & dryness.":{"en":"Skin repair & dryness.","cs":"Obnova a suchost kůže.","ru":"Восстановление и сухость кожи.","pl":"Regeneracja i suchość skóry.","ua":"Відновлення та сухість шкіри.","de":"Hautregeneration und Trockenheit."},"Liver support.":{"en":"Liver support.","cs":"Podpora jater.","ru":"Поддержка печени.","pl":"Wsparcie wątroby.","ua":"Підтримка печінки.","de":"Leberunterstützung."},"Allergy relief.":{"en":"Allergy relief.","cs":"Úleva od alergie.","ru":"От аллергии.","pl":"Ulga przy alergii.","ua":"Полегшення алергії.","de":"Linderung bei Allergie."},"Muscle & joint pain.":{"en":"Muscle & joint pain.","cs":"Bolest svalů a kloubů.","ru":"Боль в мышцах и суставах.","pl":"Ból mięśni i stawów.","ua":"Біль у м’язах і суглобах.","de":"Muskel- und Gelenkschmerzen."},"Bacterial skin infection.":{"en":"Bacterial skin infection.","cs":"Bakteriální kožní infekce.","ru":"Бактериальная инфекция кожи.","pl":"Bakteryjna infekcja skóry.","ua":"Бактеріальна інфекція шкіри.","de":"Bakterielle Hautinfektion."},"Vein & hemorrhoid support.":{"en":"Vein & hemorrhoid support.","cs":"Podpora žil a hemoroidů.","ru":"Поддержка вен и геморроя.","pl":"Wsparcie żył i hemoroidów.","ua":"Підтримка вен і геморою.","de":"Venen- und Hämorrhoidenunterstützung."},"Abdominal cramps & bloating.":{"en":"Abdominal cramps & bloating.","cs":"Křeče břicha a nadýmání.","ru":"Спазмы живота и вздутие.","pl":"Skurcze brzucha i wzdęcia.","ua":"Спазми живота та здуття.","de":"Bauchkrämpfe und Blähungen."},"Insect repellent.":{"en":"Insect repellent.","cs":"Repelent proti hmyzu.","ru":"Средство от насекомых.","pl":"Repelent na owady.","ua":"Засіб від комах.","de":"Insektenschutz."},"B12 support.":{"en":"B12 support.","cs":"Podpora vitaminu B12.","ru":"Поддержка витамина B12.","pl":"Wsparcie witaminy B12.","ua":"Підтримка вітаміну B12.","de":"Vitamin-B12-Unterstützung."},"Men’s daily vitamins.":{"en":"Men’s daily vitamins.","cs":"Denní vitamíny pro muže.","ru":"Ежедневные витамины для мужчин.","pl":"Codzienne witaminy dla mężczyzn.","ua":"Щоденні вітаміни для чоловіків.","de":"Tägliche Vitamine für Männer."},"Women’s daily vitamins.":{"en":"Women’s daily vitamins.","cs":"Denní vitamíny pro ženy.","ru":"Ежедневные витамины для женщин.","pl":"Codzienne witaminy dla kobiet.","ua":"Щоденні вітаміни для жінок.","de":"Tägliche Vitamine für Frauen."},"Iron & blood support.":{"en":"Iron & blood support.","cs":"Podpora železa a krve.","ru":"Поддержка железа и крови.","pl":"Wsparcie żelaza i krwi.","ua":"Підтримка заліза та крові.","de":"Eisen- und Blutunterstützung."},"Cold & flu symptoms.":{"en":"Cold & flu symptoms.","cs":"Příznaky nachlazení a chřipky.","ru":"Симптомы простуды и гриппа.","pl":"Objawy przeziębienia i grypy.","ua":"Симптоми застуди та грипу.","de":"Erkältungs- und Grippesymptome."},"Reflux & stomach acidity.":{"en":"Reflux & stomach acidity.","cs":"Reflux a žaludeční kyselost.","ru":"Рефлюкс и кислотность желудка.","pl":"Refluks i kwasowość żołądka.","ua":"Рефлюкс і кислотність шлунка.","de":"Reflux und Magensäure."},"Vein support.":{"en":"Vein support.","cs":"Podpora žil.","ru":"Поддержка вен.","pl":"Wsparcie żył.","ua":"Підтримка вен.","de":"Venenunterstützung."},"Acne & blemish care.":{"en":"Acne & blemish care.","cs":"Péče o akné a pupínky.","ru":"Уход при акне и высыпаниях.","pl":"Pielęgnacja trądziku i wyprysków.","ua":"Догляд при акне та висипаннях.","de":"Akne- und Hautunreinheitenpflege."},"Blood pressure support.":{"en":"Blood pressure support.","cs":"Podpora krevního tlaku.","ru":"Поддержка давления.","pl":"Wsparcie ciśnienia krwi.","ua":"Підтримка тиску.","de":"Blutdruck-Unterstützung."},"Blood sugar support.":{"en":"Blood sugar support.","cs":"Podpora hladiny cukru.","ru":"Поддержка уровня сахара.","pl":"Wsparcie poziomu cukru.","ua":"Підтримка рівня цукру.","de":"Unterstützung des Blutzuckers."},"Fungal infection.":{"en":"Fungal infection.","cs":"Plísňová infekce.","ru":"Грибковая инфекция.","pl":"Infekcja grzybicza.","ua":"Грибкова інфекція.","de":"Pilzinfektion."},"Nausea & stomach fullness.":{"en":"Nausea & stomach fullness.","cs":"Nevolnost a plnost žaludku.","ru":"Тошнота и тяжесть в желудке.","pl":"Nudności i uczucie pełności.","ua":"Нудота та важкість у шлунку.","de":"Übelkeit und Völlegefühl."},"Digestive flora support.":{"en":"Digestive flora support.","cs":"Podpora střevní mikroflóry.","ru":"Поддержка кишечной микрофлоры.","pl":"Wsparcie mikroflory jelitowej.","ua":"Підтримка кишкової мікрофлори.","de":"Unterstützung der Darmflora."},"Rehydration support.":{"en":"Rehydration support.","cs":"Podpora rehydratace.","ru":"Поддержка регидратации.","pl":"Wsparcie nawodnienia.","ua":"Підтримка регідратації.","de":"Unterstützung der Rehydrierung."},"Male performance support.":{"en":"Male performance support.","cs":"Podpora mužské výkonnosti.","ru":"Поддержка мужской активности.","pl":"Wsparcie męskiej sprawności.","ua":"Підтримка чоловічої активності.","de":"Unterstützung der männlichen Leistungsfähigkeit."},"Heartburn & acidity.":{"en":"Heartburn & acidity.","cs":"Pálení žáhy a překyselení.","ru":"Изжога и повышенная кислотность.","pl":"Zgaga i nadkwasota.","ua":"Печія та підвищена кислотність.","de":"Sodbrennen und Übersäuerung."},"High sun protection.":{"en":"High sun protection.","cs":"Vysoká ochrana před sluncem.","ru":"Высокая защита от солнца.","pl":"Wysoka ochrona przeciwsłoneczna.","ua":"Високий захист від сонця.","de":"Hoher Sonnenschutz."},"Vitamin D support.":{"en":"Vitamin D support.","cs":"Podpora vitaminu D.","ru":"Поддержка витамина D.","pl":"Wsparcie witaminy D.","ua":"Підтримка вітаміну D.","de":"Vitamin-D-Unterstützung."},"Cough & mucus relief.":{"en":"Cough & mucus relief.","cs":"Kašel a hlen.","ru":"Кашель и мокрота.","pl":"Kaszel i śluz.","ua":"Кашель і мокротиння.","de":"Husten und Schleim."},"Breathing relief.":{"en":"Breathing relief.","cs":"Úleva při dýchání.","ru":"Облегчение дыхания.","pl":"Ulga w oddychaniu.","ua":"Полегшення дихання.","de":"Erleichterung der Atmung."},"Cold sores & herpes.":{"en":"Cold sores & herpes.","cs":"Opary a herpes.","ru":"Герпес и простуда на губах.","pl":"Opryszczka i zimno na ustach.","ua":"Герпес і застуда на губах.","de":"Lippenherpes und Herpes."},"Women’s hormonal support.":{"en":"Women’s hormonal support.","cs":"Podpora ženských hormonů.","ru":"Поддержка женских гормонов.","pl":"Wsparcie hormonów kobiecych.","ua":"Підтримка жіночих гормонів.","de":"Unterstützung weiblicher Hormone."},"Migraine relief.":{"en":"Migraine relief.","cs":"Úleva při migréně.","ru":"От мигрени.","pl":"Ulga przy migrenie.","ua":"Полегшення мігрені.","de":"Linderung bei Migräne."},"Sugar metabolism support.":{"en":"Sugar metabolism support.","cs":"Podpora metabolismu cukru.","ru":"Поддержка обмена сахара.","pl":"Wsparcie metabolizmu cukru.","ua":"Підтримка обміну цукру.","de":"Unterstützung des Zuckerstoffwechsels."},"Heart & circulation support.":{"en":"Heart & circulation support.","cs":"Podpora srdce a oběhu.","ru":"Поддержка сердца и кровообращения.","pl":"Wsparcie serca i krążenia.","ua":"Підтримка серця та кровообігу.","de":"Herz- und Kreislaufunterstützung."},"Contraception.":{"en":"Contraception.","cs":"Antikoncepce.","ru":"Контрацепция.","pl":"Antykoncepcja.","ua":"Контрацепція.","de":"Verhütung."},"Argan hair care.":{"en":"Argan hair care.","cs":"Arganová péče o vlasy.","ru":"Аргановый уход за волосами.","pl":"Arganowa pielęgnacja włosów.","ua":"Аргановий догляд за волоссям.","de":"Argan-Haarpflege."},"Hair cleansing.":{"en":"Hair cleansing.","cs":"Čištění vlasů.","ru":"Очищение волос.","pl":"Oczyszczanie włosów.","ua":"Очищення волосся.","de":"Haarreinigung."},"Hair nourishment.":{"en":"Hair nourishment.","cs":"Výživa vlasů.","ru":"Питание волос.","pl":"Odżywienie włosów.","ua":"Живлення волосся.","de":"Haarpflege und Nährung."},"Collagen support.":{"en":"Collagen support.","cs":"Podpora kolagenu.","ru":"Поддержка коллагена.","pl":"Wsparcie kolagenu.","ua":"Підтримка колагену.","de":"Kollagen-Unterstützung."},"Hyaluronic hydration.":{"en":"Hyaluronic hydration.","cs":"Hydratace s kyselinou hyaluronovou.","ru":"Увлажнение с гиалуроновой кислотой.","pl":"Nawilżenie kwasem hialuronowym.","ua":"Зволоження з гіалуроновою кислотою.","de":"Hyaluron-Feuchtigkeit."},"Teeth & gum care.":{"en":"Teeth & gum care.","cs":"Péče o zuby a dásně.","ru":"Уход за зубами и дёснами.","pl":"Pielęgnacja zębów i dziąseł.","ua":"Догляд за зубами та яснами.","de":"Zahn- und Zahnfleischpflege."},"Face mask care.":{"en":"Face mask care.","cs":"Péče s pleťovou maskou.","ru":"Уход с маской для лица.","pl":"Pielęgnacja maseczką do twarzy.","ua":"Догляд з маскою для обличчя.","de":"Gesichtsmaskenpflege."},"Daily skin hydration.":{"en":"Daily skin hydration.","cs":"Denní hydratace pleti.","ru":"Ежедневное увлажнение кожи.","pl":"Codzienne nawilżenie skóry.","ua":"Щоденне зволоження шкіри.","de":"Tägliche Hautfeuchtigkeit."},"Mixed skin infection.":{"en":"Mixed skin infection.","cs":"Smíšená kožní infekce.","ru":"Смешанная инфекция кожи.","pl":"Mieszana infekcja skóry.","ua":"Змішана інфекція шкіри.","de":"Gemischte Hautinfektion."},"Pigmentation & dark spots.":{"en":"Pigmentation & dark spots.","cs":"Pigmentace a tmavé skvrny.","ru":"Пигментация и тёмные пятна.","pl":"Przebarwienia i ciemne plamy.","ua":"Пігментація та темні плями.","de":"Pigmentflecken und dunkle Flecken."},"Oral fungal infection.":{"en":"Oral fungal infection.","cs":"Plísňová infekce úst.","ru":"Грибковая инфекция во рту.","pl":"Grzybica jamy ustnej.","ua":"Грибкова інфекція рота.","de":"Pilzinfektion im Mund."},"Local numbing cream.":{"en":"Local numbing cream.","cs":"Lokální znecitlivující krém.","ru":"Местный обезболивающий крем.","pl":"Krem miejscowo znieczulający.","ua":"Місцевий знеболювальний крем.","de":"Lokal betäubende Creme."},"Mouth ulcer care.":{"en":"Mouth ulcer care.","cs":"Péče o afty v ústech.","ru":"Уход при язвочках во рту.","pl":"Pielęgnacja aft w jamie ustnej.","ua":"Догляд при виразках у роті.","de":"Pflege bei Mundgeschwüren."},"Hair growth support.":{"en":"Hair growth support.","cs":"Podpora růstu vlasů.","ru":"Поддержка роста волос.","pl":"Wsparcie wzrostu włosów.","ua":"Підтримка росту волосся.","de":"Unterstützung des Haarwachstums."},"Anti-dandruff care.":{"en":"Anti-dandruff care.","cs":"Péče proti lupům.","ru":"Уход против перхоти.","pl":"Pielęgnacja przeciwłupieżowa.","ua":"Догляд проти лупи.","de":"Anti-Schuppen-Pflege."},"Constipation relief.":{"en":"Constipation relief.","cs":"Úleva při zácpě.","ru":"При запоре.","pl":"Ulga przy zaparciach.","ua":"Полегшення при закрепі.","de":"Hilfe bei Verstopfung."},"Gout support.":{"en":"Gout support.","cs":"Podpora při dně.","ru":"Поддержка при подагре.","pl":"Wsparcie przy dnie moczanowej.","ua":"Підтримка при подагрі.","de":"Unterstützung bei Gicht."},"Urinary tract support.":{"en":"Urinary tract support.","cs":"Podpora močových cest.","ru":"Поддержка мочевых путей.","pl":"Wsparcie dróg moczowych.","ua":"Підтримка сечових шляхів.","de":"Unterstützung der Harnwege."},"Swelling & inflammation.":{"en":"Swelling & inflammation.","cs":"Otoky a zánět.","ru":"Отеки и воспаление.","pl":"Obrzęk i stan zapalny.","ua":"Набряк і запалення.","de":"Schwellung und Entzündung."},"Asthma & allergy support.":{"en":"Asthma & allergy support.","cs":"Astma a alergie.","ru":"Астма и аллергия.","pl":"Astma i alergia.","ua":"Астма та алергія.","de":"Asthma und Allergie."},"Mood support.":{"en":"Mood support.","cs":"Podpora nálady.","ru":"Поддержка настроения.","pl":"Wsparcie nastroju.","ua":"Підтримка настрою.","de":"Stimmungsunterstützung."},"Gas & bloating.":{"en":"Gas & bloating.","cs":"Plynatost a nadýmání.","ru":"Газы и вздутие.","pl":"Gazy i wzdęcia.","ua":"Газоутворення та здуття.","de":"Blähungen und Gasbildung."},"Prostate support.":{"en":"Prostate support.","cs":"Podpora prostaty.","ru":"Поддержка простаты.","pl":"Wsparcie prostaty.","ua":"Підтримка простати.","de":"Prostata-Unterstützung."},"Kidney stone support.":{"en":"Kidney stone support.","cs":"Podpora při ledvinových kamenech.","ru":"Поддержка при камнях в почках.","pl":"Wsparcie przy kamieniach nerkowych.","ua":"Підтримка при каменях у нирках.","de":"Unterstützung bei Nierensteinen."},"Nausea & vomiting.":{"en":"Nausea & vomiting.","cs":"Nevolnost a zvracení.","ru":"Тошнота и рвота.","pl":"Nudności i wymioty.","ua":"Нудота та блювання.","de":"Übelkeit und Erbrechen."},"Nerve support.":{"en":"Nerve support.","cs":"Podpora nervů.","ru":"Поддержка нервов.","pl":"Wsparcie nerwów.","ua":"Підтримка нервів.","de":"Nervenunterstützung."},"Ear discomfort.":{"en":"Ear discomfort.","cs":"Ušní diskomfort.","ru":"Дискомфорт в ухе.","pl":"Dyskomfort ucha.","ua":"Дискомфорт у вусі.","de":"Ohrbeschwerden."},"Eye inflammation.":{"en":"Eye inflammation.","cs":"Zánět oka.","ru":"Воспаление глаза.","pl":"Stan zapalny oka.","ua":"Запалення ока.","de":"Augenentzündung."},"Nail care.":{"en":"Nail care.","cs":"Péče o nehty.","ru":"Уход за ногтями.","pl":"Pielęgnacja paznokci.","ua":"Догляд за нігтями.","de":"Nagelpflege."},"After sun care.":{"en":"After sun care.","cs":"Péče po opalování.","ru":"Уход после солнца.","pl":"Pielęgnacja po opalaniu.","ua":"Догляд після сонця.","de":"After-Sun-Pflege."},"Kids sun protection.":{"en":"Kids sun protection.","cs":"Ochrana před sluncem pro děti.","ru":"Защита от солнца для детей.","pl":"Ochrona przeciwsłoneczna dla dzieci.","ua":"Захист від сонця для дітей.","de":"Sonnenschutz für Kinder."},"Sun protection.":{"en":"Sun protection.","cs":"Ochrana před sluncem.","ru":"Защита от солнца.","pl":"Ochrona przeciwsłoneczna.","ua":"Захист від сонця.","de":"Sonnenschutz."},"Tanning care.":{"en":"Tanning care.","cs":"Péče při opalování.","ru":"Уход для загара.","pl":"Pielęgnacja opalania.","ua":"Догляд для засмаги.","de":"Bräunungspflege."},"Keratin hair care.":{"en":"Keratin hair care.","cs":"Keratinová péče o vlasy.","ru":"Кератиновый уход за волосами.","pl":"Keratinowa pielęgnacja włosów.","ua":"Кератиновий догляд за волоссям.","de":"Keratin-Haarpflege."},"Face cleansing & exfoliation.":{"en":"Face cleansing & exfoliation.","cs":"Čištění a peeling pleti.","ru":"Очищение и пилинг кожи.","pl":"Oczyszczanie i peeling twarzy.","ua":"Очищення та пілінг шкіри.","de":"Reinigung und Peeling der Haut."},"Eyelash care.":{"en":"Eyelash care.","cs":"Péče o řasy.","ru":"Уход за ресницами.","pl":"Pielęgnacja rzęs.","ua":"Догляд за віями.","de":"Wimpernpflege."},"Retinol skin care.":{"en":"Retinol skin care.","cs":"Retinolová péče o pleť.","ru":"Ретиноловый уход за кожей.","pl":"Pielęgnacja skóry z retinolem.","ua":"Догляд за шкірою з ретинолом.","de":"Retinol-Hautpflege."},"Body hydration.":{"en":"Body hydration.","cs":"Hydratace těla.","ru":"Увлажнение тела.","pl":"Nawilżenie ciała.","ua":"Зволоження тіла.","de":"Körperfeuchtigkeit."},"Lip care.":{"en":"Lip care.","cs":"Péče o rty.","ru":"Уход за губами.","pl":"Pielęgnacja ust.","ua":"Догляд за губами.","de":"Lippenpflege."},"Hair loss care.":{"en":"Hair loss care.","cs":"Péče při vypadávání vlasů.","ru":"Уход при выпадении волос.","pl":"Pielęgnacja przy wypadaniu włosów.","ua":"Догляд при випадінні волосся.","de":"Pflege bei Haarausfall."},"Deodorant care.":{"en":"Deodorant care.","cs":"Péče proti pocení.","ru":"Уход против пота.","pl":"Pielęgnacja przeciw poceniu.","ua":"Догляд проти поту.","de":"Deopflege."},"Anti-aging skin care.":{"en":"Anti-aging skin care.","cs":"Anti-age péče o pleť.","ru":"Антивозрастной уход за кожей.","pl":"Pielęgnacja przeciwstarzeniowa.","ua":"Антивіковий догляд за шкірою.","de":"Anti-Aging-Hautpflege."},"Whitening toothpaste.":{"en":"Whitening toothpaste.","cs":"Bělicí zubní pasta.","ru":"Отбеливающая зубная паста.","pl":"Wybielająca pasta do zębów.","ua":"Відбілювальна зубна паста.","de":"Aufhellende Zahnpasta."},"Antioxidant support.":{"en":"Antioxidant support.","cs":"Antioxidační podpora.","ru":"Антиоксидантная поддержка.","pl":"Wsparcie antyoksydacyjne.","ua":"Антиоксидантна підтримка.","de":"Antioxidative Unterstützung."},"Energy support.":{"en":"Energy support.","cs":"Podpora energie.","ru":"Поддержка энергии.","pl":"Wsparcie energii.","ua":"Підтримка енергії.","de":"Energieunterstützung."},"Digestive support.":{"en":"Digestive support.","cs":"Podpora trávení.","ru":"Поддержка пищеварения.","pl":"Wsparcie trawienia.","ua":"Підтримка травлення.","de":"Unterstützung der Verdauung."},"Men’s vitality support.":{"en":"Men’s vitality support.","cs":"Podpora mužské vitality.","ru":"Поддержка мужской жизненной силы.","pl":"Wsparcie męskiej witalności.","ua":"Підтримка чоловічої життєвої сили.","de":"Unterstützung der männlichen Vitalität."},"Protein support.":{"en":"Protein support.","cs":"Podpora bílkovin.","ru":"Поддержка белка.","pl":"Wsparcie białka.","ua":"Підтримка білка.","de":"Proteinunterstützung."},"Skin & hair support.":{"en":"Skin & hair support.","cs":"Podpora pokožky a vlasů.","ru":"Поддержка кожи и волос.","pl":"Wsparcie skóry i włosów.","ua":"Підтримка шкіри та волосся.","de":"Unterstützung für Haut und Haare."},"Scar care.":{"en":"Scar care.","cs":"Péče o jizvy.","ru":"Уход за рубцами.","pl":"Pielęgnacja blizn.","ua":"Догляд за рубцями.","de":"Narbenpflege."},"Red & irritated eyes.":{"en":"Red & irritated eyes.","cs":"Zarudlé a podrážděné oči.","ru":"Красные и раздражённые глаза.","pl":"Czerwone i podrażnione oczy.","ua":"Почервонілі та подразнені очі.","de":"Rote und gereizte Augen."},"Vaginal fungal infection.":{"en":"Vaginal fungal infection.","cs":"Vaginální kvasinková infekce.","ru":"Вагинальная грибковая инфекция.","pl":"Grzybicza infekcja pochwy.","ua":"Вагінальна грибкова інфекція.","de":"Vaginale Pilzinfektion."},"Urinary tract infection.":{"en":"Urinary tract infection.","cs":"Infekce močových cest.","ru":"Инфекция мочевых путей.","pl":"Infekcja dróg moczowych.","ua":"Інфекція сечових шляхів.","de":"Harnwegsinfekt."},"Travel sickness.":{"en":"Travel sickness.","cs":"Cestovní nevolnost.","ru":"Укачивание в дороге.","pl":"Choroba lokomocyjna.","ua":"Заколисування в дорозі.","de":"Reisekrankheit."},"Sinus & mucus support.":{"en":"Sinus & mucus support.","cs":"Dutiny a hlen.","ru":"Пазухи и слизь.","pl":"Zatoki i śluz.","ua":"Пазухи та слиз.","de":"Nebenhöhlen und Schleim."}};
@@ -3016,7 +3015,7 @@ async function saveQuickProduct(){
       saveStockRowLive(p.name_cz,"ALL",false,p.price_egp),
       saveStockRowLive(p.pharmacy_code,"ALL",false,p.price_egp)
     ]);
-    toast(saved?"تم تحديث المنتج في الموقعين":"تم إضافة المنتج للموقعين");
+    toast(saved?"تم تحديث المنتج في الموقع":"تم إضافة المنتج للموقع");
     ["qaName","qaNameCz","qaPrice","qaCode","qaImage","qaUseEn","qaUseCz","qaCategory","qaSubcategory"].forEach(id=>{const el=document.getElementById(id); if(el)el.value=""});initQuickProductTools();
     document.getElementById("qaPreview").classList.remove("show");
     await loadProductsTable(); await loadStock();
@@ -3110,7 +3109,7 @@ async function deleteProductPermanent(name){
     return;
   }
   const label=clean(p.name_en||p.name_cz||p.pharmacy_code||name);
-  if(!confirm("حذف المنتج من الموقعين؟\n"+label))return;
+  if(!confirm("حذف المنتج من الموقع؟\n"+label))return;
   try{
     let deleted=false;
     if(p.id){
@@ -3135,7 +3134,7 @@ async function deleteProductPermanent(name){
       const dp=dynamicProductsByName[k];
       if(dp && ((p.id&&dp.id===p.id)||(p.pharmacy_code&&dp.pharmacy_code===p.pharmacy_code)))delete dynamicProductsByName[k];
     });
-    toast("تم حذف المنتج من الموقعين");
+    toast("تم حذف المنتج من الموقع");
     await loadProductsTable();
     await loadStock();
     renderStock();
@@ -3177,7 +3176,7 @@ function stockCard(name){
       <button class="stock-price-btn" onclick="saveStockPrice('${esc(name)}')">حفظ السعر</button>
     </div>
     <div class="product-edit-row">
-      <button class="product-edit-toggle" onclick="toggleProductTextEdit('${encodeURIComponent(code)}')">تعديل جملة الكارت للموقعين</button>
+      <button class="product-edit-toggle" onclick="toggleProductTextEdit('${encodeURIComponent(code)}')">تعديل جملة الكارت للموقع</button>
       <div class="product-edit-box" id="${esc(editId)}">
         <div class="product-edit-type">${esc(typeLabel)} - ${esc(productCzName(name))}</div>
         <input class="product-use-input" id="use_en_${esc(domId(code))}" value="${esc(useEn)}" list="cardTextSuggestions" oninput="syncStockUseSuggestion(\`${encodeURIComponent(code)}\`)" placeholder="Start typing, then choose...">
@@ -3187,7 +3186,7 @@ function stockCard(name){
     </div>
     <div class="stock-manage-row">
       <div></div>
-      <button class="stock-delete-btn ${canDelete?'':'static'}" ${canDelete?`onclick="deleteProductPermanent('${esc(name)}')"`:'disabled'}>${canDelete?'حذف من الموقعين':'أساسي'}</button>
+      <button class="stock-delete-btn ${canDelete?'':'static'}" ${canDelete?`onclick="deleteProductPermanent('${esc(name)}')"`:'disabled'}>${canDelete?'حذف من الموقع':'أساسي'}</button>
     </div>
   </div>`;
 }
@@ -3262,7 +3261,7 @@ async function saveProductCardText(nameEncoded){
     const row={...(dyn||{}),...body};
     if(savedId)row.id=savedId;
     registerProductRow(row);
-    toast("تم حفظ جملة الكارت للموقعين");
+    toast("تم حفظ جملة الكارت للموقع");
     setTimeout(loadProductsTable,800);
   }catch(e){console.error(e);toast("تعذر حفظ جملة الكارت")}
 }
@@ -3333,7 +3332,7 @@ async function setStock(name,branch,isOut){
     toast("تعذر تعديل الاستوك");
   }
 }
-function branchLabel(branch){return branch==="Self Care 2"?"الموقع الإنجليزي":"الموقع التشيكي";}
+function branchLabel(branch){return branch==="Self Care 2"?"الإنجليزي":"التشيكي وباقي اللغات";}
 function applyStockLocal(name,branch,isOut){
   stockAllKeys(name).forEach(alias=>{
     const key=stockToken(alias)+"|"+branch;
@@ -4455,7 +4454,7 @@ window.addEventListener("load", ()=>{ setTimeout(setupPush, 1200); });
         <input class="stock-price-input" id="price_${esc(domId('exact_'+sToken(name)))}" value="${price?esc(price):''}" inputmode="numeric" placeholder="السعر بالجنيه">
         <button class="stock-price-btn" onclick="saveStockPriceExact('${safe}')">حفظ السعر</button>
       </div>
-      <div class="stock-manage-row"><div></div><button class="stock-delete-btn ${canDelete?'':'static'}" ${canDelete?`onclick="deleteProductPermanent('${safe}')"`:'disabled'}>${canDelete?'حذف من الموقعين':'أساسي'}</button></div>
+      <div class="stock-manage-row"><div></div><button class="stock-delete-btn ${canDelete?'':'static'}" ${canDelete?`onclick="deleteProductPermanent('${safe}')"`:'disabled'}>${canDelete?'حذف من الموقع':'أساسي'}</button></div>
     </div>`;
   };
   window.saveStockPriceExact=async function(name){
@@ -4569,7 +4568,7 @@ window.addEventListener("load", ()=>{ setTimeout(setupPush, 1200); });
         <button class="stock-price-btn" onclick="saveStockPriceExact('${safe}')">حفظ السعر</button>
       </div>
       <div class="product-edit-row">
-        <button class="product-edit-toggle" onclick="toggleProductTextEdit('${encodeURIComponent(code)}')">تعديل جملة الكارت للموقعين</button>
+        <button class="product-edit-toggle" onclick="toggleProductTextEdit('${encodeURIComponent(code)}')">تعديل جملة الكارت للموقع</button>
         <div class="product-edit-box" id="${esc(editId)}">
           <div class="product-edit-type">${esc(enName(name))}</div>
           <input class="product-use-input" id="use_en_${esc(domId(code))}" value="${esc(useEn(name))}" placeholder="English card sentence">
@@ -4577,7 +4576,7 @@ window.addEventListener("load", ()=>{ setTimeout(setupPush, 1200); });
           <button class="product-use-btn" onclick="saveProductCardText('${encodeURIComponent(name)}')">حفظ الجملة</button>
         </div>
       </div>
-      <div class="stock-manage-row"><div></div><button class="stock-delete-btn ${canDelete?'':'static'}" ${canDelete?`onclick="deleteProductPermanent('${safe}')"`:'disabled'}>${canDelete?'حذف من الموقعين':'أساسي'}</button></div>
+      <div class="stock-manage-row"><div></div><button class="stock-delete-btn ${canDelete?'':'static'}" ${canDelete?`onclick="deleteProductPermanent('${safe}')"`:'disabled'}>${canDelete?'حذف من الموقع':'أساسي'}</button></div>
     </div>`;
   };
   window.buildProductTextBody=function(name,useEnValue,useCzValue){
@@ -4603,7 +4602,7 @@ window.addEventListener("load", ()=>{ setTimeout(setupPush, 1200); });
       const row={...(d||{}),...body};
       if(savedId)row.id=savedId;
       registerProductRow(row);
-      toast('تم حفظ جملة الكارت للموقعين');
+      toast('تم حفظ جملة الكارت للموقع');
       setTimeout(loadProductsTable,800);
     }catch(e){console.error(e);toast('تعذر حفظ جملة الكارت')}
   };
@@ -4681,11 +4680,11 @@ const off=isStockOffAny(name);const price=stockPrice(name);const d=dyn(name);con
 return `<div class="stock-item">
 <div class="stock-top"><div><div class="stock-name">${safe}</div><div class="stock-code exact">${esc(siteLabel)} | code: ${esc(code)}</div></div><button class="stock-switch ${off?'':'on'}" onclick="setStockExact('${safe}',${off?'false':'true'})" aria-label="تغيير حالة المنتج"></button></div>
 <div class="stock-price-row"><input class="stock-price-input" id="price_${esc(domId('exact_'+k(name)))}" value="${price?esc(price):''}" inputmode="numeric" placeholder="السعر بالجنيه"><button class="stock-price-btn" onclick="saveStockPriceExact('${safe}')">حفظ السعر</button></div>
-<div class="product-edit-row"><button class="product-edit-toggle" onclick="toggleProductTextEdit('${encodeURIComponent(code)}')">تعديل جملة الكارت للموقعين</button><div class="product-edit-box" id="${esc(editId)}"><div class="product-edit-type">${esc(enName(name))}</div><input class="product-use-input" id="use_en_${esc(domId(code))}" value="${esc(useEnValue(name))}" placeholder="English card sentence"><input class="product-use-input" id="use_cz_${esc(domId(code))}" value="${esc(useCzValue(name))}" placeholder="Czech / International card sentence"><button class="product-use-btn" onclick="saveProductCardText('${encodeURIComponent(name)}')">حفظ الجملة</button></div></div>
-<div class="stock-manage-row"><div></div><button class="stock-delete-btn ${canDelete?'':'static'}" ${canDelete?`onclick="deleteProductPermanent('${safe}')"`:'disabled'}> ${canDelete?'حذف من الموقعين':'أساسي'}</button></div>
+<div class="product-edit-row"><button class="product-edit-toggle" onclick="toggleProductTextEdit('${encodeURIComponent(code)}')">تعديل جملة الكارت للموقع</button><div class="product-edit-box" id="${esc(editId)}"><div class="product-edit-type">${esc(enName(name))}</div><input class="product-use-input" id="use_en_${esc(domId(code))}" value="${esc(useEnValue(name))}" placeholder="English card sentence"><input class="product-use-input" id="use_cz_${esc(domId(code))}" value="${esc(useCzValue(name))}" placeholder="Czech / International card sentence"><button class="product-use-btn" onclick="saveProductCardText('${encodeURIComponent(name)}')">حفظ الجملة</button></div></div>
+<div class="stock-manage-row"><div></div><button class="stock-delete-btn ${canDelete?'':'static'}" ${canDelete?`onclick="deleteProductPermanent('${safe}')"`:'disabled'}> ${canDelete?'حذف من الموقع':'أساسي'}</button></div>
 </div>`};
 window.buildProductTextBody=function(name,useEnValueSaved,useCzValueSaved){const code=codeOf(name);const price=Number(stockPrice(name)||0)||null;const base=enName(name);const cat=typeof guessCategoryFromName==='function'?guessCategoryFromName(base,'Best sellers'):'Best sellers';const body={pharmacy_code:code,name_en:base,name_cz:czName(name),active_ingredient:'',use_en:useEnValueSaved,use_cz:useCzValueSaved,price_egp:price,main_category:cat,subcategory:cat,is_active:true,out_of_stock:isStockOffAny(name)};const d=dyn(name);if(d&&d.image_url)body.image_url=d.image_url;return body};
-window.saveProductCardText=async function(nameEncoded){const name=decodeURIComponent(nameEncoded||'');const code=codeOf(name);const en=normalizeProductText((document.getElementById('use_en_'+domId(code))||{}).value);const cz=normalizeProductText((document.getElementById('use_cz_'+domId(code))||{}).value);if(!en&&!cz){toast('اكتب جملة الكارت الأول');return}const body=buildProductTextBody(name,en,cz);try{const d=dyn(name);const savedId=await saveProductTextRow(body,d);const row={...(d||{}),...body};if(savedId)row.id=savedId;registerProductRow(row);toast('تم حفظ جملة الكارت للموقعين');setTimeout(loadProductsTable,800)}catch(e){console.error(e);toast('تعذر حفظ جملة الكارت')}};
+window.saveProductCardText=async function(nameEncoded){const name=decodeURIComponent(nameEncoded||'');const code=codeOf(name);const en=normalizeProductText((document.getElementById('use_en_'+domId(code))||{}).value);const cz=normalizeProductText((document.getElementById('use_cz_'+domId(code))||{}).value);if(!en&&!cz){toast('اكتب جملة الكارت الأول');return}const body=buildProductTextBody(name,en,cz);try{const d=dyn(name);const savedId=await saveProductTextRow(body,d);const row={...(d||{}),...body};if(savedId)row.id=savedId;registerProductRow(row);toast('تم حفظ جملة الكارت للموقع');setTimeout(loadProductsTable,800)}catch(e){console.error(e);toast('تعذر حفظ جملة الكارت')}};
 })();
 </script>
 
@@ -4784,7 +4783,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
   function dbName(name){ return codeOf(name); }
   function branchOf(site){ return (site||currentSite())==="cz" ? "Self Care" : "Self Care 2"; }
 
-  // ---- حالة القفل: قفل موحد على الموقعين ----
+  // ---- حالة القفل: قفل موحد على الموقع ----
   window.isStockOff=function(name,branch){
     // v206: نفحص الاتنين (cz + en) لأن نظام القفل الموحد بيقفل الاتنين مع بعض
     var c=codeOf(name);
@@ -4822,7 +4821,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
   // وندعم أيضاً للتوافق الرجعي:
   //   - product_name بالاسم الكامل + branch
   //   - product_name="CODE::en|cz" (نسخة قديمة من الباتش)
-  //   - branch=ALL (نوزّعه على الموقعين)
+  //   - branch=ALL (نوزّعه على الموقع)
   function siteFromBranch(branch){
     var b=C(branch).toLowerCase();
     if(b==="self care") return "cz";        // الفرع التشيكي
@@ -4862,7 +4861,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
           if(x.out_of_stock) outOfStock.add(k2);
           if(x.price_egp!=null && String(x.price_egp)!=="") stockPrices.set(k2, Number(x.price_egp));
         }else{
-          // branch=ALL/غير معروف -> نوزّعه على الموقعين (الاسم يخص صنفاً واحداً فقط)
+          // branch=ALL/غير معروف -> نوزّعه على الموقع (الاسم يخص صنفاً واحداً فقط)
           ["en","cz"].forEach(function(s){
             var k3=codeOld+"|"+s;
             if(x.out_of_stock) outOfStock.add(k3);
@@ -4877,12 +4876,12 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     }
   };
 
-  // ---- حفظ القفل: صنف واحد يقفل في الموقعين مع بعض (نظام موحد بالكود) ----
+  // ---- حفظ القفل: صنف واحد يقفل في الموقع مع بعض (نظام موحد بالكود) ----
   window.setStockExact=async function(name,isOut){
     isOut=(isOut===true||isOut==="true");
     var code=codeOf(name);
 
-    // نحدث المخزن المحلي للموقعين مع بعض
+    // نحدث المخزن المحلي للموقع مع بعض
     var kCz=code+"|cz", kEn=code+"|en";
     var hadCz=outOfStock.has(kCz), hadEn=outOfStock.has(kEn);
     if(isOut){ outOfStock.add(kCz); outOfStock.add(kEn); }
@@ -4908,7 +4907,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
         }
       }catch(e){}
 
-      toast(isOut?"تم قفل المنتج على الموقعين":"تم تشغيل المنتج على الموقعين");
+      toast(isOut?"تم قفل المنتج على الموقع":"تم تشغيل المنتج على الموقع");
       setTimeout(loadStock,800);
     }catch(e){
       // ارجاع الحالة على فشل الحفظ
@@ -4964,7 +4963,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
         '<button class="stock-price-btn" onclick="saveStockPriceExact(\''+safe+'\')">حفظ</button>'+
       '</div>'+
       (canDelete
-        ? '<div class="stock-manage-row"><button class="stock-delete-btn" onclick="deleteProductPermanent(\''+safe+'\')">حذف من الموقعين</button></div>'
+        ? '<div class="stock-manage-row"><button class="stock-delete-btn" onclick="deleteProductPermanent(\''+safe+'\')">حذف من الموقع</button></div>'
         : '')+
     '</div>';
   };
@@ -5291,8 +5290,8 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
         <div class="pm-field"><label class="pm-label">القسم الرئيسي (انجليزي)</label><select class="pm-select" id="pmCat_en" onchange="pmCatChanged('en')"></select></div>
         <div class="pm-field"><label class="pm-label">القسم الرئيسي (تشيكي)</label><select class="pm-select" id="pmCat_cz" onchange="pmCatChanged('cz')"></select></div>
       </div>
-      <div class="pm-field"><label class="pm-label">القسم الفرعي <span style="color:#fbbf24;font-weight:800;font-size:10px">— ده اللي بيحدد مكان الصنف في الموقعين</span></label><select class="pm-select" id="pmSub"></select></div>
-      <div class="pm-field"><label class="pm-label">المادة الفعالة <span style="color:#5eead4;font-weight:800;font-size:10px">— بتظهر تحت اسم الصنف في الموقعين (للأدوية)</span></label><input class="pm-input" id="pmActive" dir="ltr" placeholder="مثال: Paracetamol + Caffeine"></div>
+      <div class="pm-field"><label class="pm-label">القسم الفرعي <span style="color:#fbbf24;font-weight:800;font-size:10px">— ده اللي بيحدد مكان الصنف في الموقع</span></label><select class="pm-select" id="pmSub"></select></div>
+      <div class="pm-field"><label class="pm-label">المادة الفعالة <span style="color:#5eead4;font-weight:800;font-size:10px">— بتظهر تحت اسم الصنف في الموقع (للأدوية)</span></label><input class="pm-input" id="pmActive" dir="ltr" placeholder="مثال: Paracetamol + Caffeine"></div>
       <div class="pm-field"><label class="pm-label">البادج (Card Text)</label><select class="pm-select" id="pmBadge" onchange="pmUpdatePreview()"></select></div>
       <div class="pm-field wide">
         <label class="pm-label">🖼️ صورة الصنف</label>
@@ -5310,7 +5309,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
       <div class="pm-field wide">
         <label class="pm-label">Best Sellers</label>
         <div class="pm-checkboxes">
-          <label class="pm-checkbox"><input type="checkbox" id="pmBsEn" onchange="pmUpdatePreview()"> Best Seller EN</label>
+          <label class="pm-checkbox"><input type="checkbox" id="pmBsEn" onchange="pmUpdatePreview()"> Best Seller</label>
           <label class="pm-checkbox"><input type="checkbox" id="pmBsCz" onchange="pmUpdatePreview()"> Best Seller CZ</label>
         </div>
       </div>
@@ -5319,13 +5318,13 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
         <label class="pm-label" style="margin-bottom:8px;display:block">🔒 حالة الصنف</label>
         <button type="button" id="pmLockToggle" class="pm-lock-single" data-locked="false" onclick="pmToggleLockSingle()">
           <span class="pm-lock-single-icon">✅</span>
-          <span class="pm-lock-single-text">شغال على الموقعين</span>
+          <span class="pm-lock-single-text">شغال على الموقع</span>
         </button>
         <div style="font-size:10px;color:#7fb3b8;font-weight:800;margin-top:6px;text-align:right">اضغط لتبديل الحالة — التغيير هيتحفظ لما تدوس "حفظ التغييرات"</div>
       </div>
       <input type="hidden" id="pmOut">
       <div class="pm-field-row">
-        <div class="pm-field"><label class="pm-label">ترتيب EN</label><input class="pm-input" id="pmBsOrderEn" inputmode="numeric" placeholder="1-100"></div>
+        <div class="pm-field"><label class="pm-label">ترتيب الأكثر مبيعاً</label><input class="pm-input" id="pmBsOrderEn" inputmode="numeric" placeholder="1-100"></div>
         <div class="pm-field"><label class="pm-label">ترتيب CZ</label><input class="pm-input" id="pmBsOrderCz" inputmode="numeric" placeholder="1-100"></div>
       </div>
 
@@ -6011,10 +6010,10 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     var text=btn.querySelector(".pm-lock-single-text");
     if(locked){
       icon.textContent="🔒";
-      text.textContent="مقفول (الموقعين مع بعض)";
+      text.textContent="مقفول على الموقع";
     } else {
       icon.textContent="✅";
-      text.textContent="شغال على الموقعين";
+      text.textContent="شغال على الموقع";
     }
     pmUpdatePreview();
   };
@@ -6256,7 +6255,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
       var savedMsg = isNew ? "تم إضافة الصنف ✓" : "تم الحفظ ✓";
       if(lockKey){
         var lock2=pmGetLockState();
-        savedMsg += lock2.single ? " | 🔒 مقفول على الموقعين" : " | ✅ شغال على الموقعين";
+        savedMsg += lock2.single ? " | 🔒 مقفول على الموقع" : " | ✅ شغال على الموقع";
       }
       toast(savedMsg);
       pmCloseModal();
@@ -6449,8 +6448,8 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
       var sv=document.getElementById("pmBulkSubSel").value;
       lines.push("📁 تغيير التصنيف لـ: "+(cvObj?cvObj.label_en:"— لسه ما اخترتش —")+" ← "+(sv||"— اختار القسم الفرعي —"));
     }
-    if(pmBulkChoice.lock==="lock") lines.push("🔒 قفل الأصناف (على الموقعين)");
-    if(pmBulkChoice.lock==="unlock") lines.push("🔓 فتح الأصناف (على الموقعين)");
+    if(pmBulkChoice.lock==="lock") lines.push("🔒 قفل الأصناف (على الموقع)");
+    if(pmBulkChoice.lock==="unlock") lines.push("🔓 فتح الأصناف (على الموقع)");
     var sum=document.getElementById("pmBulkSummary");
     var applyBtn=document.getElementById("pmBulkApplyBtn");
     if(lines.length===0){
@@ -6593,7 +6592,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
 <style>
 .sc-admin-stamp{position:fixed;bottom:8px;left:8px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:6px;font-size:11px;font-weight:900;z-index:99999;pointer-events:none;font-family:sans-serif}
 </style>
-<div class="sc-admin-stamp" aria-hidden="true">admin v245</div>
+<div class="sc-admin-stamp" aria-hidden="true">admin v246</div>
 <!-- ========================================================================
      BEST SELLERS MANAGER (admin v213)
      Reorder, add, remove Best Sellers per site (EN + CZ)
@@ -6612,7 +6611,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
     <!-- Tabs -->
     <div style="display:flex;background:#0f1e2b;border-bottom:1px solid #1e3448;position:sticky;top:64px;z-index:4">
       <button id="bsTabEn" onclick="bsSetTab('en')" style="flex:1;background:#0f766e;color:#fff;border:none;padding:14px;font-size:14px;font-weight:900;cursor:pointer;border-bottom:3px solid #5eead4">
-        🇬🇧 Best Sellers الإنجليزي (<span id="bsCountEn">0</span>)
+        ⭐ Best Sellers (<span id="bsCountEn">0</span>)
       </button>
       <button id="bsTabCz" onclick="bsSetTab('cz')" style="flex:1;background:#0f1e2b;color:#7d95b1;border:none;padding:14px;font-size:14px;font-weight:900;cursor:pointer;border-bottom:3px solid transparent">
         🇨🇿 Best Sellers التشيكي (<span id="bsCountCz">0</span>)
@@ -7552,7 +7551,7 @@ if(activeCategory==='settings')setTimeout(renderHotelDeliveryFees,100);
         r=await fetch(sbUrl()+"/rest/v1/products",{method:"POST",headers:H,body:JSON.stringify(p)});
       }
       if(!r.ok) throw new Error(await r.text());
-      say(exists?"تم تحديث المنتج في الموقعين":"تم إضافة المنتج للموقعين");
+      say(exists?"تم تحديث المنتج في الموقع":"تم إضافة المنتج للموقع");
       ["qaName","qaNameCz","qaPrice","qaCode","qaImage","qaUseEn","qaUseCz","qaCategory","qaSubcategory"].forEach(function(id){var el=document.getElementById(id); if(el)el.value=""});
       if(typeof initQuickProductTools==="function") initQuickProductTools();
       var pv=document.getElementById("qaPreview"); if(pv) pv.classList.remove("show");
@@ -8189,14 +8188,14 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
 </style>
 <script id="sc-funnel-admin-js">
 (function(){
-  var site = "en", cache = null, details = {};
+  var site = "all", cache = null, details = {}; /* one unified site: en + cz events together */
   var STEPS = [["visit","دخل الموقع"],["cart","ضاف للسلة"],["checkout","فتح صفحة الطلب"],["tap_order","داس اطلب"],["confirmed","أكّد"],["order","الأوردر اتبعت"],["wa_open","فتح الواتساب"]];
   var EVN = {tap_blocked:"داس والزرار مقفول",order_error:"خطأ وهو بيبعت الأوردر",js_error:"خطأ في الصفحة",confirm_cancel:"رجع من رسالة التأكيد"};
   var DEVN = {ios:"آيفون",android:"أندرويد",desktop:"كمبيوتر"};
   function devName(d){ d = String(d||""); var p = d.split("-"); return (DEVN[p[0]]||p[0]) + (p[1] ? " من جوه " + p[1] : ""); }
   function rpc(fn, body){ return fetch(SB_URL + "/rest/v1/rpc/" + fn, {method:"POST", headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"}, body:JSON.stringify(body)}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }); }
   function esc(v){ return String(v==null?"":v).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
-  function siteMatch(s){ return site === "test" ? /-test$/.test(s) : s === site; }
+  function siteMatch(s){ return site === "test" ? /-test$/.test(s) : (site === "all" ? (s === "en" || s === "cz") : s === site); }
   var dayPick = null;
   function render(){
     var body = document.getElementById("fnBody"); if(!body) return;
@@ -8239,8 +8238,10 @@ window.scMobAdmin = { open() { boot(); if (entered) reload(true); } };
   function load(){
     cache = null; render();
     var ps = site === "test" ? [null] : [site];
-    Promise.all([rpc("funnel_report", {p_days:14}), rpc("funnel_details", {p_days:3, p_site: site === "test" ? null : site})])
-      .then(function(res){ cache = {rows: res[0]}; details[site] = site === "test" ? res[1] : res[1]; render(); })
+    var detP = site === "all" ? Promise.all([rpc("funnel_details", {p_days:3, p_site:"en"}), rpc("funnel_details", {p_days:3, p_site:"cz"})]).then(function(x){ return (x[0]||[]).concat(x[1]||[]).sort(function(a, b){ return (b.n||0) - (a.n||0); }); })
+      : rpc("funnel_details", {p_days:3, p_site: site === "test" ? null : site});
+    Promise.all([rpc("funnel_report", {p_days:14}), detP])
+      .then(function(res){ cache = {rows: res[0]}; details[site] = res[1]; render(); })
       .catch(function(e){ cache = {error: "مش قادر أجيب البيانات (" + e.message + "). لو الجدول لسه ما اتعملش في الداتابيز، ده طبيعي."}; render(); });
   }
   document.addEventListener("click", function(e){
@@ -8437,6 +8438,10 @@ body.sc-role-manager #catReports,body.sc-role-manager #sectionReports{display:no
 })();
 </script>
 
+<style id="sc-unified-css">
+/* one unified site: the Czech best-seller list is no longer used anywhere */
+.pm-checkbox:has(#pmBsCz),.pm-field:has(#pmBsOrderCz),#bsTabCz{display:none!important}
+</style>
 <!-- PROMOTERS ADMIN START -->
 <style id="sc-promoters-css">
 @media(min-width:431px){.category-row{grid-template-columns:repeat(6,1fr)!important}}
