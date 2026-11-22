@@ -1604,6 +1604,15 @@ html.modal-open,body.modal-open{overflow:hidden!important;overscroll-behavior:no
           <div class="courier-admin-list" id="courierAdminList"></div>
         </div>
       </div>
+
+      <button class="settings-toggle" id="settingsToggleDevices" onclick="toggleSettingsPanel('devices');renderDashDevices()"><span>أجهزة داشبورد الصيدلية</span><span class="arrow">⌄</span></button>
+      <div class="settings-panel" id="settingsPanelDevices">
+        <div class="panel-card">
+          <div id="dashDevSummary" style="font-size:14px;margin-bottom:10px"></div>
+          <div id="dashDevList"></div>
+          <button class="courier-admin-add" style="margin-top:10px" onclick="renderDashDevices()">تحديث</button>
+        </div>
+      </div>
     </div>
   </section>
 </div>
@@ -3710,6 +3719,21 @@ function topProducts(rows,limit){
   }));
   return [...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,limit);
 }
+// أجهزة داشبورد الصيدلية (2026-11-22): العدد، الموديل، مفتوح دلوقتي ولا لأ
+const DASH_DEV_PIN='scm-61c1c7e5a9e54a312557d3bd';
+async function dashDevRpc(fn,body){const r=await fetch(SB_URL+"/rest/v1/rpc/"+fn,{method:"POST",headers:{"apikey":SB_KEY,"Authorization":"Bearer "+SB_KEY,"Content-Type":"application/json"},body:JSON.stringify(body)});return r.ok?r.json():null}
+function dashDevType(ua){ua=ua||"";return /iphone|ipad/i.test(ua)?"آيفون":/android/i.test(ua)?"أندرويد":/windows/i.test(ua)?"كمبيوتر":/mac/i.test(ua)?"ماك":"جهاز"}
+function dashDevAgo(t){if(!t)return "لم يفتح";const m=Math.round((Date.now()-new Date(t).getTime())/60000);return m<2?"الآن":m<60?("من "+m+" دقيقة"):m<1440?("من "+Math.round(m/60)+" ساعة"):("من "+Math.round(m/1440)+" يوم")}
+async function renderDashDevices(){
+  const box=document.getElementById("dashDevList"),sum=document.getElementById("dashDevSummary");if(!box)return;
+  box.textContent="...";
+  const r=await dashDevRpc("dash_devices_admin",{p_pin:DASH_DEV_PIN});
+  if(!r||r.error){box.textContent="حاول مرة أخرى";return}
+  const ds=r.devices||[],open=ds.filter(d=>d.open_now).length;
+  sum.innerHTML='الأجهزة المسجلة: <b>'+ds.length+'</b> · مفتوح دلوقتي: <b style="color:#16a34a">'+open+'</b>';
+  box.innerHTML=ds.map(d=>'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(127,127,127,.18)"><div><b>'+(d.open_now?'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:#16a34a;margin-inline-end:6px"></span>':'')+esc(d.name||"")+'</b><div style="font-size:12px;opacity:.75;margin-top:2px">'+esc(d.phone||"")+' · '+esc(d.model||dashDevType(d.ua))+' · '+(d.open_now?'مفتوح الآن':dashDevAgo(d.last_seen))+'</div></div><button class="courier-admin-add" style="background:#b42318" onclick="revokeDashDevice(\''+d.id+'\')">إزالة</button></div>').join("")||"مفيش أجهزة";
+}
+async function revokeDashDevice(id){if(!confirm("إزالة الجهاز ده من داشبورد الصيدلية؟"))return;await dashDevRpc("dash_device_revoke_admin",{p_pin:DASH_DEV_PIN,p_id:id});renderDashDevices()}
 function toggleSettingsPanel(name){
   const panel=document.getElementById("settingsPanel"+name.charAt(0).toUpperCase()+name.slice(1));
   const btn=document.getElementById("settingsToggle"+name.charAt(0).toUpperCase()+name.slice(1));
