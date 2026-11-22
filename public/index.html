@@ -8600,8 +8600,8 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
   }
   function render(){
     var t = {visits:0, orders:0, sales:0, commission:0};
-    data.forEach(function(p){ t.visits += +p.visits; t.orders += +p.orders; t.sales += +p.sales; t.commission += +p.commission; });
-    $("prSum").innerHTML = '<div><b>' + n(t.visits) + '</b><span>زيارات</span></div><div><b>' + n(t.orders) + '</b><span>طلبات</span></div><div><b>' + money(t.sales) + '</b><span>مبيعات</span></div><div><b style="color:#fbbf24">' + money(t.commission) + '</b><span>عمولة مستحقة</span></div>';
+    data.forEach(function(p){ t.visits += +p.visits; t.people = (t.people||0) + (+p.people||0); t.orders += +p.orders; t.sales += +p.sales; t.commission += +p.commission; });
+    $("prSum").innerHTML = '<div><b>' + n(t.visits) + (t.people != null ? ' <small style="font-size:.7em;opacity:.8">(' + n(t.people) + ')</small>' : '') + '</b><span>زيارات (أشخاص)</span></div><div><b>' + n(t.orders) + '</b><span>طلبات</span></div><div><b>' + money(t.sales) + '</b><span>مبيعات</span></div><div><b style="color:#fbbf24">' + money(t.commission) + '</b><span>عمولة مستحقة</span></div>';
     if(!data.length){ $("prList").innerHTML = '<div class="pr-empty">مفيش مروّجين لسه. دوس "+ مروّج جديد".</div>'; return; }
     $("prList").innerHTML = data.map(function(p){
       var link = SITE + p.code;
@@ -8611,7 +8611,7 @@ body.sc-role-manager #catPromoters,body.sc-role-manager #sectionPromoters{displa
           (p.active ? '' : '<span class="pr-chip off">موقوف</span>') + (p.phone ? '<span class="pr-chip" dir="ltr">' + esc(p.phone) + '</span>' : '') +
         '</div></div>' +
         '<div class="pr-link"><input readonly value="' + esc(link) + '"><button type="button" data-copy="' + esc(link) + '">نسخ</button></div>' +
-        '<div class="pr-stats"><div><b>' + n(p.visits) + '</b><span>زيارات</span></div><div><b>' + n(p.new_orders) + '</b><span>عملاء جداد</span></div><div><b>' + n(p.old_orders) + '</b><span>عملاء قدام</span></div><div class="big"><b>' + money(p.sales) + '</b><span>مبيعات</span></div><div class="big money"><b>' + n(p.points) + ' نقطة</b><span>= ' + money(p.commission) + '</span></div></div>' +
+        '<div class="pr-stats"><div><b>' + n(p.visits) + (p.people != null ? ' <small style="font-size:.7em;opacity:.8">(' + n(p.people) + ')</small>' : '') + '</b><span>زيارات (أشخاص)</span></div><div><b>' + n(p.new_orders) + '</b><span>عملاء جداد</span></div><div><b>' + n(p.old_orders) + '</b><span>عملاء قدام</span></div><div class="big"><b>' + money(p.sales) + '</b><span>مبيعات</span></div><div class="big money"><b>' + n(p.points) + ' نقطة</b><span>= ' + money(p.commission) + '</span></div></div>' +
         (p.notes ? '<div class="pr-note" dir="auto">' + esc(p.notes) + '</div>' : '') +
         '<div class="pr-due"><div><small>المستحق حالياً ' + (p.last_period_to ? 'من آخر تصفية ' + new Date(p.last_period_to).toLocaleDateString("ar-EG", {day:"numeric", month:"short"}) : 'من البداية') + ' · ' + n(p.unpaid_new_orders) + ' طلب جديد</small><b>' + n(p.unpaid_points) + ' نقطة = ' + money(p.unpaid_commission) + '</b>' +
           (p.last_paid_at ? '<small>آخر دفعة: ' + money(p.last_paid_amount) + ' يوم ' + new Date(p.last_paid_at).toLocaleDateString("ar-EG", {day:"numeric", month:"short", year:"numeric"}) + '</small>' : '') + '</div>' +
